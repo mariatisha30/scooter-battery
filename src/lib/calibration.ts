@@ -1,0 +1,94 @@
+import type { Trip } from "./supabase";
+
+export function defaultKmPerPct(): number {
+  const v = Number(process.env.DEFAULT_KM_PER_PCT);
+  return Number.isFinite(v) && v > 0 ? v : 135 / 90;
+}
+
+export function batteryFloor(): number {
+  const v = Number(process.env.BATTERY_FLOOR_PCT);
+  return Number.isFinite(v) && v >= 0 && v <= 100 ? v : 10;
+}
+
+export function defaultPassengerFactor(): number {
+  const v = Number(process.env.DEFAULT_PASSENGER_FACTOR);
+  return Number.isFinite(v) && v > 0 && v <= 1 ? v : 0.7;
+}
+
+export type CalibrationValue = {
+  value: number;
+  source: "calibrated" | "default" | "estimated";
+  sampleSize: number;
+};
+
+export function kmPerPctFromTrips(trips: Trip[]): CalibrationValue {
+  const usable = trips.filter((t) => t.start_pct > t.end_pct && t.distance_km > 0).slice(0, 10);
+  if (usable.length === 0) {
+    return { value: defaultKmPerPct(), source: "default", sampleSize: 0 };
+  }
+  const totalKm = usable.reduce((s, t) => s + Number(t.distance_km), 0);
+  const totalPct = usable.reduce((s, t) => s + (t.start_pct - t.end_pct), 0);
+  if (totalPct <= 0) {
+    return { value: defaultKmPerPct(), source: "default", sampleSize: 0 };
+  }
+  return { value: totalKm / totalPct, source: "calibrated", sampleSize: usable.length };
+}
+
+export type Calibration = {
+  solo: CalibrationValue;
+  passenger: CalibrationValue;
+};
+
+export function calibrationFromTrips(trips: Trip[]): Calibration {
+  const soloTrips = trips.filter((t) => !t.with_passenger);
+  const passengerTrips = trips.filter((t) => t.with_passenger);
+  const solo = kmPerPctFromTrips(soloTrips);
+  const passenger = kmPerPctFromTrips(passengerTrips);
+  if (passenger.source === "default") {
+    return {
+      solo,
+      passenger: {
+        value: solo.value * defaultPassengerFactor(),
+        source: "estimated",
+        sampleSize: 0,
+      },
+    };
+  }
+  return { solo, passenger };
+}
+
+export function remainingKm(currentPct: number, kmPerPct: number, floor: number): number {
+  const usable = Math.max(0, currentPct - floor);
+  return usable * kmPerPct;
+}
+
+export function dailyAvgKm(trips: Trip[]): number | null {
+  if (trips.length < 3) return null;
+  const now = Date.now();
+  const cutoff = now - 30 * 24 * 60 * 60 * 1000;
+  const recent = trips.filter((t) => new Date(t.trip_date).getTime() >= cutoff);
+  if (recent.length < 3) return null;
+  const totalKm = recent.reduce((s, t) => s + Number(t.distance_km), 0);
+  const earliest = Math.min(...recent.map((t) => new Date(t.trip_date).getTime()));
+  const spanDays = Math.max(1, Math.ceil((now - earliest) / (1000 * 60 * 60 * 24)));
+  return totalKm / spanDays;
+}
+
+export type ChargeHint = {
+  days: number;
+  severity: "good" | "soon" | "now";
+  label: string;
+};
+
+export function chargeHint(remainingKmLeft: number, dailyKm: number | null): ChargeHint | null {
+  if (dailyKm === null || dailyKm <= 0) return null;
+  const days = remainingKmLeft / dailyKm;
+  if (days < 1) {
+    return { days, severity: "now", label: "Charge before tomorrow's ride" };
+  }
+  if (days < 2) {
+    return { days, severity: "soon", label: "About 1 more day at this pace" };
+  }
+  const rounded = Math.floor(days);
+  return { days, severity: "good", label: `About ${rounded} days at this pace` };
+}
