@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { logBattery } from "@/lib/actions";
 import { isRedirectError } from "@/lib/isRedirect";
+import { Spinner } from "./Spinner";
 
 const QUICK_PCTS = [100, 80, 60, 40, 25, 10];
 
@@ -199,8 +200,9 @@ export function LogForm({ soloKmPerPct, passengerKmPerPct, floor, calibrationSou
       <button
         type="submit"
         disabled={!valid || pending}
-        className="w-full rounded-2xl bg-emerald-500 py-4 text-base font-semibold text-emerald-950 transition-colors hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
+        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 py-4 text-base font-semibold text-emerald-950 transition-colors hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
       >
+        {pending && <Spinner className="h-5 w-5" />}
         {pending ? "Saving…" : "Save reading"}
       </button>
     </form>

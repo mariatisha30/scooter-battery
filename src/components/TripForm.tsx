@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { logTrip } from "@/lib/actions";
 import { isRedirectError } from "@/lib/isRedirect";
+import { Spinner } from "./Spinner";
 
 function nowLocalForInput(): string {
   const d = new Date();
@@ -171,8 +172,9 @@ export function TripForm({ latest }: Props) {
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-xl bg-emerald-500 py-3 text-sm font-semibold text-emerald-950 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3 text-sm font-semibold text-emerald-950 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
       >
+        {pending && <Spinner className="h-4 w-4" />}
         {pending ? "Saving…" : "Save trip"}
       </button>
     </form>

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { updateBatteryLog } from "@/lib/actions";
 import { isRedirectError } from "@/lib/isRedirect";
+import { Spinner } from "./Spinner";
 
 function toLocalInput(iso: string): string {
   const d = new Date(iso);
@@ -116,8 +117,9 @@ export function LogEditForm({ id, initial }: Props) {
         <button
           type="submit"
           disabled={pending}
-          className="flex-[2] rounded-2xl bg-emerald-500 py-3 text-sm font-semibold text-emerald-950 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
+          className="flex flex-[2] items-center justify-center gap-2 rounded-2xl bg-emerald-500 py-3 text-sm font-semibold text-emerald-950 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
         >
+          {pending && <Spinner className="h-4 w-4" />}
           {pending ? "Saving…" : "Save changes"}
         </button>
       </div>
