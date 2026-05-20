@@ -29,14 +29,24 @@ create table if not exists trips (
   constraint start_higher check (start_pct > end_pct)
 );
 
--- Migration: add columns if upgrading from an earlier schema.
+-- Migration: idempotent — safe to re-run when upgrading from an earlier schema.
 alter table trips add column if not exists with_passenger boolean not null default false;
 alter table trips add column if not exists trip_at timestamptz;
-update trips set trip_at = (trip_date::timestamptz + interval '12 hours') where trip_at is null and trip_date is not null;
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'trips' and column_name = 'trip_date'
+  ) then
+    execute 'update trips set trip_at = (trip_date::timestamptz + interval ''12 hours'') where trip_at is null';
+  end if;
+end $$;
+update trips set trip_at = now() where trip_at is null;
 alter table trips alter column trip_at set not null;
 alter table trips alter column trip_at set default now();
 alter table trips drop column if exists trip_date;
 alter table battery_logs add column if not exists trip_id uuid references trips(id) on delete cascade;
+alter table trips add column if not exists km_estimated boolean not null default false;
 
 create index if not exists trips_trip_at_idx
   on trips (trip_at desc);

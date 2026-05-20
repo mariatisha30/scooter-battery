@@ -2,7 +2,7 @@ import Link from "next/link";
 import { BatteryRing } from "@/components/BatteryRing";
 import { DashboardHero } from "@/components/DashboardHero";
 import { HistoryChart } from "@/components/HistoryChart";
-import { RowDelete } from "@/components/RowDelete";
+import { RowActions } from "@/components/RowActions";
 import { SetupBanner } from "@/components/SetupBanner";
 import { StatsStrip } from "@/components/StatsStrip";
 import { Toast } from "@/components/Toast";
@@ -132,7 +132,7 @@ export default async function Dashboard({
                         minute: "2-digit",
                       })}
                     </span>
-                    <RowDelete kind="log" id={l.id} />
+                    <RowActions kind="log" id={l.id} linkedTripId={l.trip_id} />
                   </div>
                 </li>
               );

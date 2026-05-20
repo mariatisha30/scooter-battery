@@ -22,7 +22,11 @@ export type CalibrationValue = {
 };
 
 export function kmPerPctFromTrips(trips: Trip[]): CalibrationValue {
-  const usable = trips.filter((t) => t.start_pct > t.end_pct && t.distance_km > 0).slice(0, 10);
+  // Only trips with REAL measured km should feed the calibration — estimated
+  // ones are computed from this calibration in the first place (would cause feedback).
+  const usable = trips
+    .filter((t) => !t.km_estimated && t.start_pct > t.end_pct && t.distance_km > 0)
+    .slice(0, 10);
   if (usable.length === 0) {
     return { value: defaultKmPerPct(), source: "default", sampleSize: 0 };
   }

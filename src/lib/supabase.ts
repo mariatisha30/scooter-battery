@@ -27,6 +27,7 @@ export type Trip = {
   distance_km: number;
   trip_at: string;
   with_passenger: boolean;
+  km_estimated: boolean;
   note: string | null;
   created_at: string;
 };

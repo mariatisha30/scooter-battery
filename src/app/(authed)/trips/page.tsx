@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { RowDelete } from "@/components/RowDelete";
+import { RowActions } from "@/components/RowActions";
 import { Toast } from "@/components/Toast";
 import { TripFormDrawer } from "@/components/TripFormDrawer";
 import { calibrationFromTrips } from "@/lib/calibration";
@@ -105,12 +105,20 @@ export default async function TripsPage({
                           👥 +1
                         </span>
                       )}
+                      {t.km_estimated && (
+                        <span
+                          className="rounded-full border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-amber-300"
+                          title="km estimated from battery drop — edit to enter the real distance"
+                        >
+                          est
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-2">
                       <div className={`text-xs tabular-nums ${efficiency}`}>
                         {ratio.toFixed(2)} km/%
                       </div>
-                      <RowDelete kind="trip" id={t.id} />
+                      <RowActions kind="trip" id={t.id} />
                     </div>
                   </div>
                   <div className="mt-1 flex items-center gap-2 text-xs text-neutral-500">
