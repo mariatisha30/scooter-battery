@@ -13,6 +13,7 @@ import {
   dailyAvgKm,
   remainingKm,
 } from "@/lib/calibration";
+import { formatLocalDateTime } from "@/lib/datetime";
 import { supabase, supabaseConfigured, type BatteryLog, type Trip } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
@@ -115,7 +116,7 @@ export default async function Dashboard() {
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
                     <span className="text-xs text-neutral-500">
-                      {new Date(l.logged_at).toLocaleString([], {
+                      {formatLocalDateTime(l.logged_at, {
                         month: "short",
                         day: "numeric",
                         hour: "2-digit",

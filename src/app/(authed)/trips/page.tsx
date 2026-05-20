@@ -2,6 +2,7 @@ import Link from "next/link";
 import { RowActions } from "@/components/RowActions";
 import { TripFormDrawer } from "@/components/TripFormDrawer";
 import { calibrationFromTrips } from "@/lib/calibration";
+import { formatLocalDateTime } from "@/lib/datetime";
 import { supabase, supabaseConfigured, type BatteryLog, type Trip } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
@@ -122,7 +123,7 @@ export default async function TripsPage() {
                       {t.end_pct}%
                     </span>
                     <span className="ml-auto">
-                      {new Date(t.trip_at).toLocaleString([], {
+                      {formatLocalDateTime(t.trip_at, {
                         day: "numeric",
                         month: "short",
                         hour: "2-digit",

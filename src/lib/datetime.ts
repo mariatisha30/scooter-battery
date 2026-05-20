@@ -1,5 +1,34 @@
 // Helpers for converting between ISO strings and the local-time formats
-// expected by HTML date / datetime-local inputs.
+// expected by HTML date / datetime-local inputs, plus a server-aware
+// formatter for displaying timestamps in the user's timezone.
+
+/**
+ * Timezone to use for SERVER-side date formatting. On Vercel the Node
+ * runtime is UTC, so `.toLocaleString()` server-rendered would show UTC
+ * instead of the user's local time. Set APP_TIMEZONE in the env to your
+ * IANA zone (e.g. "Asia/Dhaka") and server-rendered dates will match the
+ * client.
+ *
+ * On the client this returns undefined so the browser's own zone is used.
+ */
+function preferredTimezone(): string | undefined {
+  if (typeof window !== "undefined") return undefined;
+  return process.env.APP_TIMEZONE || "Asia/Dhaka";
+}
+
+/**
+ * Format an ISO timestamp for display in the user's timezone.
+ * Safe to call from both server and client components.
+ */
+export function formatLocalDateTime(
+  iso: string,
+  options: Intl.DateTimeFormatOptions = {}
+): string {
+  return new Date(iso).toLocaleString("en-US", {
+    ...options,
+    timeZone: preferredTimezone(),
+  });
+}
 
 /** Current local time formatted as `YYYY-MM-DDTHH:MM` for `<input type="datetime-local">`. */
 export function nowLocalDateTime(): string {
