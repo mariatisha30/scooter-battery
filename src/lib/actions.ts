@@ -69,7 +69,7 @@ export async function logTrip(formData: FormData) {
   const endPct = Number(formData.get("end_pct"));
   const distance = Number(formData.get("distance_km"));
   const note = String(formData.get("note") ?? "").trim() || null;
-  const tripDate = String(formData.get("trip_date") ?? "").trim() || undefined;
+  const tripAtRaw = String(formData.get("trip_at") ?? "").trim();
   const withPassenger = formData.get("with_passenger") === "true";
 
   if (!Number.isInteger(startPct) || startPct <= 0 || startPct > 100) {
@@ -82,15 +82,28 @@ export async function logTrip(formData: FormData) {
     throw new Error("Distance must be greater than 0 km");
   }
 
-  const { error } = await supabase.from("trips").insert({
+  const tripAtIso = tripAtRaw ? new Date(tripAtRaw).toISOString() : new Date().toISOString();
+
+  const { error: tripError } = await supabase.from("trips").insert({
     start_pct: startPct,
     end_pct: endPct,
     distance_km: distance,
     with_passenger: withPassenger,
     note,
-    ...(tripDate ? { trip_date: tripDate } : {}),
+    trip_at: tripAtIso,
   });
-  if (error) throw new Error(error.message);
+  if (tripError) throw new Error(tripError.message);
+
+  // Also insert a battery log at trip end so the dashboard reflects current state.
+  const logNoteParts = [`After ${distance} km`];
+  if (withPassenger) logNoteParts.push("+1");
+  if (note) logNoteParts.push(note);
+  const { error: logError } = await supabase.from("battery_logs").insert({
+    battery_pct: endPct,
+    logged_at: tripAtIso,
+    note: logNoteParts.join(" · "),
+  });
+  if (logError) throw new Error(logError.message);
 
   revalidatePath("/trips");
   revalidatePath("/");

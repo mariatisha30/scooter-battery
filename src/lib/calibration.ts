@@ -66,10 +66,10 @@ export function dailyAvgKm(trips: Trip[]): number | null {
   if (trips.length < 3) return null;
   const now = Date.now();
   const cutoff = now - 30 * 24 * 60 * 60 * 1000;
-  const recent = trips.filter((t) => new Date(t.trip_date).getTime() >= cutoff);
+  const recent = trips.filter((t) => new Date(t.trip_at).getTime() >= cutoff);
   if (recent.length < 3) return null;
   const totalKm = recent.reduce((s, t) => s + Number(t.distance_km), 0);
-  const earliest = Math.min(...recent.map((t) => new Date(t.trip_date).getTime()));
+  const earliest = Math.min(...recent.map((t) => new Date(t.trip_at).getTime()));
   const spanDays = Math.max(1, Math.ceil((now - earliest) / (1000 * 60 * 60 * 24)));
   return totalKm / spanDays;
 }

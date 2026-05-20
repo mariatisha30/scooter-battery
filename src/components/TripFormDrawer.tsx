@@ -3,7 +3,11 @@
 import { useState } from "react";
 import { TripForm } from "./TripForm";
 
-export function TripFormDrawer() {
+type Props = {
+  latest: { battery_pct: number; logged_at: string } | null;
+};
+
+export function TripFormDrawer({ latest }: Props) {
   const [open, setOpen] = useState(false);
 
   if (!open) {
@@ -21,7 +25,9 @@ export function TripFormDrawer() {
           </span>
           <span className="text-sm font-medium text-neutral-100">Log a new trip</span>
         </span>
-        <span className="text-xs text-neutral-500">teach the calibration</span>
+        <span className="text-xs text-neutral-500">
+          {latest ? `start auto · ${latest.battery_pct}%` : "teach the calibration"}
+        </span>
       </button>
     );
   }
@@ -40,7 +46,7 @@ export function TripFormDrawer() {
           Cancel
         </button>
       </div>
-      <TripForm />
+      <TripForm latest={latest} />
     </div>
   );
 }

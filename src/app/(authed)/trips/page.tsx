@@ -3,7 +3,7 @@ import { RowDelete } from "@/components/RowDelete";
 import { Toast } from "@/components/Toast";
 import { TripFormDrawer } from "@/components/TripFormDrawer";
 import { calibrationFromTrips } from "@/lib/calibration";
-import { supabase, supabaseConfigured, type Trip } from "@/lib/supabase";
+import { supabase, supabaseConfigured, type BatteryLog, type Trip } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
@@ -13,9 +13,22 @@ export default async function TripsPage({
   searchParams: Promise<{ saved?: string }>;
 }) {
   const { saved } = await searchParams;
+
   const trips: Trip[] = supabaseConfigured && supabase
-    ? ((await supabase.from("trips").select("*").order("trip_date", { ascending: false }).limit(50)).data ?? [])
+    ? ((await supabase.from("trips").select("*").order("trip_at", { ascending: false }).limit(50)).data ?? [])
     : [];
+
+  const latestLog: Pick<BatteryLog, "battery_pct" | "logged_at"> | null =
+    supabaseConfigured && supabase
+      ? ((
+          await supabase
+            .from("battery_logs")
+            .select("battery_pct, logged_at")
+            .order("logged_at", { ascending: false })
+            .limit(1)
+            .maybeSingle()
+        ).data ?? null)
+      : null;
 
   const cal = calibrationFromTrips(trips);
 
@@ -28,7 +41,7 @@ export default async function TripsPage({
         </Link>
         <h1 className="mt-2 text-2xl font-semibold">Trips</h1>
         <p className="mt-1 text-sm text-neutral-500">
-          Each trip teaches the app your real km per %.
+          Each trip teaches the app your real km per % — and updates your current battery.
         </p>
       </div>
 
@@ -56,7 +69,7 @@ export default async function TripsPage({
         </div>
       </section>
 
-      <TripFormDrawer />
+      <TripFormDrawer latest={latestLog} />
 
       <section>
         <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-400">
@@ -109,7 +122,12 @@ export default async function TripsPage({
                       {t.end_pct}%
                     </span>
                     <span className="ml-auto">
-                      {new Date(t.trip_date).toLocaleDateString([], { day: "numeric", month: "short" })}
+                      {new Date(t.trip_at).toLocaleString([], {
+                        day: "numeric",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </span>
                   </div>
                   {t.note && <div className="mt-1 text-xs text-neutral-400">{t.note}</div>}

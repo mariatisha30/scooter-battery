@@ -24,7 +24,7 @@ export type Trip = {
   start_pct: number;
   end_pct: number;
   distance_km: number;
-  trip_date: string;
+  trip_at: string;
   with_passenger: boolean;
   note: string | null;
   created_at: string;

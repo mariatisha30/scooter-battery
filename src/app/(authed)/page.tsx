@@ -39,7 +39,7 @@ export default async function Dashboard({
 
   const [{ data: logs }, { data: trips }] = await Promise.all([
     supabase.from("battery_logs").select("*").order("logged_at", { ascending: false }).limit(60),
-    supabase.from("trips").select("*").order("trip_date", { ascending: false }).limit(50),
+    supabase.from("trips").select("*").order("trip_at", { ascending: false }).limit(50),
   ]);
 
   const allLogs = (logs as BatteryLog[]) ?? [];
@@ -54,7 +54,7 @@ export default async function Dashboard({
   const soloHint = latest ? chargeHint(soloKmLeft, daily) : null;
   const passengerHint = latest ? chargeHint(passengerKmLeft, daily) : null;
   const totalKm = allTrips.reduce((s, t) => s + Number(t.distance_km), 0);
-  const lastTripDate = allTrips[0]?.trip_date ?? null;
+  const lastTripDate = allTrips[0]?.trip_at ?? null;
 
   const chartData = allLogs
     .slice()

@@ -18,18 +18,26 @@ create table if not exists trips (
   start_pct int not null check (start_pct >= 0 and start_pct <= 100),
   end_pct int not null check (end_pct >= 0 and end_pct <= 100),
   distance_km numeric(6,2) not null check (distance_km > 0),
-  trip_date date not null default current_date,
+  trip_at timestamptz not null default now(),
   with_passenger boolean not null default false,
   note text,
   created_at timestamptz not null default now(),
   constraint start_higher check (start_pct > end_pct)
 );
 
--- Migration: if you previously ran the schema, add the new column.
+-- Migration: add columns if upgrading from an earlier schema.
 alter table trips add column if not exists with_passenger boolean not null default false;
+alter table trips add column if not exists trip_at timestamptz;
+update trips set trip_at = (trip_date::timestamptz + interval '12 hours') where trip_at is null and trip_date is not null;
+alter table trips alter column trip_at set not null;
+alter table trips alter column trip_at set default now();
+alter table trips drop column if exists trip_date;
 
-create index if not exists trips_trip_date_idx
-  on trips (trip_date desc);
+create index if not exists trips_trip_at_idx
+  on trips (trip_at desc);
+
+-- Drop the old date-based index if it exists.
+drop index if exists trips_trip_date_idx;
 
 -- Row Level Security: we go through the service role from the server,
 -- and the middleware gate handles access. Disable RLS so server writes work.

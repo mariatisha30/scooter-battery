@@ -3,24 +3,41 @@
 import { useEffect, useState, useTransition } from "react";
 import { logTrip } from "@/lib/actions";
 
-function todayLocal(): string {
+function nowLocalForInput(): string {
   const d = new Date();
   d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-  return d.toISOString().slice(0, 10);
+  return d.toISOString().slice(0, 16);
 }
 
-export function TripForm() {
-  const [startPct, setStartPct] = useState<number | "">("");
+function relativeAgo(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  if (diffMs < 0) return "in the future";
+  const min = Math.floor(diffMs / 60000);
+  if (min < 1) return "just now";
+  if (min < 60) return `${min} min ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  const day = Math.floor(hr / 24);
+  return `${day}d ago`;
+}
+
+type Props = {
+  latest: { battery_pct: number; logged_at: string } | null;
+};
+
+export function TripForm({ latest }: Props) {
+  const [startPct, setStartPct] = useState<number | "">(latest?.battery_pct ?? "");
+  const [startOverridden, setStartOverridden] = useState(false);
   const [endPct, setEndPct] = useState<number | "">("");
   const [km, setKm] = useState<string>("");
-  const [date, setDate] = useState<string>("");
+  const [tripAt, setTripAt] = useState<string>("");
   const [note, setNote] = useState("");
   const [withPassenger, setWithPassenger] = useState(false);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setDate(todayLocal());
+    setTripAt(nowLocalForInput());
   }, []);
 
   const usedPct =
@@ -29,6 +46,7 @@ export function TripForm() {
       : null;
   const kmNum = Number(km);
   const liveKmPerPct = usedPct && Number.isFinite(kmNum) && kmNum > 0 ? kmNum / usedPct : null;
+  const showAutofillHint = !startOverridden && latest && startPct === latest.battery_pct;
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -45,7 +63,7 @@ export function TripForm() {
     fd.set("start_pct", String(startPct));
     fd.set("end_pct", String(endPct));
     fd.set("distance_km", km);
-    fd.set("trip_date", date);
+    fd.set("trip_at", tripAt);
     fd.set("note", note);
     fd.set("with_passenger", withPassenger ? "true" : "false");
     startTransition(async () => {
@@ -85,8 +103,17 @@ export function TripForm() {
       </div>
 
       <div className="grid grid-cols-3 gap-2">
-        <NumField label="Start %" value={startPct} onChange={setStartPct} min={1} max={100} />
-        <NumField label="End %" value={endPct} onChange={setEndPct} min={0} max={99} />
+        <NumField
+          label="Start %"
+          value={startPct}
+          onChange={(v) => {
+            setStartPct(v);
+            setStartOverridden(true);
+          }}
+          min={1}
+          max={100}
+        />
+        <NumField label="End %" value={endPct} onChange={setEndPct} min={0} max={99} autoFocus={!!latest} />
         <label className="block">
           <span className="text-[10px] uppercase tracking-wider text-neutral-500">km</span>
           <input
@@ -101,6 +128,12 @@ export function TripForm() {
         </label>
       </div>
 
+      {showAutofillHint && latest && (
+        <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-1.5 text-[11px] text-emerald-300">
+          Start % from your last reading · {relativeAgo(latest.logged_at)}
+        </div>
+      )}
+
       {liveKmPerPct !== null && (
         <div className="rounded-lg bg-emerald-500/10 px-3 py-2 text-center text-xs text-emerald-300">
           This trip: <span className="font-semibold tabular-nums">{liveKmPerPct.toFixed(2)} km/%</span>
@@ -108,11 +141,11 @@ export function TripForm() {
       )}
 
       <label className="block">
-        <span className="text-[10px] uppercase tracking-wider text-neutral-500">Date</span>
+        <span className="text-[10px] uppercase tracking-wider text-neutral-500">When</span>
         <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
+          type="datetime-local"
+          value={tripAt}
+          onChange={(e) => setTripAt(e.target.value)}
           className="mt-1 w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 focus:border-emerald-500 focus:outline-none"
         />
       </label>
@@ -150,12 +183,14 @@ function NumField({
   onChange,
   min,
   max,
+  autoFocus,
 }: {
   label: string;
   value: number | "";
   onChange: (v: number | "") => void;
   min: number;
   max: number;
+  autoFocus?: boolean;
 }) {
   return (
     <label className="block">
@@ -165,6 +200,7 @@ function NumField({
         min={min}
         max={max}
         required
+        autoFocus={autoFocus}
         value={value}
         onChange={(e) => {
           const v = e.target.value;
