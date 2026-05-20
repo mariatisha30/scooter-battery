@@ -102,7 +102,7 @@ export async function logBattery(formData: FormData) {
 
   revalidatePath("/");
   revalidatePath("/trips");
-  redirect(`/?saved=${pct}`);
+  redirect("/");
 }
 
 export async function logTrip(formData: FormData) {
@@ -156,7 +156,7 @@ export async function logTrip(formData: FormData) {
 
   revalidatePath("/trips");
   revalidatePath("/");
-  redirect(`/trips?saved=${distance}`);
+  redirect("/trips");
 }
 
 export async function updateBatteryLog(id: string, formData: FormData) {
@@ -178,7 +178,7 @@ export async function updateBatteryLog(id: string, formData: FormData) {
 
   revalidatePath("/");
   revalidatePath("/trips");
-  redirect("/?saved_edit=1");
+  redirect("/");
 }
 
 export async function updateTrip(id: string, formData: FormData) {
@@ -232,7 +232,7 @@ export async function updateTrip(id: string, formData: FormData) {
 
   revalidatePath("/trips");
   revalidatePath("/");
-  redirect("/trips?saved_edit=1");
+  redirect("/trips");
 }
 
 export async function deleteBatteryLog(id: string) {

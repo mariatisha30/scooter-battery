@@ -5,7 +5,6 @@ import { HistoryChart } from "@/components/HistoryChart";
 import { RowActions } from "@/components/RowActions";
 import { SetupBanner } from "@/components/SetupBanner";
 import { StatsStrip } from "@/components/StatsStrip";
-import { Toast } from "@/components/Toast";
 import {
   batteryFloor,
   calibrationFromTrips,
@@ -17,18 +16,12 @@ import { supabase, supabaseConfigured, type BatteryLog, type Trip } from "@/lib/
 
 export const dynamic = "force-dynamic";
 
-export default async function Dashboard({
-  searchParams,
-}: {
-  searchParams: Promise<{ saved?: string }>;
-}) {
+export default async function Dashboard() {
   const floor = batteryFloor();
-  const { saved } = await searchParams;
 
   if (!supabaseConfigured || !supabase) {
     return (
       <div className="space-y-6">
-        {saved && <Toast message={`Saved ${saved}%`} />}
         <SetupBanner />
         <div className="rounded-3xl border border-neutral-800 bg-gradient-to-b from-neutral-900/80 to-neutral-950/40 p-6">
           <BatteryRing pct={null} remainingKm={0} floor={floor} />
@@ -63,8 +56,6 @@ export default async function Dashboard({
 
   return (
     <div className="space-y-6">
-      {saved && <Toast message={`Saved ${saved}%`} />}
-
       <DashboardHero
         pct={pct}
         floor={floor}

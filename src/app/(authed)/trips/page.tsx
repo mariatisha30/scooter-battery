@@ -1,19 +1,12 @@
 import Link from "next/link";
 import { RowActions } from "@/components/RowActions";
-import { Toast } from "@/components/Toast";
 import { TripFormDrawer } from "@/components/TripFormDrawer";
 import { calibrationFromTrips } from "@/lib/calibration";
 import { supabase, supabaseConfigured, type BatteryLog, type Trip } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
-export default async function TripsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ saved?: string }>;
-}) {
-  const { saved } = await searchParams;
-
+export default async function TripsPage() {
   const trips: Trip[] = supabaseConfigured && supabase
     ? ((await supabase.from("trips").select("*").order("trip_at", { ascending: false }).limit(50)).data ?? [])
     : [];
@@ -34,7 +27,6 @@ export default async function TripsPage({
 
   return (
     <div className="space-y-6">
-      {saved && <Toast message={`Saved ${saved} km trip`} />}
       <div>
         <Link href="/" className="text-sm text-neutral-400 hover:text-neutral-100">
           ← Back
