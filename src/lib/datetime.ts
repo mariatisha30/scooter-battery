@@ -18,6 +18,21 @@ export function isoToLocalDateTime(iso: string): string {
   return d.toISOString().slice(0, 16);
 }
 
+/**
+ * Convert the local-time string from `<input type="datetime-local">`
+ * (`YYYY-MM-DDTHH:MM`, no zone) into a proper UTC ISO string with `Z`.
+ *
+ * Why this matters: bare datetime-local values are interpreted as *local*
+ * time by the spec, but on the Vercel server `new Date("...")` reads them
+ * as UTC instead. Doing the conversion here on the client — where the
+ * browser knows the user's actual timezone — produces a correct moment in
+ * time that round-trips through Postgres and back to .toLocaleString().
+ */
+export function localDateTimeToIso(local: string): string {
+  if (!local) return new Date().toISOString();
+  return new Date(local).toISOString();
+}
+
 /** "just now" / "3 min ago" / "2h ago" / "5d ago" — short relative phrasing. */
 export function relativeAgo(iso: string): string {
   const diffMs = Date.now() - new Date(iso).getTime();

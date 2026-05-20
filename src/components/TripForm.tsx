@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { logTrip } from "@/lib/actions";
-import { nowLocalDateTime, relativeAgo } from "@/lib/datetime";
+import { localDateTimeToIso, nowLocalDateTime, relativeAgo } from "@/lib/datetime";
 import { isRedirectError } from "@/lib/isRedirect";
 import { Spinner } from "./Spinner";
 
@@ -48,7 +48,7 @@ export function TripForm({ latest }: Props) {
     fd.set("start_pct", String(startPct));
     fd.set("end_pct", String(endPct));
     fd.set("distance_km", km);
-    fd.set("trip_at", tripAt);
+    fd.set("trip_at", localDateTimeToIso(tripAt));
     fd.set("note", note);
     fd.set("with_passenger", withPassenger ? "true" : "false");
     startTransition(async () => {

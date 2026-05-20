@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { updateBatteryLog } from "@/lib/actions";
-import { isoToLocalDateTime } from "@/lib/datetime";
+import { isoToLocalDateTime, localDateTimeToIso } from "@/lib/datetime";
 import { isRedirectError } from "@/lib/isRedirect";
 import { Spinner } from "./Spinner";
 
@@ -29,7 +29,7 @@ export function LogEditForm({ id, initial }: Props) {
     setError(null);
     const fd = new FormData();
     fd.set("battery_pct", String(pct));
-    fd.set("logged_at", when);
+    fd.set("logged_at", localDateTimeToIso(when));
     fd.set("note", note);
     startTransition(async () => {
       try {

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { updateTrip } from "@/lib/actions";
-import { isoToLocalDateTime } from "@/lib/datetime";
+import { isoToLocalDateTime, localDateTimeToIso } from "@/lib/datetime";
 import { isRedirectError } from "@/lib/isRedirect";
 import { Spinner } from "./Spinner";
 
@@ -50,7 +50,7 @@ export function TripEditForm({ id, initial }: Props) {
     fd.set("start_pct", String(startPct));
     fd.set("end_pct", String(endPct));
     fd.set("distance_km", km);
-    fd.set("trip_at", tripAt);
+    fd.set("trip_at", localDateTimeToIso(tripAt));
     fd.set("note", note);
     fd.set("with_passenger", withPassenger ? "true" : "false");
     startTransition(async () => {
