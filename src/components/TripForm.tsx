@@ -2,26 +2,9 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { logTrip } from "@/lib/actions";
+import { nowLocalDateTime, relativeAgo } from "@/lib/datetime";
 import { isRedirectError } from "@/lib/isRedirect";
 import { Spinner } from "./Spinner";
-
-function nowLocalForInput(): string {
-  const d = new Date();
-  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-  return d.toISOString().slice(0, 16);
-}
-
-function relativeAgo(iso: string): string {
-  const diffMs = Date.now() - new Date(iso).getTime();
-  if (diffMs < 0) return "in the future";
-  const min = Math.floor(diffMs / 60000);
-  if (min < 1) return "just now";
-  if (min < 60) return `${min} min ago`;
-  const hr = Math.floor(min / 60);
-  if (hr < 24) return `${hr}h ago`;
-  const day = Math.floor(hr / 24);
-  return `${day}d ago`;
-}
 
 type Props = {
   latest: { battery_pct: number; logged_at: string } | null;
@@ -39,7 +22,7 @@ export function TripForm({ latest }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setTripAt(nowLocalForInput());
+    setTripAt(nowLocalDateTime());
   }, []);
 
   const usedPct =

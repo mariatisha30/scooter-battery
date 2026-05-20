@@ -3,14 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { updateBatteryLog } from "@/lib/actions";
+import { isoToLocalDateTime } from "@/lib/datetime";
 import { isRedirectError } from "@/lib/isRedirect";
 import { Spinner } from "./Spinner";
-
-function toLocalInput(iso: string): string {
-  const d = new Date(iso);
-  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-  return d.toISOString().slice(0, 16);
-}
 
 type Props = {
   id: string;
@@ -24,7 +19,7 @@ type Props = {
 export function LogEditForm({ id, initial }: Props) {
   const router = useRouter();
   const [pct, setPct] = useState<number>(initial.battery_pct);
-  const [when, setWhen] = useState<string>(toLocalInput(initial.logged_at));
+  const [when, setWhen] = useState<string>(isoToLocalDateTime(initial.logged_at));
   const [note, setNote] = useState<string>(initial.note ?? "");
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);

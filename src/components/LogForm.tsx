@@ -2,16 +2,11 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { logBattery } from "@/lib/actions";
+import { nowLocalDateTime } from "@/lib/datetime";
 import { isRedirectError } from "@/lib/isRedirect";
 import { Spinner } from "./Spinner";
 
 const QUICK_PCTS = [100, 80, 60, 40, 25, 10];
-
-function nowLocalForInput(): string {
-  const d = new Date();
-  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-  return d.toISOString().slice(0, 16);
-}
 
 type Props = {
   soloKmPerPct: number;
@@ -28,7 +23,7 @@ export function LogForm({ soloKmPerPct, passengerKmPerPct, floor, calibrationSou
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setWhen(nowLocalForInput());
+    setWhen(nowLocalDateTime());
   }, []);
 
   const valid = typeof pct === "number" && pct >= 0 && pct <= 100;

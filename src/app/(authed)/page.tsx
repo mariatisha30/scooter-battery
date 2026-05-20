@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { BatteryRing } from "@/components/BatteryRing";
 import { DashboardHero } from "@/components/DashboardHero";
-import { HistoryChart } from "@/components/HistoryChart";
+import { HistoryChart } from "@/components/HistoryChartLazy";
 import { RowActions } from "@/components/RowActions";
 import { SetupBanner } from "@/components/SetupBanner";
 import { StatsStrip } from "@/components/StatsStrip";

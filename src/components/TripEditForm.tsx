@@ -3,14 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { updateTrip } from "@/lib/actions";
+import { isoToLocalDateTime } from "@/lib/datetime";
 import { isRedirectError } from "@/lib/isRedirect";
 import { Spinner } from "./Spinner";
-
-function toLocalInput(iso: string): string {
-  const d = new Date(iso);
-  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-  return d.toISOString().slice(0, 16);
-}
 
 type Props = {
   id: string;
@@ -30,7 +25,7 @@ export function TripEditForm({ id, initial }: Props) {
   const [startPct, setStartPct] = useState<number>(initial.start_pct);
   const [endPct, setEndPct] = useState<number>(initial.end_pct);
   const [km, setKm] = useState<string>(String(initial.distance_km));
-  const [tripAt, setTripAt] = useState<string>(toLocalInput(initial.trip_at));
+  const [tripAt, setTripAt] = useState<string>(isoToLocalDateTime(initial.trip_at));
   const [withPassenger, setWithPassenger] = useState<boolean>(initial.with_passenger);
   const [note, setNote] = useState<string>(initial.note ?? "");
   const [pending, startTransition] = useTransition();
