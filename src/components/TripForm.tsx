@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { logTrip } from "@/lib/actions";
+import { isRedirectError } from "@/lib/isRedirect";
 
 function nowLocalForInput(): string {
   const d = new Date();
@@ -70,6 +71,7 @@ export function TripForm({ latest }: Props) {
       try {
         await logTrip(fd);
       } catch (err) {
+        if (isRedirectError(err)) throw err;
         setError(err instanceof Error ? err.message : "Something went wrong");
       }
     });

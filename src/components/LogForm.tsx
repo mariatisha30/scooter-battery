@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { logBattery } from "@/lib/actions";
+import { isRedirectError } from "@/lib/isRedirect";
 
 const QUICK_PCTS = [100, 80, 60, 40, 25, 10];
 
@@ -43,6 +44,7 @@ export function LogForm({ soloKmPerPct, passengerKmPerPct, floor, calibrationSou
       try {
         await logBattery(fd);
       } catch (err) {
+        if (isRedirectError(err)) throw err;
         setError(err instanceof Error ? err.message : "Something went wrong");
       }
     });

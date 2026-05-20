@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { updateTrip } from "@/lib/actions";
+import { isRedirectError } from "@/lib/isRedirect";
 
 function toLocalInput(iso: string): string {
   const d = new Date(iso);
@@ -60,6 +61,7 @@ export function TripEditForm({ id, initial }: Props) {
       try {
         await updateTrip(id, fd);
       } catch (err) {
+        if (isRedirectError(err)) throw err;
         setError(err instanceof Error ? err.message : "Something went wrong");
       }
     });

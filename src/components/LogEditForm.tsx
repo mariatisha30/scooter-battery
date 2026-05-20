@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { updateBatteryLog } from "@/lib/actions";
+import { isRedirectError } from "@/lib/isRedirect";
 
 function toLocalInput(iso: string): string {
   const d = new Date(iso);
@@ -38,6 +39,7 @@ export function LogEditForm({ id, initial }: Props) {
       try {
         await updateBatteryLog(id, fd);
       } catch (err) {
+        if (isRedirectError(err)) throw err;
         setError(err instanceof Error ? err.message : "Something went wrong");
       }
     });
