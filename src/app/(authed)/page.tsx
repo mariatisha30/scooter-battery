@@ -108,6 +108,14 @@ export default async function Dashboard({
                 <li key={l.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
                   <div className="flex min-w-0 items-baseline gap-3">
                     <span className="text-base font-medium tabular-nums">{l.battery_pct}%</span>
+                    {l.trip_id && (
+                      <span
+                        className="rounded-full border border-sky-500/30 bg-sky-500/10 px-1.5 py-0.5 text-[9px] uppercase tracking-wider text-sky-300"
+                        title="From a logged trip — deleting this also deletes the trip"
+                      >
+                        ↳ trip
+                      </span>
+                    )}
                     {delta !== null && delta !== 0 && (
                       <span className={`tabular-nums text-xs ${delta > 0 ? "text-emerald-400" : "text-neutral-400"}`}>
                         {delta > 0 ? "▲" : "▼"} {Math.abs(delta)}

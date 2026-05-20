@@ -6,12 +6,16 @@ create table if not exists battery_logs (
   id uuid primary key default gen_random_uuid(),
   battery_pct int not null check (battery_pct >= 0 and battery_pct <= 100),
   logged_at timestamptz not null default now(),
+  trip_id uuid references trips(id) on delete cascade,
   note text,
   created_at timestamptz not null default now()
 );
 
 create index if not exists battery_logs_logged_at_idx
   on battery_logs (logged_at desc);
+
+create index if not exists battery_logs_trip_id_idx
+  on battery_logs (trip_id);
 
 create table if not exists trips (
   id uuid primary key default gen_random_uuid(),
@@ -32,6 +36,7 @@ update trips set trip_at = (trip_date::timestamptz + interval '12 hours') where 
 alter table trips alter column trip_at set not null;
 alter table trips alter column trip_at set default now();
 alter table trips drop column if exists trip_date;
+alter table battery_logs add column if not exists trip_id uuid references trips(id) on delete cascade;
 
 create index if not exists trips_trip_at_idx
   on trips (trip_at desc);

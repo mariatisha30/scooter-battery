@@ -84,23 +84,28 @@ export async function logTrip(formData: FormData) {
 
   const tripAtIso = tripAtRaw ? new Date(tripAtRaw).toISOString() : new Date().toISOString();
 
-  const { error: tripError } = await supabase.from("trips").insert({
-    start_pct: startPct,
-    end_pct: endPct,
-    distance_km: distance,
-    with_passenger: withPassenger,
-    note,
-    trip_at: tripAtIso,
-  });
-  if (tripError) throw new Error(tripError.message);
+  const { data: tripRow, error: tripError } = await supabase
+    .from("trips")
+    .insert({
+      start_pct: startPct,
+      end_pct: endPct,
+      distance_km: distance,
+      with_passenger: withPassenger,
+      note,
+      trip_at: tripAtIso,
+    })
+    .select("id")
+    .single();
+  if (tripError || !tripRow) throw new Error(tripError?.message ?? "Failed to save trip");
 
-  // Also insert a battery log at trip end so the dashboard reflects current state.
+  // Also insert a battery log at trip end, linked to the trip so deletes cascade.
   const logNoteParts = [`After ${distance} km`];
   if (withPassenger) logNoteParts.push("+1");
   if (note) logNoteParts.push(note);
   const { error: logError } = await supabase.from("battery_logs").insert({
     battery_pct: endPct,
     logged_at: tripAtIso,
+    trip_id: tripRow.id,
     note: logNoteParts.join(" · "),
   });
   if (logError) throw new Error(logError.message);
@@ -112,12 +117,26 @@ export async function logTrip(formData: FormData) {
 
 export async function deleteBatteryLog(id: string) {
   if (!supabase) return;
-  await supabase.from("battery_logs").delete().eq("id", id);
+  // If this log was created by a trip, deleting the trip will cascade-delete the log.
+  // Otherwise just delete the log row directly.
+  const { data: log } = await supabase
+    .from("battery_logs")
+    .select("trip_id")
+    .eq("id", id)
+    .maybeSingle();
+  if (log?.trip_id) {
+    await supabase.from("trips").delete().eq("id", log.trip_id);
+  } else {
+    await supabase.from("battery_logs").delete().eq("id", id);
+  }
   revalidatePath("/");
+  revalidatePath("/trips");
 }
 
 export async function deleteTrip(id: string) {
   if (!supabase) return;
+  // The FK from battery_logs.trip_id is ON DELETE CASCADE,
+  // so deleting the trip auto-removes the linked battery log.
   await supabase.from("trips").delete().eq("id", id);
   revalidatePath("/trips");
   revalidatePath("/");
