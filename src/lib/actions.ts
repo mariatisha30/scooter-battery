@@ -159,6 +159,56 @@ export async function logTrip(formData: FormData) {
   redirect("/trips");
 }
 
+/**
+ * Insert a battery_log sourced from the JBD BMS over BLE.
+ *
+ * - Skips when the latest existing reading has the same SOC AND was logged
+ *   within the last 30 minutes (no point spamming identical rows when the
+ *   scooter sits idle).
+ * - Does NOT auto-create an estimated trip on a drop — at 5-minute polling
+ *   that would generate dozens of micro-trips per ride. Real trip km still
+ *   come from manual trip entries.
+ */
+export async function logBatteryFromBms(
+  pct: number,
+  voltage: number | null,
+  current: number | null
+): Promise<{ saved: boolean; reason?: string }> {
+  if (!supabaseConfigured || !supabase) {
+    throw new Error("Supabase not configured");
+  }
+  if (!Number.isInteger(pct) || pct < 0 || pct > 100) {
+    throw new Error("Battery percentage must be 0–100");
+  }
+
+  const { data: latest } = await supabase
+    .from("battery_logs")
+    .select("battery_pct, logged_at")
+    .order("logged_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (latest) {
+    const ageMs = Date.now() - new Date(latest.logged_at).getTime();
+    const thirtyMin = 30 * 60 * 1000;
+    if (latest.battery_pct === pct && ageMs < thirtyMin) {
+      return { saved: false, reason: "unchanged" };
+    }
+  }
+
+  const { error } = await supabase.from("battery_logs").insert({
+    battery_pct: pct,
+    voltage_v: voltage,
+    current_a: current,
+    logged_at: new Date().toISOString(),
+    note: "BMS",
+  });
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/");
+  return { saved: true };
+}
+
 export async function updateBatteryLog(id: string, formData: FormData) {
   if (!supabase) throw new Error("Supabase not configured");
   const pct = Number(formData.get("battery_pct"));

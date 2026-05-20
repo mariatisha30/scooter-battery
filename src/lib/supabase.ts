@@ -16,6 +16,8 @@ export type BatteryLog = {
   battery_pct: number;
   logged_at: string;
   trip_id: string | null;
+  voltage_v: number | null;
+  current_a: number | null;
   note: string | null;
   created_at: string;
 };

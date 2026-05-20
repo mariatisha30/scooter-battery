@@ -1,7 +1,8 @@
-import Link from "next/link";
 import { BatteryRing } from "@/components/BatteryRing";
+import { BmsCard } from "@/components/BmsCard";
 import { DashboardHero } from "@/components/DashboardHero";
 import { HistoryChart } from "@/components/HistoryChartLazy";
+import { PullToRefresh } from "@/components/PullToRefresh";
 import { RowActions } from "@/components/RowActions";
 import { SetupBanner } from "@/components/SetupBanner";
 import { StatsStrip } from "@/components/StatsStrip";
@@ -30,6 +31,8 @@ export default async function Dashboard() {
     );
   }
 
+  // We must inline this content in the PullToRefresh wrapper below.
+
   const [{ data: logs }, { data: trips }] = await Promise.all([
     supabase.from("battery_logs").select("*").order("logged_at", { ascending: false }).limit(60),
     supabase.from("trips").select("*").order("trip_at", { ascending: false }).limit(50),
@@ -55,6 +58,7 @@ export default async function Dashboard() {
     .map((l) => ({ t: new Date(l.logged_at).getTime(), pct: l.battery_pct }));
 
   return (
+    <PullToRefresh>
     <div className="space-y-6">
       <DashboardHero
         pct={pct}
@@ -64,12 +68,7 @@ export default async function Dashboard() {
         lastLoggedAt={latest?.logged_at ?? null}
       />
 
-      <Link
-        href="/log"
-        className="block rounded-2xl bg-emerald-500 py-4 text-center text-base font-semibold text-emerald-950 shadow-lg shadow-emerald-500/20 transition-colors hover:bg-emerald-400"
-      >
-        + Log battery now
-      </Link>
+      <BmsCard />
 
       <StatsStrip tripCount={allTrips.length} totalKm={totalKm} lastTripDate={lastTripDate} />
 
@@ -132,5 +131,6 @@ export default async function Dashboard() {
         </section>
       )}
     </div>
+    </PullToRefresh>
   );
 }
