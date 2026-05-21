@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { LogoutButton } from "@/components/LogoutButton";
 import { HeaderBattery } from "@/components/HeaderBattery";
+import { OfflineSync } from "@/components/OfflineSync";
+import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { batteryFloor } from "@/lib/calibration";
 import { supabase, supabaseConfigured, type BatteryLog } from "@/lib/supabase";
 
@@ -21,6 +23,7 @@ export default async function AuthedLayout({ children }: { children: React.React
 
   return (
     <div className="mx-auto max-w-md px-4 pb-24 pt-6">
+      <ServiceWorkerRegister />
       <header className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Link href="/" className="text-lg font-semibold tracking-tight">
@@ -33,6 +36,9 @@ export default async function AuthedLayout({ children }: { children: React.React
           <LogoutButton />
         </nav>
       </header>
+      <div className="mb-4">
+        <OfflineSync />
+      </div>
       <main>{children}</main>
     </div>
   );

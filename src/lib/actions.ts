@@ -172,7 +172,8 @@ export async function logTrip(formData: FormData) {
 export async function logBatteryFromBms(
   pct: number,
   voltage: number | null,
-  current: number | null
+  current: number | null,
+  loggedAtIso?: string
 ): Promise<{ saved: boolean; reason?: string }> {
   if (!supabaseConfigured || !supabase) {
     throw new Error("Supabase not configured");
@@ -181,15 +182,23 @@ export async function logBatteryFromBms(
     throw new Error("Battery percentage must be 0–100");
   }
 
+  // Use the caller-provided time if present (queued offline reads carry their
+  // original moment), otherwise the server's wall clock.
+  const newAt = loggedAtIso ? new Date(loggedAtIso) : new Date();
+  const newAtIso = newAt.toISOString();
+
+  // Compare against the row immediately preceding this moment, not just the
+  // overall latest — important when draining a queue of older readings.
   const { data: latest } = await supabase
     .from("battery_logs")
     .select("battery_pct, logged_at")
+    .lt("logged_at", newAtIso)
     .order("logged_at", { ascending: false })
     .limit(1)
     .maybeSingle();
 
   if (latest) {
-    const ageMs = Date.now() - new Date(latest.logged_at).getTime();
+    const ageMs = newAt.getTime() - new Date(latest.logged_at).getTime();
     const thirtyMin = 30 * 60 * 1000;
     if (latest.battery_pct === pct && ageMs < thirtyMin) {
       return { saved: false, reason: "unchanged" };
@@ -200,7 +209,7 @@ export async function logBatteryFromBms(
     battery_pct: pct,
     voltage_v: voltage,
     current_a: current,
-    logged_at: new Date().toISOString(),
+    logged_at: newAtIso,
     note: "BMS",
   });
   if (error) throw new Error(error.message);

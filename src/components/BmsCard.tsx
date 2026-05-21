@@ -12,6 +12,7 @@ import {
   timeEstimateMinutes,
   type BmsReading,
 } from "@/lib/bms";
+import { enqueueReading } from "@/lib/queue";
 import { Spinner } from "./Spinner";
 
 const POLL_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
@@ -176,8 +177,26 @@ export function BmsCard() {
     try {
       const r = await readOnce();
       setReading(r);
+      const now = new Date().toISOString();
       setLastSyncAt(Date.now());
-      await logBatteryFromBms(r.soc, r.voltage, r.current);
+      try {
+        await logBatteryFromBms(r.soc, r.voltage, r.current, now);
+      } catch (uploadErr) {
+        // Offline or server unreachable — stash to IndexedDB so OfflineSync
+        // can drain it when connectivity returns. Don't surface as an error.
+        const looksNetworky =
+          !navigator.onLine ||
+          uploadErr instanceof TypeError ||
+          (uploadErr instanceof Error && /fetch|network/i.test(uploadErr.message));
+        if (!looksNetworky) throw uploadErr;
+        await enqueueReading({
+          soc: r.soc,
+          voltage: r.voltage,
+          current: r.current,
+          loggedAtIso: now,
+        });
+        window.dispatchEvent(new Event("scooter-queue-changed"));
+      }
       setStatus("connected");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Read failed");
