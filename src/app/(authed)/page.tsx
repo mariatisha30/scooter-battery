@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { BatteryRing } from "@/components/BatteryRing";
 import { BmsCard } from "@/components/BmsCard";
 import { DashboardHero } from "@/components/DashboardHero";
@@ -13,6 +14,7 @@ import {
   dailyAvgKm,
   remainingKm,
 } from "@/lib/calibration";
+import { detectChargeSessions, formatChargeDuration } from "@/lib/charging";
 import { formatLocalDateTime } from "@/lib/datetime";
 import { supabase, supabaseConfigured, type BatteryLog, type Trip } from "@/lib/supabase";
 
@@ -52,6 +54,7 @@ export default async function Dashboard() {
   const passengerHint = latest ? chargeHint(passengerKmLeft, daily) : null;
   const totalKm = allTrips.reduce((s, t) => s + Number(t.distance_km), 0);
   const lastTripDate = allTrips[0]?.trip_at ?? null;
+  const lastCharge = detectChargeSessions(allLogs)[0] ?? null;
 
   const chartData = allLogs
     .slice()
@@ -70,6 +73,38 @@ export default async function Dashboard() {
       />
 
       <BmsCard />
+
+      {lastCharge && (
+        <Link
+          href="/health"
+          className="block rounded-2xl border border-neutral-800 bg-neutral-900/50 px-4 py-3 transition-colors hover:border-neutral-700 hover:bg-neutral-900"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-baseline gap-2">
+              <span className="text-[10px] uppercase tracking-wider text-neutral-500">
+                Last charge
+              </span>
+              <span className="text-sm font-medium text-neutral-100 tabular-nums">
+                {lastCharge.startPct}% → {lastCharge.endPct}%
+              </span>
+            </div>
+            <span className="text-xs tabular-nums text-neutral-300">
+              {formatChargeDuration(lastCharge.durationMin)}
+            </span>
+          </div>
+          <div className="mt-1 flex items-center justify-between text-[10px] text-neutral-500">
+            <span>
+              {formatLocalDateTime(lastCharge.endAt, {
+                day: "numeric",
+                month: "short",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </span>
+            <span className="tabular-nums">{lastCharge.ratePctPerHour.toFixed(1)} %/h</span>
+          </div>
+        </Link>
+      )}
 
       <StatsStrip tripCount={allTrips.length} totalKm={totalKm} lastTripDate={lastTripDate} />
 

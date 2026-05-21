@@ -9,6 +9,8 @@ create table if not exists battery_logs (
   trip_id uuid references trips(id) on delete cascade,
   voltage_v numeric(6,2),
   current_a numeric(6,2),
+  cycles int,
+  max_temp_c numeric(4,1),
   note text,
   created_at timestamptz not null default now()
 );
@@ -50,6 +52,8 @@ alter table trips drop column if exists trip_date;
 alter table battery_logs add column if not exists trip_id uuid references trips(id) on delete cascade;
 alter table battery_logs add column if not exists voltage_v numeric(6,2);
 alter table battery_logs add column if not exists current_a numeric(6,2);
+alter table battery_logs add column if not exists cycles int;
+alter table battery_logs add column if not exists max_temp_c numeric(4,1);
 alter table trips add column if not exists km_estimated boolean not null default false;
 
 create index if not exists trips_trip_at_idx

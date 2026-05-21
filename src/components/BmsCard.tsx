@@ -179,8 +179,16 @@ export function BmsCard() {
       setReading(r);
       const now = new Date().toISOString();
       setLastSyncAt(Date.now());
+      const maxTempC = r.temperatures.length > 0 ? Math.max(...r.temperatures) : null;
       try {
-        await logBatteryFromBms(r.soc, r.voltage, r.current, now);
+        await logBatteryFromBms({
+          pct: r.soc,
+          voltage: r.voltage,
+          current: r.current,
+          cycles: r.cycles,
+          maxTempC,
+          loggedAtIso: now,
+        });
       } catch (uploadErr) {
         // Offline or server unreachable — stash to IndexedDB so OfflineSync
         // can drain it when connectivity returns. Don't surface as an error.
@@ -193,6 +201,8 @@ export function BmsCard() {
           soc: r.soc,
           voltage: r.voltage,
           current: r.current,
+          cycles: r.cycles,
+          maxTempC,
           loggedAtIso: now,
         });
         window.dispatchEvent(new Event("scooter-queue-changed"));

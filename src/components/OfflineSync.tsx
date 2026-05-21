@@ -52,7 +52,14 @@ export function OfflineSync() {
       let drained = 0;
       for (const item of items) {
         try {
-          await logBatteryFromBms(item.soc, item.voltage, item.current, item.loggedAtIso);
+          await logBatteryFromBms({
+            pct: item.soc,
+            voltage: item.voltage,
+            current: item.current,
+            cycles: item.cycles,
+            maxTempC: item.maxTempC,
+            loggedAtIso: item.loggedAtIso,
+          });
           if (item.id !== undefined) await removeQueued(item.id);
           drained++;
         } catch {

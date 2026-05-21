@@ -33,6 +33,7 @@ export default async function AuthedLayout({ children }: { children: React.React
         </div>
         <nav className="flex items-center gap-4 text-sm text-neutral-400">
           <Link href="/trips" className="hover:text-neutral-100">Trips</Link>
+          <Link href="/health" className="hover:text-neutral-100">Health</Link>
           <LogoutButton />
         </nav>
       </header>

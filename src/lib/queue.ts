@@ -13,6 +13,8 @@ export type QueuedReading = {
   soc: number;
   voltage: number | null;
   current: number | null;
+  cycles?: number | null;
+  maxTempC?: number | null;
   loggedAtIso: string;
 };
 

@@ -169,15 +169,23 @@ export async function logTrip(formData: FormData) {
  *   that would generate dozens of micro-trips per ride. Real trip km still
  *   come from manual trip entries.
  */
+export type BmsReadingInput = {
+  pct: number;
+  voltage: number | null;
+  current: number | null;
+  cycles?: number | null;
+  maxTempC?: number | null;
+  /** ISO timestamp of when the reading happened. Defaults to server time. */
+  loggedAtIso?: string;
+};
+
 export async function logBatteryFromBms(
-  pct: number,
-  voltage: number | null,
-  current: number | null,
-  loggedAtIso?: string
+  reading: BmsReadingInput
 ): Promise<{ saved: boolean; reason?: string }> {
   if (!supabaseConfigured || !supabase) {
     throw new Error("Supabase not configured");
   }
+  const { pct, voltage, current, cycles, maxTempC, loggedAtIso } = reading;
   if (!Number.isInteger(pct) || pct < 0 || pct > 100) {
     throw new Error("Battery percentage must be 0–100");
   }
@@ -209,6 +217,8 @@ export async function logBatteryFromBms(
     battery_pct: pct,
     voltage_v: voltage,
     current_a: current,
+    cycles: cycles ?? null,
+    max_temp_c: maxTempC ?? null,
     logged_at: newAtIso,
     note: "BMS",
   });
