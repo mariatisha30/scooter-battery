@@ -17,8 +17,16 @@ import { Spinner } from "./Spinner";
 
 const POLL_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 const READ_TIMEOUT_MS = 8000;
+const RECONNECT_DELAY_MS = 5000;
 
-type Status = "unsupported" | "idle" | "connecting" | "connected" | "syncing" | "error";
+type Status =
+  | "unsupported"
+  | "idle"        // never paired in this browser
+  | "searching"   // previously paired, looking for the device
+  | "connecting"  // GATT connect in progress
+  | "connected"
+  | "syncing"
+  | "error";
 
 export function BmsCard() {
   const [status, setStatus] = useState<Status>("idle");
@@ -33,56 +41,9 @@ export function BmsCard() {
   const notifyCharRef = useRef<BluetoothRemoteGATTCharacteristic | null>(null);
   const assemblerRef = useRef(new BmsFrameAssembler());
   const pendingResolveRef = useRef<((r: BmsReading) => void) | null>(null);
-  const pendingRejectRef = useRef<((e: Error) => void) | null>(null);
-
-  // Check Web Bluetooth availability once on mount.
-  useEffect(() => {
-    if (typeof navigator === "undefined" || !navigator.bluetooth) {
-      setStatus("unsupported");
-    }
-  }, []);
-
-  // Try silent reconnect to a previously paired device on mount.
-  useEffect(() => {
-    if (status !== "idle") return;
-    let cancelled = false;
-    (async () => {
-      try {
-        if (!navigator.bluetooth?.getDevices) return;
-        const devices = await navigator.bluetooth.getDevices();
-        const candidate = devices[0];
-        if (cancelled || !candidate) return;
-        await connectToDevice(candidate);
-      } catch {
-        // silent — user just hasn't paired yet
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Auto-sync timer.
-  useEffect(() => {
-    if (status !== "connected" || !autoSync) return;
-    const id = setInterval(() => {
-      void readAndSave();
-    }, POLL_INTERVAL_MS);
-    return () => clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, autoSync]);
-
-  // Cleanup on unmount.
-  useEffect(() => {
-    return () => {
-      try {
-        deviceRef.current?.gatt?.disconnect();
-      } catch {
-        /* noop */
-      }
-    };
-  }, []);
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cancelledRef = useRef(false);
+  const disconnectListenerSetRef = useRef<WeakSet<BluetoothDevice>>(new WeakSet());
 
   const handleNotify = useCallback((event: Event) => {
     const target = event.target as BluetoothRemoteGATTCharacteristic;
@@ -93,84 +54,35 @@ export function BmsCard() {
     if (parsed && pendingResolveRef.current) {
       pendingResolveRef.current(parsed);
       pendingResolveRef.current = null;
-      pendingRejectRef.current = null;
     }
   }, []);
 
-  async function connectToDevice(device: BluetoothDevice) {
-    setStatus("connecting");
-    setError(null);
-    try {
-      device.addEventListener("gattserverdisconnected", () => {
-        setStatus("idle");
-      });
-      const server = await device.gatt!.connect();
-      const service = await server.getPrimaryService(JBD_SERVICE_UUID);
-      const notifyChar = await service.getCharacteristic(JBD_NOTIFY_CHAR_UUID);
-      const writeChar = await service.getCharacteristic(JBD_WRITE_CHAR_UUID);
-      await notifyChar.startNotifications();
-      notifyChar.addEventListener("characteristicvaluechanged", handleNotify);
-
-      deviceRef.current = device;
-      writeCharRef.current = writeChar;
-      notifyCharRef.current = notifyChar;
-      setDeviceName(device.name ?? "BMS");
-      setStatus("connected");
-      // First read immediately
-      await readAndSave();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Connection failed");
-      setStatus("error");
-    }
-  }
-
-  async function handleConnectClick() {
-    setError(null);
-    try {
-      const device = await navigator.bluetooth.requestDevice({
-        filters: [{ services: [JBD_SERVICE_UUID] }],
-      });
-      await connectToDevice(device);
-    } catch (err) {
-      // User cancelled the chooser
-      if (err instanceof DOMException && err.name === "NotFoundError") return;
-      setError(err instanceof Error ? err.message : "Connection failed");
-      setStatus("error");
-    }
-  }
-
-  function readOnce(): Promise<BmsReading> {
+  // Send one read command, wait for the BMS response.
+  const readOnce = useCallback((): Promise<BmsReading> => {
     const write = writeCharRef.current;
     if (!write) return Promise.reject(new Error("Not connected"));
     return new Promise<BmsReading>((resolve, reject) => {
-      pendingResolveRef.current = resolve;
-      pendingRejectRef.current = reject;
       assemblerRef.current.reset();
       const timeoutId = setTimeout(() => {
-        if (pendingResolveRef.current === resolve) {
+        if (pendingResolveRef.current) {
           pendingResolveRef.current = null;
-          pendingRejectRef.current = null;
           reject(new Error("Timed out waiting for BMS response"));
         }
       }, READ_TIMEOUT_MS);
-
-      write
-        .writeValueWithoutResponse(CMD_READ_BASIC_INFO)
-        .catch((e) => {
-          clearTimeout(timeoutId);
-          pendingResolveRef.current = null;
-          reject(e);
-        });
-
-      // Resolve wrapper to also clear the timeout
-      const origResolve = resolve;
       pendingResolveRef.current = (r) => {
         clearTimeout(timeoutId);
-        origResolve(r);
+        resolve(r);
       };
+      write.writeValueWithoutResponse(CMD_READ_BASIC_INFO).catch((e) => {
+        clearTimeout(timeoutId);
+        pendingResolveRef.current = null;
+        reject(e);
+      });
     });
-  }
+  }, []);
 
+  // Read + persist (with offline queue fallback). Used by auto-sync, manual
+  // Sync button, pull-to-refresh, and as the first action after connecting.
   const readAndSave = useCallback(async () => {
     if (!writeCharRef.current) return;
     setStatus("syncing");
@@ -190,8 +102,6 @@ export function BmsCard() {
           loggedAtIso: now,
         });
       } catch (uploadErr) {
-        // Offline or server unreachable — stash to IndexedDB so OfflineSync
-        // can drain it when connectivity returns. Don't surface as an error.
         const looksNetworky =
           !navigator.onLine ||
           uploadErr instanceof TypeError ||
@@ -212,17 +122,146 @@ export function BmsCard() {
       setError(err instanceof Error ? err.message : "Read failed");
       setStatus("error");
     }
-  }, []);
+  }, [readOnce]);
 
-  // Expose so the page-level pull-to-refresh can trigger a sync.
+  // Connect to a known device. On failure schedules a retry; on success kicks
+  // off an initial read. Also wires up the disconnect listener so the next
+  // drop triggers another retry loop automatically.
+  const connectToDevice = useCallback(
+    async (device: BluetoothDevice) => {
+      if (cancelledRef.current) return;
+      setError(null);
+      setStatus("connecting");
+
+      // Only register the disconnect listener once per device — re-adding on
+      // every connect would stack handlers.
+      if (!disconnectListenerSetRef.current.has(device)) {
+        device.addEventListener("gattserverdisconnected", () => {
+          if (cancelledRef.current) return;
+          notifyCharRef.current?.removeEventListener("characteristicvaluechanged", handleNotify);
+          writeCharRef.current = null;
+          notifyCharRef.current = null;
+          setStatus("searching");
+          if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+          retryTimerRef.current = setTimeout(() => {
+            if (cancelledRef.current) return;
+            connectToDevice(device).catch(() => {});
+          }, RECONNECT_DELAY_MS);
+        });
+        disconnectListenerSetRef.current.add(device);
+      }
+
+      try {
+        const server = await device.gatt!.connect();
+        const service = await server.getPrimaryService(JBD_SERVICE_UUID);
+        const notifyChar = await service.getCharacteristic(JBD_NOTIFY_CHAR_UUID);
+        const writeChar = await service.getCharacteristic(JBD_WRITE_CHAR_UUID);
+        await notifyChar.startNotifications();
+        notifyChar.removeEventListener("characteristicvaluechanged", handleNotify);
+        notifyChar.addEventListener("characteristicvaluechanged", handleNotify);
+
+        deviceRef.current = device;
+        writeCharRef.current = writeChar;
+        notifyCharRef.current = notifyChar;
+        setDeviceName(device.name ?? "BMS");
+        setStatus("connected");
+        await readAndSave();
+      } catch (err) {
+        // Connect failed — likely out of range or BMS busy with another app.
+        // Stay in "searching" and try again in a few seconds.
+        setStatus("searching");
+        setError(err instanceof Error ? err.message : "Connecting…");
+        if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+        retryTimerRef.current = setTimeout(() => {
+          if (cancelledRef.current) return;
+          connectToDevice(device).catch(() => {});
+        }, RECONNECT_DELAY_MS);
+      }
+    },
+    [handleNotify, readAndSave]
+  );
+
+  // Web Bluetooth availability + initial auto-reconnect.
+  useEffect(() => {
+    cancelledRef.current = false;
+    if (typeof navigator === "undefined" || !navigator.bluetooth) {
+      setStatus("unsupported");
+      return;
+    }
+    (async () => {
+      if (!navigator.bluetooth?.getDevices) return;
+      try {
+        const devices = await navigator.bluetooth.getDevices();
+        const candidate = devices[0];
+        if (!candidate || cancelledRef.current) return;
+        deviceRef.current = candidate;
+        setDeviceName(candidate.name ?? "BMS");
+        setStatus("searching");
+        await connectToDevice(candidate);
+      } catch {
+        /* getDevices may throw if user denied permission — stay idle */
+      }
+    })();
+    return () => {
+      cancelledRef.current = true;
+      if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+      try {
+        deviceRef.current?.gatt?.disconnect();
+      } catch {
+        /* noop */
+      }
+    };
+  }, [connectToDevice]);
+
+  // Auto-sync timer.
+  useEffect(() => {
+    if (status !== "connected" || !autoSync) return;
+    const id = setInterval(() => {
+      void readAndSave();
+    }, POLL_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [status, autoSync, readAndSave]);
+
+  // Expose to pull-to-refresh.
   useEffect(() => {
     (window as Window & { __bmsSync?: () => Promise<void> }).__bmsSync = async () => {
-      if (deviceRef.current && writeCharRef.current) await readAndSave();
+      if (deviceRef.current && writeCharRef.current) {
+        await readAndSave();
+      } else if (deviceRef.current) {
+        // Pulling while disconnected → try to reconnect immediately.
+        if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+        await connectToDevice(deviceRef.current).catch(() => {});
+      }
     };
     return () => {
       delete (window as Window & { __bmsSync?: () => Promise<void> }).__bmsSync;
     };
-  }, [readAndSave]);
+  }, [readAndSave, connectToDevice]);
+
+  async function handleFirstPairing() {
+    setError(null);
+    try {
+      const device = await navigator.bluetooth.requestDevice({
+        filters: [{ services: [JBD_SERVICE_UUID] }],
+      });
+      deviceRef.current = device;
+      setDeviceName(device.name ?? "BMS");
+      await connectToDevice(device);
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "NotFoundError") return;
+      setError(err instanceof Error ? err.message : "Connection failed");
+      setStatus("error");
+    }
+  }
+
+  function handleManualRetry() {
+    if (deviceRef.current) {
+      if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+      void connectToDevice(deviceRef.current);
+    } else {
+      void handleFirstPairing();
+    }
+  }
 
   // --- Render branches --------------------------------------------------------
 
@@ -238,7 +277,8 @@ export function BmsCard() {
     );
   }
 
-  if (status === "idle" || status === "connecting") {
+  // First-time setup: never paired — show the big Connect button.
+  if (status === "idle") {
     return (
       <Card>
         <div className="flex items-center justify-between gap-3">
@@ -250,12 +290,10 @@ export function BmsCard() {
           </div>
           <button
             type="button"
-            onClick={handleConnectClick}
-            disabled={status === "connecting"}
-            className="flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-emerald-950 hover:bg-emerald-400 disabled:opacity-50"
+            onClick={handleFirstPairing}
+            className="rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-emerald-950 hover:bg-emerald-400"
           >
-            {status === "connecting" && <Spinner className="h-4 w-4" />}
-            {status === "connecting" ? "Connecting…" : "Connect"}
+            Connect
           </button>
         </div>
         {error && (
@@ -267,7 +305,44 @@ export function BmsCard() {
     );
   }
 
-  // connected / syncing / error states all have reading data available
+  // Paired but currently searching for the device — auto-retrying in background.
+  if (status === "searching" || status === "connecting") {
+    return (
+      <Card>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-2">
+            <span className="relative inline-flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-50" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-400" />
+            </span>
+            <span className="truncate text-sm font-medium text-neutral-100">
+              {deviceName ?? "BMS"}
+            </span>
+            <span className="text-xs text-neutral-500">
+              {status === "connecting" ? "connecting…" : "looking for device…"}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={handleManualRetry}
+            className="flex items-center gap-1.5 rounded-full border border-neutral-700 px-3 py-1 text-[11px] font-medium text-neutral-300 hover:bg-neutral-800"
+          >
+            <Spinner className="h-3 w-3" />
+            Retry
+          </button>
+        </div>
+        {reading && (
+          <div className="mt-2 text-[11px] text-neutral-500">
+            Last seen{" "}
+            <span className="tabular-nums text-neutral-300">{reading.soc}%</span> ·{" "}
+            {lastSyncAt ? relativeMin(lastSyncAt) : ""}
+          </div>
+        )}
+      </Card>
+    );
+  }
+
+  // connected / syncing / error — populated readings card
   const est = reading ? timeEstimateMinutes(reading) : null;
   const stateLabel =
     est?.state === "charging"
@@ -321,7 +396,13 @@ export function BmsCard() {
             <Stat
               label="Current"
               value={`${reading.current >= 0 ? "+" : ""}${reading.current.toFixed(2)} A`}
-              accent={reading.current > 0.05 ? "text-emerald-300" : reading.current < -0.05 ? "text-amber-300" : "text-neutral-300"}
+              accent={
+                reading.current > 0.05
+                  ? "text-emerald-300"
+                  : reading.current < -0.05
+                  ? "text-amber-300"
+                  : "text-neutral-300"
+              }
             />
           </div>
           <div className="mt-3 flex items-baseline justify-between text-xs">
@@ -344,7 +425,8 @@ export function BmsCard() {
             <div className="mt-2 text-[11px] text-neutral-500">
               MOS {reading.temperatures.map((t) => `${t.toFixed(1)}°C`).join(" · ")}
               {" · "}
-              cycles <span className="tabular-nums text-neutral-300">{reading.cycles}</span>
+              cycles{" "}
+              <span className="tabular-nums text-neutral-300">{reading.cycles}</span>
             </div>
           )}
         </>
@@ -363,7 +445,7 @@ export function BmsCard() {
         <span className="text-neutral-600">pull down to sync</span>
       </div>
 
-      {error && (
+      {error && status === "error" && (
         <div className="mt-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
           {error}
         </div>
