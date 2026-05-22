@@ -74,9 +74,6 @@ function finalize(
   out.push({ ...s, durationMin, ratePctPerHour });
 }
 
-export function formatChargeDuration(min: number): string {
-  if (min < 60) return `${min} min`;
-  const h = Math.floor(min / 60);
-  const m = min % 60;
-  return m === 0 ? `${h}h` : `${h}h ${m}m`;
-}
+// Charge-session duration uses the shared formatDuration helper —
+// re-exported from datetime.ts to keep call sites short.
+export { formatDuration as formatChargeDuration } from "./datetime";

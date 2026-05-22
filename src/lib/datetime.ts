@@ -62,15 +62,27 @@ export function localDateTimeToIso(local: string): string {
   return new Date(local).toISOString();
 }
 
-/** "just now" / "3 min ago" / "2h ago" / "5d ago" — short relative phrasing. */
-export function relativeAgo(iso: string): string {
-  const diffMs = Date.now() - new Date(iso).getTime();
+/** "just now" / "3 min ago" / "2h ago" / "5d ago" — short relative phrasing.
+ * Accepts either an ISO string or a millisecond timestamp. */
+export function relativeAgo(when: string | number): string {
+  const ms = typeof when === "number" ? when : new Date(when).getTime();
+  const diffMs = Date.now() - ms;
   if (diffMs < 0) return "in the future";
-  const min = Math.floor(diffMs / 60000);
-  if (min < 1) return "just now";
+  const sec = Math.floor(diffMs / 1000);
+  if (sec < 5) return "just now";
+  if (sec < 60) return `${sec}s ago`;
+  const min = Math.floor(sec / 60);
   if (min < 60) return `${min} min ago`;
   const hr = Math.floor(min / 60);
   if (hr < 24) return `${hr}h ago`;
   const day = Math.floor(hr / 24);
   return `${day}d ago`;
+}
+
+/** "45 min" / "1h" / "1h 30m" — for trip / charge / ride durations. */
+export function formatDuration(minutes: number): string {
+  if (minutes < 60) return `${minutes} min`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m === 0 ? `${h}h` : `${h}h ${m}m`;
 }

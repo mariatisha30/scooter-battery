@@ -12,6 +12,7 @@ import {
   timeEstimateMinutes,
   type BmsReading,
 } from "@/lib/bms";
+import { relativeAgo } from "@/lib/datetime";
 import { enqueueReading } from "@/lib/queue";
 import { Spinner } from "./Spinner";
 
@@ -335,7 +336,7 @@ export function BmsCard() {
           <div className="mt-2 text-[11px] text-neutral-500">
             Last seen{" "}
             <span className="tabular-nums text-neutral-300">{reading.soc}%</span> ·{" "}
-            {lastSyncAt ? relativeMin(lastSyncAt) : ""}
+            {lastSyncAt ? relativeAgo(lastSyncAt) : ""}
           </div>
         )}
       </Card>
@@ -418,7 +419,7 @@ export function BmsCard() {
               )}
             </span>
             <span className="text-neutral-500">
-              {lastSyncAt ? `synced ${relativeMin(lastSyncAt)}` : ""}
+              {lastSyncAt ? `synced ${relativeAgo(lastSyncAt)}` : ""}
             </span>
           </div>
           {reading.temperatures.length > 0 && (
@@ -479,10 +480,3 @@ function Stat({
   );
 }
 
-function relativeMin(ts: number): string {
-  const diffSec = Math.floor((Date.now() - ts) / 1000);
-  if (diffSec < 5) return "just now";
-  if (diffSec < 60) return `${diffSec}s ago`;
-  const min = Math.floor(diffSec / 60);
-  return `${min} min ago`;
-}

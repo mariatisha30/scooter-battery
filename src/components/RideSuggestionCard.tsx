@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { logTrip } from "@/lib/actions";
-import { formatLocalDateTime } from "@/lib/datetime";
+import { formatDuration, formatLocalDateTime } from "@/lib/datetime";
 import { isRedirectError } from "@/lib/isRedirect";
 import { Spinner } from "./Spinner";
 
@@ -77,7 +77,7 @@ export function RideSuggestionCard({ ride }: { ride: Ride }) {
 
   if (dismissed !== false) return null; // hide on null (pre-mount) + true (dismissed)
 
-  const km_per_pct = Number(km) > 0 ? (Number(km) / ride.drop).toFixed(2) : null;
+  const kmPerPct = Number(km) > 0 ? (Number(km) / ride.drop).toFixed(2) : null;
   const durationLabel = formatDuration(ride.durationMin);
 
   return (
@@ -158,9 +158,9 @@ export function RideSuggestionCard({ ride }: { ride: Ride }) {
           </button>
         </div>
 
-        {km_per_pct && (
+        {kmPerPct && (
           <div className="text-center text-[10px] text-emerald-300">
-            This trip: <span className="font-semibold tabular-nums">{km_per_pct} km/%</span>
+            This trip: <span className="font-semibold tabular-nums">{kmPerPct} km/%</span>
           </div>
         )}
 
@@ -183,9 +183,3 @@ export function RideSuggestionCard({ ride }: { ride: Ride }) {
   );
 }
 
-function formatDuration(min: number): string {
-  if (min < 60) return `${min} min`;
-  const h = Math.floor(min / 60);
-  const m = min % 60;
-  return m === 0 ? `${h}h` : `${h}h ${m}m`;
-}
