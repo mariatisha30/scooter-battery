@@ -156,7 +156,10 @@ export async function logTrip(formData: FormData) {
 
   revalidatePath("/trips");
   revalidatePath("/");
-  redirect("/trips");
+  // Ride-suggestion saves should land back on the dashboard so the user
+  // sees the card disappear in place. Trip-page saves stay on /trips.
+  const from = String(formData.get("from") ?? "");
+  redirect(from === "ride" ? "/" : "/trips");
 }
 
 /**

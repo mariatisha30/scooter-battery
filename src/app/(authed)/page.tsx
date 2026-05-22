@@ -4,6 +4,7 @@ import { BmsCard } from "@/components/BmsCard";
 import { DashboardHero } from "@/components/DashboardHero";
 import { HistoryChart } from "@/components/HistoryChartLazy";
 import { PullToRefresh } from "@/components/PullToRefresh";
+import { RideSuggestionCard } from "@/components/RideSuggestionCard";
 import { RowActions } from "@/components/RowActions";
 import { SetupBanner } from "@/components/SetupBanner";
 import { StatsStrip } from "@/components/StatsStrip";
@@ -16,6 +17,7 @@ import {
 } from "@/lib/calibration";
 import { detectChargeSessions, formatChargeDuration } from "@/lib/charging";
 import { formatLocalDateTime } from "@/lib/datetime";
+import { detectUnloggedRides } from "@/lib/rides";
 import { supabase, supabaseConfigured, type BatteryLog, type Trip } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
@@ -55,6 +57,7 @@ export default async function Dashboard() {
   const totalKm = allTrips.reduce((s, t) => s + Number(t.distance_km), 0);
   const lastTripDate = allTrips[0]?.trip_at ?? null;
   const lastCharge = detectChargeSessions(allLogs)[0] ?? null;
+  const rideSuggestions = detectUnloggedRides(allLogs, allTrips).slice(0, 3);
 
   const chartData = allLogs
     .slice()
@@ -73,6 +76,14 @@ export default async function Dashboard() {
       />
 
       <BmsCard />
+
+      {rideSuggestions.length > 0 && (
+        <section className="space-y-2">
+          {rideSuggestions.map((r) => (
+            <RideSuggestionCard key={r.id} ride={r} />
+          ))}
+        </section>
+      )}
 
       {lastCharge && (
         <Link
