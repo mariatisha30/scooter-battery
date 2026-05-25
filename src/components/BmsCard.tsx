@@ -17,7 +17,11 @@ import { enqueueReading } from "@/lib/queue";
 import { Spinner } from "./Spinner";
 
 const POLL_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
-const READ_TIMEOUT_MS = 8000;
+// BLE round-trips through Android's stack can take several seconds — give the
+// BMS plenty of time before declaring a timeout. Most reads complete in 1–2s
+// when everything is healthy; we only hit the upper bound when the radio is
+// busy or the BMS is under load.
+const READ_TIMEOUT_MS = 20_000;
 const RECONNECT_DELAY_MS = 5000;
 
 type Status =
@@ -92,6 +96,7 @@ export function BmsCard() {
       setReading(r);
       const now = new Date().toISOString();
       setLastSyncAt(Date.now());
+      setError(null);
       const maxTempC = r.temperatures.length > 0 ? Math.max(...r.temperatures) : null;
       try {
         await logBatteryFromBms({
@@ -120,8 +125,11 @@ export function BmsCard() {
       }
       setStatus("connected");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Read failed");
-      setStatus("error");
+      // Don't surface read failures as a prominent error — the link is still
+      // open, the next auto-sync (or a manual tap) usually succeeds. Keep the
+      // last good reading visible and stash a soft hint for the footer.
+      setError(err instanceof Error ? err.message : "Couldn't reach BMS");
+      setStatus("connected");
     }
   }, [readOnce]);
 
@@ -446,6 +454,11 @@ export function BmsCard() {
         <span className="text-neutral-600">pull down to sync</span>
       </div>
 
+      {error && status === "connected" && (
+        <div className="mt-2 text-[10px] text-amber-400/80">
+          Last sync didn&apos;t complete — will retry automatically.
+        </div>
+      )}
       {error && status === "error" && (
         <div className="mt-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
           {error}
