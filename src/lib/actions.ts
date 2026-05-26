@@ -210,8 +210,14 @@ export async function logBatteryFromBms(
 
   if (latest) {
     const ageMs = newAt.getTime() - new Date(latest.logged_at).getTime();
-    const thirtyMin = 30 * 60 * 1000;
-    if (latest.battery_pct === pct && ageMs < thirtyMin) {
+    // When the scooter is sitting idle (current draw is ~zero) we don't need
+    // a fresh row every 30 minutes — the SOC isn't moving and the extra rows
+    // just bloat the table. Use 3h then. During an active ride or charge
+    // (meaningful current) keep the tighter 30-minute window so flat-SOC
+    // stretches mid-ride still get sampled.
+    const isIdle = current !== null && Math.abs(current) <= 0.05;
+    const dedupeWindowMs = isIdle ? 3 * 60 * 60 * 1000 : 30 * 60 * 1000;
+    if (latest.battery_pct === pct && ageMs < dedupeWindowMs) {
       return { saved: false, reason: "unchanged" };
     }
   }

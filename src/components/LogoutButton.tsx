@@ -5,11 +5,9 @@ export function LogoutButton() {
     <form action={logout}>
       <button
         type="submit"
-        className="text-sm text-neutral-500 transition-colors hover:text-neutral-100"
-        aria-label="Log out"
-        title="Log out"
+        className="text-sm text-neutral-400 transition-colors hover:text-neutral-100"
       >
-        ⎋
+        Log out
       </button>
     </form>
   );

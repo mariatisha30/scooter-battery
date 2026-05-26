@@ -16,6 +16,7 @@ import { relativeAgo } from "@/lib/datetime";
 import { enqueueReading } from "@/lib/queue";
 import { Spinner } from "./Spinner";
 
+const AUTOSYNC_STORAGE_KEY = "scooter-bms-autosync";
 const POLL_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 // BLE round-trips through Android's stack can take several seconds — give the
 // BMS plenty of time before declaring a timeout. Most reads complete in 1–2s
@@ -39,7 +40,19 @@ export function BmsCard() {
   const [lastSyncAt, setLastSyncAt] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [deviceName, setDeviceName] = useState<string | null>(null);
-  const [autoSync, setAutoSync] = useState(true);
+  const [autoSync, setAutoSync] = useState<boolean>(() => {
+    // Lazy initializer: read once on mount. Guarded for SSR where window
+    // doesn't exist. Default to true (on) for first-time users.
+    if (typeof window === "undefined") return true;
+    const stored = window.localStorage.getItem(AUTOSYNC_STORAGE_KEY);
+    return stored === null ? true : stored === "true";
+  });
+
+  // Persist autoSync changes so the toggle survives reloads.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(AUTOSYNC_STORAGE_KEY, String(autoSync));
+  }, [autoSync]);
 
   const deviceRef = useRef<BluetoothDevice | null>(null);
   const writeCharRef = useRef<BluetoothRemoteGATTCharacteristic | null>(null);
