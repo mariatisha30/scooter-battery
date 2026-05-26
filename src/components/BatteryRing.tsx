@@ -8,7 +8,9 @@ type State = {
   ringColor: string;
   textColor: string;
   glow: string;
-  label: string;
+  /** Pill is only rendered when this is set — the healthy state stays silent
+   * so the ring isn't shouting "all clear" on every glance. */
+  label: string | null;
   labelBg: string;
 };
 
@@ -44,8 +46,8 @@ function getState(pct: number | null, floor: number): State {
     ringColor: "#34d399",
     textColor: "text-emerald-400",
     glow: "drop-shadow-[0_0_24px_rgba(52,211,153,0.3)]",
-    label: "Good to ride",
-    labelBg: "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30",
+    label: null,
+    labelBg: "",
   };
 }
 
@@ -117,9 +119,11 @@ export function BatteryRing({ pct, remainingKm, floor }: Props) {
           )}
         </div>
       </div>
-      <span className={`mt-5 rounded-full px-3 py-1 text-xs font-medium ${state.labelBg}`}>
-        {state.label}
-      </span>
+      {state.label && (
+        <span className={`mt-5 rounded-full px-3 py-1 text-xs font-medium ${state.labelBg}`}>
+          {state.label}
+        </span>
+      )}
     </div>
   );
 }
