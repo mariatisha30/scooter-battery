@@ -7,7 +7,6 @@ import { PullToRefresh } from "@/components/PullToRefresh";
 import { RideSuggestionCard } from "@/components/RideSuggestionCard";
 import { RowActions } from "@/components/RowActions";
 import { SetupBanner } from "@/components/SetupBanner";
-import { StatsStrip } from "@/components/StatsStrip";
 import {
   batteryFloor,
   calibrationFromTrips,
@@ -54,8 +53,6 @@ export default async function Dashboard() {
   const daily = dailyAvgKm(allTrips);
   const soloHint = latest ? chargeHint(soloKmLeft, daily) : null;
   const passengerHint = latest ? chargeHint(passengerKmLeft, daily) : null;
-  const totalKm = allTrips.reduce((s, t) => s + Number(t.distance_km), 0);
-  const lastTripDate = allTrips[0]?.trip_at ?? null;
   const lastCharge = detectChargeSessions(allLogs)[0] ?? null;
   const rideSuggestions = detectUnloggedRides(allLogs, allTrips).slice(0, 3);
 
@@ -116,8 +113,6 @@ export default async function Dashboard() {
           </div>
         </Link>
       )}
-
-      <StatsStrip tripCount={allTrips.length} totalKm={totalKm} lastTripDate={lastTripDate} />
 
       <section>
         <div className="mb-2 flex items-baseline justify-between">
