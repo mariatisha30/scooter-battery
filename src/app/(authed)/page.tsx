@@ -2,7 +2,7 @@ import Link from "next/link";
 import { BatteryRing } from "@/components/BatteryRing";
 import { BmsCard } from "@/components/BmsCard";
 import { DashboardHero } from "@/components/DashboardHero";
-import { HistoryChart } from "@/components/HistoryChartLazy";
+import { HistoryPanel } from "@/components/HistoryPanel";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { RideSuggestionCard } from "@/components/RideSuggestionCard";
 import { RowActions } from "@/components/RowActions";
@@ -38,7 +38,9 @@ export default async function Dashboard() {
   // We must inline this content in the PullToRefresh wrapper below.
 
   const [{ data: logs }, { data: trips }] = await Promise.all([
-    supabase.from("battery_logs").select("*").order("logged_at", { ascending: false }).limit(60),
+    // 500 rows covers ~2 months of typical usage so the History panel's
+    // "All" filter has enough to plot without needing pagination.
+    supabase.from("battery_logs").select("*").order("logged_at", { ascending: false }).limit(500),
     supabase.from("trips").select("*").order("trip_at", { ascending: false }).limit(50),
   ]);
 
@@ -114,15 +116,7 @@ export default async function Dashboard() {
         </Link>
       )}
 
-      <section>
-        <div className="mb-2 flex items-baseline justify-between">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-neutral-400">History</h2>
-          <span className="text-[10px] uppercase tracking-wider text-neutral-500">
-            {allLogs.length} reading{allLogs.length === 1 ? "" : "s"}
-          </span>
-        </div>
-        <HistoryChart data={chartData} floor={floor} />
-      </section>
+      <HistoryPanel points={chartData} floor={floor} />
 
       {latest && (
         <section>
