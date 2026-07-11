@@ -18,11 +18,16 @@ import { Spinner } from "./Spinner";
 
 const AUTOSYNC_STORAGE_KEY = "scooter-bms-autosync";
 const POLL_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
-// BLE round-trips through Android's stack can take several seconds — give the
-// BMS plenty of time before declaring a timeout. Most reads complete in 1–2s
-// when everything is healthy; we only hit the upper bound when the radio is
-// busy or the BMS is under load.
-const READ_TIMEOUT_MS = 20_000;
+// Each individual read attempt waits up to this long. Total wall-time worst
+// case = READ_TIMEOUT_MS × READ_ATTEMPTS + small retry pause.
+const READ_TIMEOUT_MS = 10_000;
+const READ_ATTEMPTS = 2;
+const READ_RETRY_PAUSE_MS = 500;
+// After GATT connect, give Android a moment to fully activate the
+// notification subscription before sending the first command — otherwise the
+// BMS response can land before the OS has wired up our listener, which
+// stalls the very first read for the full timeout.
+const POST_CONNECT_SETTLE_MS = 800;
 const RECONNECT_DELAY_MS = 5000;
 
 type Status =
@@ -104,8 +109,28 @@ export function BmsCard() {
   const readAndSave = useCallback(async () => {
     if (!writeCharRef.current) return;
     setStatus("syncing");
+    // Try a few times before surfacing failure — BLE notifications can be
+    // briefly missed (especially the very first read after a fresh GATT
+    // subscription). Re-issuing the command almost always wakes things up.
+    let r: BmsReading | null = null;
+    let lastErr: unknown;
+    for (let attempt = 0; attempt < READ_ATTEMPTS; attempt++) {
+      try {
+        r = await readOnce();
+        break;
+      } catch (err) {
+        lastErr = err;
+        if (attempt < READ_ATTEMPTS - 1) {
+          await new Promise((res) => setTimeout(res, READ_RETRY_PAUSE_MS));
+        }
+      }
+    }
+    if (!r) {
+      setError(lastErr instanceof Error ? lastErr.message : "Couldn't reach BMS");
+      setStatus("connected");
+      return;
+    }
     try {
-      const r = await readOnce();
       setReading(r);
       const now = new Date().toISOString();
       setLastSyncAt(Date.now());
@@ -187,6 +212,8 @@ export function BmsCard() {
         notifyCharRef.current = notifyChar;
         setDeviceName(device.name ?? "BMS");
         setStatus("connected");
+        // Settle window — see POST_CONNECT_SETTLE_MS comment.
+        await new Promise((res) => setTimeout(res, POST_CONNECT_SETTLE_MS));
         await readAndSave();
       } catch (err) {
         // Connect failed — likely out of range or BMS busy with another app.

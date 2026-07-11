@@ -58,7 +58,7 @@ Copy `.env.example` → `.env.local` and fill in:
 |---|---|---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | ✅ | — | Your Supabase project URL |
 | `SUPABASE_SERVICE_ROLE_KEY` | ✅ | — | Supabase `service_role` secret (server-only) |
-| `APP_PASSWORD` | ✅ | — | The password you type at `/login`. Use ≥12 chars. |
+| `APP_PASSWORD` | ✅ | — | The password you type at `/login`. **Use ≥16 random chars** — there's no rate limiting and the login mechanism is in the public source. |
 | `APP_TIMEZONE` | recommended | `Asia/Dhaka` | Your IANA timezone (e.g. `Europe/Berlin`, `America/New_York`). Used for server-rendered dates so timestamps match your local time. |
 | `DEFAULT_KM_PER_PCT` | optional | `1.5` | Baseline range: km per 1% of battery, used until trips calibrate it. (Mine: 135 km over 10–100% = 1.5.) |
 | `BATTERY_FLOOR_PCT` | optional | `10` | "Range left" is calculated down to this floor — never to 0. |
@@ -132,6 +132,16 @@ Requirements (same as the Xiaoxiang app): **Bluetooth on** and **Location permis
 | `/trips` | Log + browse trips; per-trip and overall km/% calibration |
 | `/health` | Cycle count, capacity-health estimate, temperature highs, pack-voltage trend, charge sessions |
 | `/login` | Password gate |
+| `/log/[id]/edit` · `/trips/[id]/edit` | Edit an existing battery reading or trip (entered via the pencil icon on each row) |
+
+## Security notes
+
+If you're deploying your own instance from this code:
+
+- `SUPABASE_SERVICE_ROLE_KEY` bypasses all row-level security. **Keep it in Vercel/host env vars only** — never in client code, never in screenshots or issues. It must never reach the browser. The repo verifies this by isolating Supabase usage to server-only files.
+- `APP_PASSWORD` is your only auth. The login mechanism is in the public source, so use a long random password (≥16 chars). There is no rate limiting on `/login`.
+- The auth cookie is `httpOnly` + `secure` + `sameSite=lax`, set only over HTTPS in production. Sessions last one year by default and can be invalidated server-side by rotating `APP_PASSWORD` (every existing cookie becomes invalid instantly).
+- RLS on `battery_logs` and `trips` is intentionally **disabled** — the app reaches the DB only through the server-side `service_role` key. If you ever expose the `anon` key publicly, you must also enable RLS and write policies.
 
 ## Files worth knowing
 
