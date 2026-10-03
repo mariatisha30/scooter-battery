@@ -1,3 +1,4 @@
+import { IconArrowLeft } from "@tabler/icons-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TripEditForm } from "@/components/TripEditForm";
@@ -16,9 +17,9 @@ export default async function EditTripPage({ params }: { params: Promise<{ id: s
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/trips" className="text-sm text-neutral-400 hover:text-neutral-100">← Back</Link>
-        <h1 className="mt-2 text-2xl font-semibold">Edit trip</h1>
-        <p className="mt-1 text-sm text-neutral-500">
+        <Link href="/trips" className="inline-flex items-center gap-1 text-sm text-muted hover:text-fg"><IconArrowLeft size={16} stroke={1.75} aria-hidden />Back</Link>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight">Edit trip</h1>
+        <p className="mt-1 text-sm text-muted">
           Changes here also sync the linked battery reading.
         </p>
       </div>

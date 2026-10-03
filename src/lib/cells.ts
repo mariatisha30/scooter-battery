@@ -71,9 +71,15 @@ export const BALANCE_LABEL: Record<BalanceLevel, string> = {
 };
 
 export const BALANCE_TEXT_CLASS: Record<BalanceLevel, string> = {
-  good: "text-emerald-300",
-  watch: "text-amber-300",
-  uneven: "text-red-300",
+  good: "text-acc",
+  watch: "text-amber",
+  uneven: "text-red",
+};
+
+export const BALANCE_CHIP_CLASS: Record<BalanceLevel, string> = {
+  good: "bg-acc/15 text-acc",
+  watch: "bg-amber/15 text-amber",
+  uneven: "bg-red/15 text-red",
 };
 
 export const ZONE_LABEL: Record<BalanceZone, string> = {

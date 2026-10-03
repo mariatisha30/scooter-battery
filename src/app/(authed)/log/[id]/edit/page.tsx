@@ -1,3 +1,4 @@
+import { IconArrowLeft } from "@tabler/icons-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LogEditForm } from "@/components/LogEditForm";
@@ -21,9 +22,9 @@ export default async function EditLogPage({ params }: { params: Promise<{ id: st
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/" className="text-sm text-neutral-400 hover:text-neutral-100">← Back</Link>
-        <h1 className="mt-2 text-2xl font-semibold">Edit reading</h1>
-        <p className="mt-1 text-sm text-neutral-500">
+        <Link href="/" className="inline-flex items-center gap-1 text-sm text-muted hover:text-fg"><IconArrowLeft size={16} stroke={1.75} aria-hidden />Back</Link>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight">Edit reading</h1>
+        <p className="mt-1 text-sm text-muted">
           {log.trip_id
             ? "Heads up — this reading came from a trip. To edit the ride distance, edit the trip instead."
             : "Adjust the value, time, or note."}

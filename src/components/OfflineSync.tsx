@@ -1,5 +1,6 @@
 "use client";
 
+import { IconCloudOff, IconRefresh } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { logBatteryFromBms } from "@/lib/actions";
@@ -108,30 +109,21 @@ export function OfflineSync() {
 
   if (online && pending === 0) return null;
 
-  const tone =
-    !online
-      ? "border-amber-500/40 bg-amber-500/10 text-amber-200"
-      : stage === "syncing"
-      ? "border-sky-500/40 bg-sky-500/10 text-sky-200"
-      : "border-neutral-700 bg-neutral-900 text-neutral-300";
+  const tone = !online
+    ? "bg-amber/12 text-amber"
+    : stage === "syncing"
+    ? "bg-acc/12 text-acc"
+    : "glass text-muted";
+  const Icon = !online ? IconCloudOff : IconRefresh;
 
   return (
-    <div
-      role="status"
-      className={`flex items-center justify-between rounded-full border px-3 py-1.5 text-[11px] font-medium ${tone}`}
-    >
-      <span className="flex items-center gap-2">
-        <span
-          className={`inline-block h-1.5 w-1.5 rounded-full ${
-            online ? "bg-sky-400 animate-pulse" : "bg-amber-400"
-          }`}
-        />
-        {!online
-          ? "Offline — readings will queue locally"
-          : stage === "syncing"
-          ? `Syncing ${pending} queued reading${pending === 1 ? "" : "s"}…`
-          : `${pending} reading${pending === 1 ? "" : "s"} queued`}
-      </span>
+    <div role="status" className={`mt-2 flex items-center gap-2 rounded-full px-3.5 py-2 text-[11px] font-medium ${tone}`}>
+      <Icon size={14} stroke={1.75} className={online && stage === "syncing" ? "animate-spin" : ""} aria-hidden />
+      {!online
+        ? "Offline — readings will queue on this phone"
+        : stage === "syncing"
+        ? `Syncing ${pending} queued reading${pending === 1 ? "" : "s"}…`
+        : `${pending} reading${pending === 1 ? "" : "s"} queued`}
     </div>
   );
 }

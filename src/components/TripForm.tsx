@@ -1,5 +1,6 @@
 "use client";
 
+import { IconUser, IconUsers } from "@tabler/icons-react";
 import { useEffect, useState, useTransition } from "react";
 import { logTrip } from "@/lib/actions";
 import { localDateTimeToIso, nowLocalDateTime, relativeAgo } from "@/lib/datetime";
@@ -62,29 +63,31 @@ export function TripForm({ latest }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3 rounded-2xl border border-neutral-800 bg-neutral-900/50 p-4">
-      <div className="flex gap-2 rounded-xl bg-neutral-950 p-1">
+    <form onSubmit={handleSubmit} className="glass space-y-3 rounded-[22px] p-4">
+      <div className="flex gap-1 rounded-2xl bg-white/[0.04] p-1">
         <button
           type="button"
           onClick={() => setWithPassenger(false)}
-          className={`flex-1 rounded-lg px-3 py-2 text-sm transition-colors ${
+          className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2.5 text-sm transition-colors ${
             !withPassenger
-              ? "bg-neutral-800 text-neutral-100"
-              : "text-neutral-500 hover:text-neutral-300"
+              ? "bg-white/[0.08] text-fg"
+              : "text-muted hover:text-fg"
           }`}
         >
-          🛵 Solo
+          <IconUser size={16} stroke={1.75} aria-hidden />
+          Solo
         </button>
         <button
           type="button"
           onClick={() => setWithPassenger(true)}
-          className={`flex-1 rounded-lg px-3 py-2 text-sm transition-colors ${
+          className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2.5 text-sm transition-colors ${
             withPassenger
-              ? "bg-neutral-800 text-neutral-100"
-              : "text-neutral-500 hover:text-neutral-300"
+              ? "bg-white/[0.08] text-fg"
+              : "text-muted hover:text-fg"
           }`}
         >
-          👥 With passenger
+          <IconUsers size={16} stroke={1.75} aria-hidden />
+          +1 rider
         </button>
       </div>
 
@@ -101,7 +104,7 @@ export function TripForm({ latest }: Props) {
         />
         <NumField label="End %" value={endPct} onChange={setEndPct} min={0} max={99} autoFocus={!!latest} />
         <label className="block">
-          <span className="text-[10px] uppercase tracking-wider text-neutral-500">km</span>
+          <span className="eyebrow text-[11px] text-dim">km</span>
           <input
             type="number"
             step="0.1"
@@ -109,45 +112,45 @@ export function TripForm({ latest }: Props) {
             required
             value={km}
             onChange={(e) => setKm(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-center tabular-nums focus:border-emerald-500 focus:outline-none"
+            className="num mt-1 w-full px-3 py-2.5 text-center text-lg rounded-xl bg-white/[0.04] ring-1 ring-line focus:outline-none focus:ring-acc/60"
           />
         </label>
       </div>
 
       {showAutofillHint && latest && (
-        <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-1.5 text-[11px] text-emerald-300">
+        <div className="rounded-xl bg-acc/10 px-3 py-2 text-[11px] text-acc">
           Start % from your last reading · {relativeAgo(latest.logged_at)}
         </div>
       )}
 
       {liveKmPerPct !== null && (
-        <div className="rounded-lg bg-emerald-500/10 px-3 py-2 text-center text-xs text-emerald-300">
+        <div className="rounded-xl bg-acc/10 px-3 py-2 text-center text-xs text-acc">
           This trip: <span className="font-semibold tabular-nums">{liveKmPerPct.toFixed(2)} km/%</span>
         </div>
       )}
 
       <label className="block">
-        <span className="text-[10px] uppercase tracking-wider text-neutral-500">When</span>
+        <span className="eyebrow text-[11px] text-dim">When</span>
         <input
           type="datetime-local"
           value={tripAt}
           onChange={(e) => setTripAt(e.target.value)}
-          className="mt-1 w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 focus:border-emerald-500 focus:outline-none"
+          className="mt-1 w-full px-3 py-2.5 rounded-xl bg-white/[0.04] ring-1 ring-line focus:outline-none focus:ring-acc/60"
         />
       </label>
       <label className="block">
-        <span className="text-[10px] uppercase tracking-wider text-neutral-500">Note (optional)</span>
+        <span className="eyebrow text-[11px] text-dim">Note (optional)</span>
         <input
           type="text"
           value={note}
           onChange={(e) => setNote(e.target.value)}
           placeholder="e.g. office round trip"
-          className="mt-1 w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 focus:border-emerald-500 focus:outline-none"
+          className="mt-1 w-full px-3 py-2.5 rounded-xl bg-white/[0.04] ring-1 ring-line focus:outline-none focus:ring-acc/60"
         />
       </label>
 
       {error && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
+        <div className="rounded-xl bg-red/12 px-3 py-2 text-xs text-red">
           {error}
         </div>
       )}
@@ -155,7 +158,7 @@ export function TripForm({ latest }: Props) {
       <button
         type="submit"
         disabled={pending}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 py-3 text-sm font-semibold text-emerald-950 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
+        className="flex w-full items-center justify-center gap-2 rounded-2xl py-3 bg-acc text-sm font-semibold text-acc-ink hover:brightness-110 disabled:cursor-not-allowed disabled:bg-white/[0.06] disabled:text-dim"
       >
         {pending && <Spinner className="h-4 w-4" />}
         {pending ? "Saving…" : "Save trip"}
@@ -181,7 +184,7 @@ function NumField({
 }) {
   return (
     <label className="block">
-      <span className="text-[10px] uppercase tracking-wider text-neutral-500">{label}</span>
+      <span className="eyebrow text-[11px] text-dim">{label}</span>
       <input
         type="number"
         min={min}
@@ -193,7 +196,7 @@ function NumField({
           const v = e.target.value;
           onChange(v === "" ? "" : Math.max(min, Math.min(max, Number(v))));
         }}
-        className="mt-1 w-full rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-center tabular-nums focus:border-emerald-500 focus:outline-none"
+        className="num mt-1 w-full px-3 py-2.5 text-center text-lg rounded-xl bg-white/[0.04] ring-1 ring-line focus:outline-none focus:ring-acc/60"
       />
     </label>
   );

@@ -1,27 +1,131 @@
 @import "tailwindcss";
 
+/* ---- Design tokens ------------------------------------------------------ */
+@theme {
+  --font-sans: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
+  --font-num: var(--font-barlow), var(--font-sora), ui-sans-serif, sans-serif;
+
+  --color-ink: #040605;
+  --color-fg: #f1f5f2;
+  --color-muted: #8d9a94;
+  --color-dim: #76827b;
+  --color-line: rgb(255 255 255 / 0.08);
+  --color-glass: rgb(255 255 255 / 0.045);
+  --color-lime: #c4f24b;
+  --color-em: #34d399;
+  --color-teal: #5eead4;
+  --color-amber: #fbbf24;
+  --color-orange: #ffb648;
+  --color-red: #ff5e5e;
+  --color-sky: #7dd3fc;
+
+  --animate-wave: wave 3.4s linear infinite;
+  --animate-rise: rise 3.6s ease-in infinite;
+
+  @keyframes wave {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes rise {
+    0% {
+      transform: translateY(0);
+      opacity: 0;
+    }
+    15% {
+      opacity: 0.8;
+    }
+    100% {
+      transform: translateY(-110px);
+      opacity: 0;
+    }
+  }
+}
+
+/* The accent follows the scooter's live state: BmsProvider sets
+   <html data-state="parked|riding|charging">. Parked = lime, riding =
+   amber, charging = teal. --hi is the "highest cell" colour. */
+@theme inline {
+  --color-acc: var(--acc);
+  --color-acc2: var(--acc2);
+  --color-acc-ink: var(--acc-ink);
+  --color-hi: var(--hi);
+}
+
 :root {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-  --card: #161616;
-  --border: #262626;
-  --accent: #34d399;
-  --warning: #fbbf24;
-  --danger: #f87171;
+  --acc: #c4f24b;
+  --acc2: #34d399;
+  --acc-ink: #0b1a0e;
+  --hi: #c4f24b;
+  --glow1: rgb(160 232 80 / 0.13);
+  --glow2: rgb(52 211 153 / 0.07);
+  color-scheme: dark;
+}
+:root[data-state="riding"] {
+  --acc: #ffb648;
+  --acc2: #f59e0b;
+  --acc-ink: #2a1600;
+  --hi: #f1f5f2;
+  --glow1: rgb(255 170 60 / 0.11);
+  --glow2: rgb(52 211 153 / 0.04);
+}
+:root[data-state="charging"] {
+  --acc: #5eead4;
+  --acc2: #10b981;
+  --acc-ink: #022c22;
+  --hi: #5eead4;
+  --glow1: rgb(16 185 129 / 0.16);
+  --glow2: rgb(45 212 191 / 0.08);
 }
 
-html,
+html {
+  background: var(--color-ink);
+}
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+  color: var(--color-fg);
   -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+/* Ambient glow behind everything, tinted by the state accent. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(90% 40% at 50% 10%, var(--glow1), transparent 70%),
+    radial-gradient(70% 32% at 0% 60%, var(--glow2), transparent 72%);
 }
 
-* {
-  box-sizing: border-box;
+/* ---- Utilities ---------------------------------------------------------- */
+@utility glass {
+  background: var(--color-glass);
+  box-shadow: inset 0 0 0 1px var(--color-line);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+}
+@utility eyebrow {
+  font-family: var(--font-num);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+@utility num {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .animate-wave,
+  .animate-rise {
+    animation: none !important;
+  }
+}
+
+/* ---- Form controls ------------------------------------------------------ */
 /* Hide native number input spinners — we provide our own +/- steppers */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
@@ -32,12 +136,11 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
-/* Make datetime-local / date pickers blend into the dark theme */
 input[type="datetime-local"],
 input[type="date"] {
   color-scheme: dark;
 }
 
 ::placeholder {
-  color: rgb(64 64 64);
+  color: rgb(255 255 255 / 0.25);
 }

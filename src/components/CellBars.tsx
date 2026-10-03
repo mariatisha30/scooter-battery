@@ -5,27 +5,28 @@ type BarsProps = {
   balanceMask?: number | null;
   /** Height of the bar area in px */
   height?: number;
-  /** Scale labels + cell-number ticks (Health page). Off for the compact strip. */
+  /** Scale labels + cell-number ticks (Health page). Off for the compact card. */
   detailed?: boolean;
 };
 
 /**
  * Each cell drawn as a bar above or below the pack average, in pack order.
  * The scale never shrinks below ±10 mV, so a well-balanced pack looks flat
- * instead of dramatic. Highest cell sky, lowest amber; `detailed` dots balancing cells.
+ * instead of dramatic. Highest cell = state accent, lowest = amber;
+ * `detailed` also dots the cells the BMS is balancing.
  */
-export function CellBars({ cellsMv, balanceMask, height = 64, detailed = false }: BarsProps) {
+export function CellBars({ cellsMv, balanceMask, height = 54, detailed = false }: BarsProps) {
   const s = cellStats(cellsMv);
   if (!s) return null;
   const halfRange = Math.max(10, ...cellsMv.map((mv) => Math.abs(mv - s.avg)));
-  // Balancing dots need the Health page legend — skip them in the compact strip.
+  // Balancing dots need the Health page legend — skip them in the compact card.
   const anyBalancing = detailed && cellsMv.some((_, i) => isBalancing(balanceMask, i));
 
   return (
     <div className="flex gap-2">
       {detailed && (
         <div
-          className="flex w-10 shrink-0 flex-col justify-between text-right text-[9px] leading-none tabular-nums text-neutral-600"
+          className="num flex w-10 shrink-0 flex-col justify-between text-right text-[10px] leading-none text-dim"
           style={{ height, marginTop: anyBalancing ? 8 : 0 }}
         >
           <span>+{Math.round(halfRange)} mV</span>
@@ -35,31 +36,31 @@ export function CellBars({ cellsMv, balanceMask, height = 64, detailed = false }
       )}
       <div className="min-w-0 flex-1">
         {anyBalancing && (
-          <div className="mb-1 flex h-1 gap-[2px]" aria-hidden>
+          <div className="mb-1 flex h-1 gap-[3px]" aria-hidden>
             {cellsMv.map((_, i) => (
               <span key={i} className="flex flex-1 justify-center">
-                {isBalancing(balanceMask, i) && <span className="h-1 w-1 rounded-full bg-emerald-400" />}
+                {isBalancing(balanceMask, i) && <span className="h-1 w-1 rounded-full bg-em" />}
               </span>
             ))}
           </div>
         )}
         <div
-          className="relative flex gap-[2px]"
+          className="relative flex gap-[3px]"
           style={{ height }}
           role="img"
           aria-label={`${s.count} cells, ${s.delta} mV between highest and lowest`}
         >
-          <div className="pointer-events-none absolute inset-x-0 top-1/2 h-px bg-neutral-700/70" />
+          <div className="pointer-events-none absolute inset-x-0 top-1/2 h-px bg-line" />
           {cellsMv.map((mv, i) => {
             const cell = i + 1;
             const dev = mv - s.avg;
-            const barPx = Math.max(1.5, (Math.abs(dev) / halfRange) * (height / 2));
+            const barPx = Math.max(2, (Math.abs(dev) / halfRange) * (height / 2));
             const tone =
               s.delta > 0 && cell === s.maxCell
-                ? "bg-sky-400"
+                ? "bg-hi"
                 : s.delta > 0 && cell === s.minCell
-                ? "bg-amber-400"
-                : "bg-neutral-500";
+                ? "bg-amber"
+                : "bg-white/20";
             return (
               <div key={cell} className="relative flex-1" title={`Cell ${cell} · ${formatCellVolts(mv)} V`}>
                 <div
@@ -71,7 +72,7 @@ export function CellBars({ cellsMv, balanceMask, height = 64, detailed = false }
           })}
         </div>
         {detailed && (
-          <div className="mt-1.5 flex gap-[2px] text-[9px] leading-none tabular-nums text-neutral-600" aria-hidden>
+          <div className="num mt-1.5 flex gap-[3px] text-[10px] leading-none text-dim" aria-hidden>
             {cellsMv.map((_, i) => (
               <span key={i} className="flex-1 text-center">
                 {i === 0 || (i + 1) % 6 === 0 ? i + 1 : ""}
@@ -94,19 +95,17 @@ export function CellGrid({ cellsMv, balanceMask }: { cellsMv: number[]; balanceM
         const cell = i + 1;
         const edge =
           s.delta > 0 && cell === s.maxCell
-            ? "border-sky-400/50"
+            ? "border-hi/60"
             : s.delta > 0 && cell === s.minCell
-            ? "border-amber-400/50"
-            : "border-neutral-800";
+            ? "border-amber/60"
+            : "border-line";
         return (
-          <div key={cell} className={`rounded-lg border ${edge} bg-neutral-950/60 px-1 py-1.5 text-center`}>
-            <div className="flex items-center justify-center gap-1 text-[9px] leading-none text-neutral-500">
+          <div key={cell} className={`rounded-lg border ${edge} bg-white/[0.03] px-1 py-1.5 text-center`}>
+            <div className="flex items-center justify-center gap-1 text-[10px] leading-none text-dim">
               {cell}
-              {isBalancing(balanceMask, i) && <span className="h-1 w-1 rounded-full bg-emerald-400" />}
+              {isBalancing(balanceMask, i) && <span className="h-1 w-1 rounded-full bg-em" />}
             </div>
-            <div className="mt-1 text-[11px] font-medium leading-none tabular-nums text-neutral-200">
-              {formatCellVolts(mv)}
-            </div>
+            <div className="num mt-1 text-[14px] font-semibold leading-none text-fg">{formatCellVolts(mv)}</div>
           </div>
         );
       })}

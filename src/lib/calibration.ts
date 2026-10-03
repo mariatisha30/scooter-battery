@@ -60,39 +60,3 @@ export function calibrationFromTrips(trips: Trip[]): Calibration {
   }
   return { solo, passenger };
 }
-
-export function remainingKm(currentPct: number, kmPerPct: number, floor: number): number {
-  const usable = Math.max(0, currentPct - floor);
-  return usable * kmPerPct;
-}
-
-export function dailyAvgKm(trips: Trip[]): number | null {
-  if (trips.length < 3) return null;
-  const now = Date.now();
-  const cutoff = now - 30 * 24 * 60 * 60 * 1000;
-  const recent = trips.filter((t) => new Date(t.trip_at).getTime() >= cutoff);
-  if (recent.length < 3) return null;
-  const totalKm = recent.reduce((s, t) => s + Number(t.distance_km), 0);
-  const earliest = Math.min(...recent.map((t) => new Date(t.trip_at).getTime()));
-  const spanDays = Math.max(1, Math.ceil((now - earliest) / (1000 * 60 * 60 * 24)));
-  return totalKm / spanDays;
-}
-
-export type ChargeHint = {
-  days: number;
-  severity: "good" | "soon" | "now";
-  label: string;
-};
-
-export function chargeHint(remainingKmLeft: number, dailyKm: number | null): ChargeHint | null {
-  if (dailyKm === null || dailyKm <= 0) return null;
-  const days = remainingKmLeft / dailyKm;
-  if (days < 1) {
-    return { days, severity: "now", label: "Charge before tomorrow's ride" };
-  }
-  if (days < 2) {
-    return { days, severity: "soon", label: "About 1 more day at this pace" };
-  }
-  const rounded = Math.floor(days);
-  return { days, severity: "good", label: `About ${rounded} days at this pace` };
-}

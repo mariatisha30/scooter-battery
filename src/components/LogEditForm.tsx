@@ -1,5 +1,6 @@
 "use client";
 
+import { IconMinus, IconPlus } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { updateBatteryLog } from "@/lib/actions";
@@ -43,16 +44,16 @@ export function LogEditForm({ id, initial }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="rounded-2xl border border-neutral-800 bg-neutral-900/50 p-5">
-        <div className="text-xs uppercase tracking-wider text-neutral-500">Battery %</div>
+      <div className="glass rounded-[22px] p-5">
+        <div className="eyebrow text-[11px] text-dim">Battery %</div>
         <div className="mt-2 flex items-center justify-between gap-3">
           <button
             type="button"
             onClick={() => setPct((p) => Math.max(0, p - 1))}
-            className="grid h-12 w-12 place-items-center rounded-full border border-neutral-800 bg-neutral-950 text-xl text-neutral-300 active:scale-95 active:bg-neutral-800"
+            className="glass grid h-12 w-12 place-items-center rounded-full text-muted active:scale-95"
             aria-label="Decrease"
           >
-            −
+            <IconMinus size={20} stroke={1.75} aria-hidden />
           </button>
           <input
             type="number"
@@ -62,41 +63,41 @@ export function LogEditForm({ id, initial }: Props) {
             required
             value={pct}
             onChange={(e) => setPct(Math.max(0, Math.min(100, Number(e.target.value))))}
-            className="w-full bg-transparent text-center text-6xl font-semibold tabular-nums text-emerald-400 focus:outline-none"
+            className="num w-full bg-transparent text-center text-7xl font-bold text-acc focus:outline-none"
           />
           <button
             type="button"
             onClick={() => setPct((p) => Math.min(100, p + 1))}
-            className="grid h-12 w-12 place-items-center rounded-full border border-neutral-800 bg-neutral-950 text-xl text-neutral-300 active:scale-95 active:bg-neutral-800"
+            className="glass grid h-12 w-12 place-items-center rounded-full text-muted active:scale-95"
             aria-label="Increase"
           >
-            +
+            <IconPlus size={20} stroke={1.75} aria-hidden />
           </button>
         </div>
       </div>
 
       <label className="block">
-        <span className="text-xs uppercase tracking-wider text-neutral-500">When</span>
+        <span className="eyebrow text-[11px] text-dim">When</span>
         <input
           type="datetime-local"
           value={when}
           onChange={(e) => setWhen(e.target.value)}
-          className="mt-1 w-full rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-3 focus:border-emerald-500 focus:outline-none"
+          className="glass mt-1 w-full rounded-2xl px-4 py-3 focus:outline-none focus:ring-1 focus:ring-acc/60"
         />
       </label>
 
       <label className="block">
-        <span className="text-xs uppercase tracking-wider text-neutral-500">Note</span>
+        <span className="eyebrow text-[11px] text-dim">Note</span>
         <input
           type="text"
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          className="mt-1 w-full rounded-xl border border-neutral-800 bg-neutral-900 px-4 py-3 focus:border-emerald-500 focus:outline-none"
+          className="glass mt-1 w-full rounded-2xl px-4 py-3 focus:outline-none focus:ring-1 focus:ring-acc/60"
         />
       </label>
 
       {error && (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <div className="rounded-2xl bg-red/12 px-4 py-3 text-sm text-red">
           {error}
         </div>
       )}
@@ -105,14 +106,14 @@ export function LogEditForm({ id, initial }: Props) {
         <button
           type="button"
           onClick={() => router.back()}
-          className="flex-1 rounded-2xl border border-neutral-800 bg-neutral-900 py-3 text-sm font-medium text-neutral-300 hover:bg-neutral-800"
+          className="glass flex-1 rounded-2xl py-3 text-sm font-medium text-muted hover:text-fg"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={pending}
-          className="flex flex-[2] items-center justify-center gap-2 rounded-2xl bg-emerald-500 py-3 text-sm font-semibold text-emerald-950 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
+          className="flex flex-[2] items-center justify-center gap-2 rounded-2xl py-3 bg-acc text-sm font-semibold text-acc-ink hover:brightness-110 disabled:cursor-not-allowed disabled:bg-white/[0.06] disabled:text-dim"
         >
           {pending && <Spinner className="h-4 w-4" />}
           {pending ? "Saving…" : "Save changes"}

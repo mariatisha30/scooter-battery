@@ -1,5 +1,6 @@
 "use client";
 
+import { IconArrowDown } from "@tabler/icons-react";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Spinner } from "./Spinner";
@@ -10,8 +11,8 @@ const MAX_PULL = 110;
 /**
  * Touch-driven swipe-down-to-refresh.
  *
- * On pull past threshold, calls window.__bmsSync if available (so BmsCard can
- * trigger a fresh BMS read), then router.refresh() to re-render the server
+ * On pull past threshold, calls window.__bmsSync if available (so BmsProvider
+ * can trigger a fresh BMS read), then router.refresh() to re-render the server
  * component with the new battery_log.
  *
  * Native Chrome pull-to-refresh is disabled with `overscroll-behavior: contain`
@@ -64,7 +65,7 @@ export function PullToRefresh({ children }: { children: React.ReactNode }) {
           const w = window as Window & { __bmsSync?: () => Promise<void> };
           if (w.__bmsSync) await w.__bmsSync();
         } catch {
-          /* surfaced by BmsCard */
+          /* surfaced by the BMS pill */
         }
         router.refresh();
         setTimeout(() => {
@@ -96,31 +97,20 @@ export function PullToRefresh({ children }: { children: React.ReactNode }) {
         aria-hidden={pull === 0}
       >
         <div
-          className={`flex h-10 w-10 items-center justify-center rounded-full border shadow-lg transition-colors ${
-            ready || refreshing
-              ? "border-emerald-500/50 bg-emerald-500/15 text-emerald-300"
-              : "border-neutral-700 bg-neutral-900 text-neutral-400"
+          className={`flex h-10 w-10 items-center justify-center rounded-full shadow-lg transition-colors ${
+            ready || refreshing ? "bg-acc/15 text-acc ring-1 ring-acc/40" : "glass text-muted"
           }`}
         >
           {refreshing ? (
             <Spinner className="h-4 w-4" />
           ) : (
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
+            <IconArrowDown
+              size={16}
+              stroke={1.75}
               className="transition-transform"
               style={{ transform: `rotate(${Math.min(180, (pull / PULL_THRESHOLD) * 180)}deg)` }}
-            >
-              <path
-                d="M8 3v9M4 9l4 4 4-4"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+              aria-hidden
+            />
           )}
         </div>
       </div>

@@ -1,9 +1,18 @@
 import type { Metadata, Viewport } from "next";
+import { Barlow_Condensed, Sora } from "next/font/google";
 import "./globals.css";
+
+const sora = Sora({ subsets: ["latin"], variable: "--font-sora", display: "swap" });
+const barlow = Barlow_Condensed({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-barlow",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Scooter Battery",
-  description: "Log battery, predict remaining range",
+  description: "Live battery, range and cell health for your e-scooter",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
@@ -13,7 +22,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0a0a",
+  themeColor: "#040605",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -21,8 +30,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen">{children}</body>
+    <html lang="en" className={`${sora.variable} ${barlow.variable}`}>
+      <body className="min-h-screen font-sans">{children}</body>
     </html>
   );
 }

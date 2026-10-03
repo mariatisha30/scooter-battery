@@ -4,11 +4,11 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Scooter Battery",
     short_name: "Scooter",
-    description: "Log e-scooter battery, predict remaining range",
+    description: "Live battery, range and cell health for your e-scooter",
     start_url: "/",
     display: "standalone",
-    background_color: "#0a0a0a",
-    theme_color: "#0a0a0a",
+    background_color: "#040605",
+    theme_color: "#040605",
     orientation: "portrait",
     icons: [
       { src: "/icon", sizes: "512x512", type: "image/png" },

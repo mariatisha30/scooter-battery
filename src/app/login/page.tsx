@@ -1,4 +1,5 @@
 import { login } from "@/lib/actions";
+import { BrandMark } from "@/components/BrandMark";
 
 export const dynamic = "force-dynamic";
 
@@ -12,18 +13,10 @@ export default async function LoginPage({
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-xs">
-        <div className="mb-8 text-center">
-          <div
-            className="mx-auto grid h-14 w-14 place-items-center rounded-2xl text-3xl"
-            style={{
-              background: "linear-gradient(135deg, #064e3b 0%, #0a0a0a 60%)",
-              color: "#34d399",
-            }}
-          >
-            ⚡
-          </div>
-          <h1 className="mt-4 text-xl font-semibold text-neutral-100">Scooter Battery</h1>
-          <p className="mt-1 text-xs text-neutral-500">Enter password to continue</p>
+        <div className="mb-8 flex flex-col items-center text-center">
+          <BrandMark size={56} />
+          <h1 className="mt-4 text-xl font-semibold tracking-tight">Scooter Battery</h1>
+          <p className="mt-1 text-xs text-muted">Enter your password to continue</p>
         </div>
 
         <form action={login} className="space-y-3">
@@ -35,20 +28,18 @@ export default async function LoginPage({
             required
             autoComplete="current-password"
             placeholder="Password"
-            className={`w-full rounded-xl border px-4 py-3 text-center text-base tabular-nums focus:outline-none ${
+            className={`w-full rounded-2xl px-4 py-3.5 text-center text-base focus:outline-none ${
               error
-                ? "border-red-500/50 bg-red-500/5 text-red-200 focus:border-red-500"
-                : "border-neutral-800 bg-neutral-900 text-neutral-100 focus:border-emerald-500"
+                ? "bg-red/10 text-red ring-1 ring-red/50 focus:ring-red"
+                : "glass text-fg focus:ring-1 focus:ring-acc/60"
             }`}
           />
 
-          {error && (
-            <p className="text-center text-xs text-red-400">Wrong password — try again.</p>
-          )}
+          {error && <p className="text-center text-xs text-red">Wrong password — try again.</p>}
 
           <button
             type="submit"
-            className="w-full rounded-xl bg-emerald-500 py-3 text-sm font-semibold text-emerald-950 transition-colors hover:bg-emerald-400"
+            className="w-full rounded-2xl bg-acc py-3.5 text-sm font-semibold text-acc-ink transition hover:brightness-110"
           >
             Unlock
           </button>

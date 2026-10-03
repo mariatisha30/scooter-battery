@@ -13,13 +13,12 @@ export default function AppleIcon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "linear-gradient(135deg, #064e3b 0%, #0a0a0a 60%)",
-          color: "#34d399",
-          fontSize: 116,
-          lineHeight: 1,
+          background: "linear-gradient(135deg, #c4f24b 0%, #34d399 100%)",
         }}
       >
-        ⚡
+        <svg width="104" height="104" viewBox="0 0 24 24" fill="none" stroke="#0b1a0e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11" />
+        </svg>
       </div>
     ),
     { ...size }

@@ -1,5 +1,6 @@
 "use client";
 
+import { IconArrowRight, IconScooterElectric, IconUser, IconUsers, IconX } from "@tabler/icons-react";
 import { useEffect, useState, useTransition } from "react";
 import { logTrip } from "@/lib/actions";
 import { formatDuration, formatLocalDateTime } from "@/lib/datetime";
@@ -64,7 +65,6 @@ export function RideSuggestionCard({ ride }: { ride: Ride }) {
     fd.set("trip_at", ride.endAt);
     fd.set("note", "");
     fd.set("with_passenger", withPassenger ? "true" : "false");
-    fd.set("from", "ride");
     startTransition(async () => {
       try {
         await logTrip(fd);
@@ -81,35 +81,38 @@ export function RideSuggestionCard({ ride }: { ride: Ride }) {
   const durationLabel = formatDuration(ride.durationMin);
 
   return (
-    <section className="rounded-2xl border border-sky-500/20 bg-sky-500/5 p-3">
+    <section className="glass rounded-[22px] p-3.5">
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-sky-300">
-          <span>🛵 Unlogged ride</span>
+        <div className="eyebrow flex items-center gap-1.5 text-[11px] text-sky">
+          <IconScooterElectric size={14} stroke={1.75} aria-hidden />
+          <span>Unlogged ride</span>
         </div>
         <button
           type="button"
           onClick={handleDismiss}
           aria-label="Dismiss"
-          className="grid h-6 w-6 place-items-center rounded-full text-neutral-600 hover:bg-neutral-800 hover:text-neutral-300"
+          className="grid h-7 w-7 place-items-center rounded-full text-dim hover:bg-white/[0.06] hover:text-fg"
           title="Hide this suggestion"
         >
-          ×
+          <IconX size={15} stroke={1.75} aria-hidden />
         </button>
       </div>
 
       <div className="mt-2 flex items-baseline justify-between text-sm">
         <div className="flex items-baseline gap-2">
-          <span className="text-base font-medium tabular-nums text-neutral-100">
-            {ride.startPct}% → {ride.endPct}%
+          <span className="num flex items-center gap-1 text-lg font-semibold text-fg">
+            {ride.startPct}%
+            <IconArrowRight size={14} stroke={1.75} className="text-dim" aria-hidden />
+            {ride.endPct}%
           </span>
-          <span className="text-[10px] uppercase tracking-wider text-amber-300">
+          <span className="num text-sm font-semibold text-amber">
             −{ride.drop}%
           </span>
         </div>
-        <span className="text-xs tabular-nums text-neutral-300">{durationLabel}</span>
+        <span className="text-xs text-muted">{durationLabel}</span>
       </div>
 
-      <div className="mt-1 text-[11px] text-neutral-500">
+      <div className="mt-1 text-[11px] text-dim">
         {formatLocalDateTime(ride.endAt, {
           day: "numeric",
           month: "short",
@@ -128,44 +131,44 @@ export function RideSuggestionCard({ ride }: { ride: Ride }) {
             placeholder="km"
             value={km}
             onChange={(e) => setKm(e.target.value)}
-            className="flex-1 rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 text-center text-base tabular-nums focus:border-emerald-500 focus:outline-none"
+            className="num flex-1 px-3 py-2 text-center text-lg rounded-xl bg-white/[0.04] ring-1 ring-line focus:outline-none focus:ring-acc/60"
             required
           />
           <button
             type="button"
             onClick={() => setWithPassenger(false)}
-            className={`rounded-lg px-3 py-2 text-xs ${
+            className={`grid place-items-center rounded-xl px-3 py-2 text-xs ${
               !withPassenger
-                ? "bg-neutral-800 text-neutral-100"
-                : "border border-neutral-800 text-neutral-500"
+                ? "bg-white/[0.08] text-fg"
+                : "text-muted ring-1 ring-line"
             }`}
             aria-pressed={!withPassenger}
           >
-            🛵
+            <IconUser size={16} stroke={1.75} aria-hidden />
           </button>
           <button
             type="button"
             onClick={() => setWithPassenger(true)}
-            className={`rounded-lg px-3 py-2 text-xs ${
+            className={`grid place-items-center rounded-xl px-3 py-2 text-xs ${
               withPassenger
-                ? "bg-neutral-800 text-neutral-100"
-                : "border border-neutral-800 text-neutral-500"
+                ? "bg-white/[0.08] text-fg"
+                : "text-muted ring-1 ring-line"
             }`}
             aria-pressed={withPassenger}
             title="With passenger"
           >
-            👥
+            <IconUsers size={16} stroke={1.75} aria-hidden />
           </button>
         </div>
 
         {kmPerPct && (
-          <div className="text-center text-[10px] text-emerald-300">
+          <div className="text-center text-[11px] text-acc">
             This trip: <span className="font-semibold tabular-nums">{kmPerPct} km/%</span>
           </div>
         )}
 
         {error && (
-          <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs text-red-300">
+          <div className="rounded-xl bg-red/12 px-3 py-1.5 text-xs text-red">
             {error}
           </div>
         )}
@@ -173,7 +176,7 @@ export function RideSuggestionCard({ ride }: { ride: Ride }) {
         <button
           type="submit"
           disabled={pending || !km}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 py-2.5 text-sm font-semibold text-emerald-950 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
+          className="flex w-full items-center justify-center gap-2 rounded-2xl py-2.5 bg-acc text-sm font-semibold text-acc-ink hover:brightness-110 disabled:cursor-not-allowed disabled:bg-white/[0.06] disabled:text-dim"
         >
           {pending && <Spinner className="h-4 w-4" />}
           {pending ? "Saving…" : "Log this ride"}

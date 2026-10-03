@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { IconPencil, IconTrash } from "@tabler/icons-react";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { deleteBatteryLog, deleteTrip } from "@/lib/actions";
 
@@ -35,12 +36,9 @@ export function RowActions({ kind, id, linkedTripId }: Props) {
     });
   }
 
-  // Where editing should go. A trip-linked log always opens the trip editor —
-  // since they're a single conceptual ride, you edit one and the other syncs.
+  // A trip-linked log always opens the trip editor — one ride, one editor.
   const editHref =
-    kind === "trip" || linkedTripId
-      ? `/trips/${linkedTripId ?? id}/edit`
-      : `/log/${id}/edit`;
+    kind === "trip" || linkedTripId ? `/trips/${linkedTripId ?? id}/edit` : `/log/${id}/edit`;
 
   if (armed) {
     return (
@@ -51,29 +49,21 @@ export function RowActions({ kind, id, linkedTripId }: Props) {
           confirm();
         }}
         disabled={pending}
-        className="rounded-full bg-red-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-red-300 transition-colors hover:bg-red-500/25 disabled:opacity-50"
+        className="rounded-full bg-red/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-red transition-colors hover:bg-red/25 disabled:opacity-50"
       >
-        {pending ? "…" : "Delete?"}
+        {pending ? "Deleting" : "Delete?"}
       </button>
     );
   }
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center">
       <Link
         href={editHref}
         aria-label="Edit"
-        className="grid h-7 w-7 place-items-center rounded-full text-neutral-600 transition-colors hover:bg-neutral-800 hover:text-neutral-300"
+        className="grid h-8 w-8 place-items-center rounded-full text-dim transition-colors hover:bg-white/[0.06] hover:text-fg"
       >
-        <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
-          <path
-            d="M2 12h2.5L11 5.5l-2.5-2.5L2 9.5V12z M8.5 3l2.5 2.5"
-            stroke="currentColor"
-            strokeWidth="1.3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <IconPencil size={15} stroke={1.75} aria-hidden />
       </Link>
       <button
         type="button"
@@ -82,17 +72,9 @@ export function RowActions({ kind, id, linkedTripId }: Props) {
           setArmed(true);
         }}
         aria-label="Delete"
-        className="grid h-7 w-7 place-items-center rounded-full text-neutral-600 transition-colors hover:bg-neutral-800 hover:text-neutral-300"
+        className="grid h-8 w-8 place-items-center rounded-full text-dim transition-colors hover:bg-white/[0.06] hover:text-fg"
       >
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path
-            d="M3 4h8M5.5 4V2.5h3V4M5.5 6.5v4M8.5 6.5v4M4 4l.5 7.5h5L10 4"
-            stroke="currentColor"
-            strokeWidth="1.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <IconTrash size={15} stroke={1.75} aria-hidden />
       </button>
     </div>
   );

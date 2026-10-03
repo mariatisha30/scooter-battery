@@ -4,7 +4,7 @@
 // - JS / CSS / fonts / images: cache-first, populated as you browse.
 // - Server actions (POST) and Supabase API calls: passed through untouched.
 
-const CACHE = "scooter-v3";
+const CACHE = "scooter-v4";
 
 self.addEventListener("install", (event) => {
   // Pre-cache the entry routes so a cold offline open still boots.

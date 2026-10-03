@@ -1,79 +1,79 @@
-import Link from "next/link";
+import { IconArrowRight, IconUser, IconUsers } from "@tabler/icons-react";
+import { RideSuggestionCard } from "@/components/RideSuggestionCard";
 import { RowActions } from "@/components/RowActions";
 import { TripFormDrawer } from "@/components/TripFormDrawer";
-import { calibrationFromTrips } from "@/lib/calibration";
+import { calibrationFromTrips, defaultKmPerPct, type CalibrationValue } from "@/lib/calibration";
 import { formatLocalDateTime } from "@/lib/datetime";
+import { detectUnloggedRides } from "@/lib/rides";
 import { supabase, supabaseConfigured, type BatteryLog, type Trip } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
+function sourceLabel(c: CalibrationValue) {
+  if (c.source === "calibrated") return `${c.sampleSize} trip${c.sampleSize === 1 ? "" : "s"}`;
+  return c.source === "estimated" ? "estimated" : "default";
+}
+
 export default async function TripsPage() {
-  const trips: Trip[] = supabaseConfigured && supabase
-    ? ((await supabase.from("trips").select("*").order("trip_at", { ascending: false }).limit(50)).data ?? [])
-    : [];
+  let trips: Trip[] = [];
+  let logs: BatteryLog[] = [];
+  if (supabaseConfigured && supabase) {
+    const [t, l] = await Promise.all([
+      supabase.from("trips").select("*").order("trip_at", { ascending: false }).limit(50),
+      supabase.from("battery_logs").select("*").order("logged_at", { ascending: false }).limit(500),
+    ]);
+    trips = (t.data as Trip[]) ?? [];
+    logs = (l.data as BatteryLog[]) ?? [];
+  }
 
-  const latestLog: Pick<BatteryLog, "battery_pct" | "logged_at"> | null =
-    supabaseConfigured && supabase
-      ? ((
-          await supabase
-            .from("battery_logs")
-            .select("battery_pct, logged_at")
-            .order("logged_at", { ascending: false })
-            .limit(1)
-            .maybeSingle()
-        ).data ?? null)
-      : null;
-
+  const latestLog = logs[0] ? { battery_pct: logs[0].battery_pct, logged_at: logs[0].logged_at } : null;
   const cal = calibrationFromTrips(trips);
+  const rides = detectUnloggedRides(logs, trips).slice(0, 3);
+  const baseline = defaultKmPerPct();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-7 pt-2">
       <div>
-        <Link href="/" className="text-sm text-neutral-400 hover:text-neutral-100">
-          ← Back
-        </Link>
-        <h1 className="mt-2 text-2xl font-semibold">Trips</h1>
-        <p className="mt-1 text-sm text-neutral-500">
-          Each trip teaches the app your real km per % — and updates your current battery.
-        </p>
+        <h1 className="text-2xl font-semibold tracking-tight">Trips</h1>
+        <p className="mt-1.5 text-sm text-muted">Log a ride&apos;s km and the app learns your real range per %.</p>
       </div>
 
-      <section className="grid grid-cols-2 divide-x divide-neutral-800 rounded-2xl border border-neutral-800 bg-neutral-900/50">
-        <div className="px-3 py-3 text-center">
-          <div className="text-xl font-semibold tabular-nums text-emerald-400">
-            {cal.solo.value.toFixed(2)}
-          </div>
-          <div className="mt-0.5 text-[10px] uppercase tracking-wider text-neutral-500">
-            🛵 solo km/% {cal.solo.source === "calibrated" ? `· ${cal.solo.sampleSize} trips` : "· default"}
-          </div>
+      <section className="glass grid grid-cols-2 rounded-[22px] py-3.5">
+        <div className="text-center">
+          <b className="num block text-[30px] font-semibold leading-none text-acc">{cal.solo.value.toFixed(2)}</b>
+          <span className="mt-1.5 flex items-center justify-center gap-1 text-[11px] text-dim">
+            <IconUser size={12} stroke={2} aria-hidden />
+            solo km/% · {sourceLabel(cal.solo)}
+          </span>
         </div>
-        <div className="px-3 py-3 text-center">
-          <div className="text-xl font-semibold tabular-nums text-sky-400">
-            {cal.passenger.value.toFixed(2)}
-          </div>
-          <div className="mt-0.5 text-[10px] uppercase tracking-wider text-neutral-500">
-            👥 +1 km/%{" "}
-            {cal.passenger.source === "calibrated"
-              ? `· ${cal.passenger.sampleSize} trips`
-              : cal.passenger.source === "estimated"
-              ? "· estimated"
-              : "· default"}
-          </div>
+        <div className="text-center shadow-[-1px_0_0_var(--color-line)]">
+          <b className="num block text-[30px] font-semibold leading-none text-sky">{cal.passenger.value.toFixed(2)}</b>
+          <span className="mt-1.5 flex items-center justify-center gap-1 text-[11px] text-dim">
+            <IconUsers size={12} stroke={2} aria-hidden />
+            +1 km/% · {sourceLabel(cal.passenger)}
+          </span>
         </div>
       </section>
 
       <TripFormDrawer latest={latestLog} />
 
-      <section>
-        <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-400">
-          Recent trips
-        </h2>
+      {rides.length > 0 && (
+        <section className="space-y-2.5">
+          <h2 className="eyebrow">Unlogged rides</h2>
+          {rides.map((r) => (
+            <RideSuggestionCard key={r.id} ride={r} />
+          ))}
+        </section>
+      )}
+
+      <section className="space-y-2.5">
+        <h2 className="eyebrow">Recent trips</h2>
         {trips.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-neutral-800 px-4 py-8 text-center text-sm text-neutral-500">
+          <div className="rounded-[22px] border border-dashed border-line px-4 py-8 text-center text-sm text-muted">
             <p>No trips logged yet.</p>
-            <p className="mt-2 text-xs text-neutral-600">
-              Log one and the app learns your real km/% — right now it's using the default{" "}
-              <span className="tabular-nums text-neutral-400">1.50</span>.
+            <p className="mt-2 text-xs text-dim">
+              Log one and the app learns your real km/% — right now it uses{" "}
+              <span className="num text-[13px] text-muted">{baseline.toFixed(2)}</span>.
             </p>
           </div>
         ) : (
@@ -81,57 +81,42 @@ export default async function TripsPage() {
             {trips.map((t) => {
               const used = t.start_pct - t.end_pct;
               const ratio = Number(t.distance_km) / used;
-              const vsDefault = ratio / 1.5;
-              const efficiency = vsDefault >= 1 ? "text-emerald-400" : "text-amber-400";
               return (
-                <li
-                  key={t.id}
-                  className="rounded-2xl border border-neutral-800 bg-neutral-900/50 px-4 py-3 text-sm"
-                >
+                <li key={t.id} className="glass rounded-[22px] py-3 pl-4 pr-2">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <div className="text-base font-medium tabular-nums">
-                        {Number(t.distance_km).toFixed(1)} km
-                      </div>
+                      <span className="num text-xl font-semibold">{Number(t.distance_km).toFixed(1)} km</span>
                       {t.with_passenger && (
-                        <span className="rounded-full border border-sky-500/30 bg-sky-500/10 px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-sky-300">
-                          👥 +1
+                        <span className="flex items-center gap-1 rounded-full bg-sky/12 px-2 py-0.5 text-[10px] font-semibold text-sky">
+                          <IconUsers size={11} stroke={2} aria-hidden />
+                          +1
                         </span>
                       )}
                       {t.km_estimated && (
                         <span
-                          className="rounded-full border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-amber-300"
-                          title="km estimated from battery drop — edit to enter the real distance"
+                          className="rounded-full bg-amber/12 px-2 py-0.5 text-[10px] font-semibold text-amber"
+                          title="km estimated from the battery drop — edit to enter the real distance"
                         >
                           est
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className={`text-xs tabular-nums ${efficiency}`}>
+                    <div className="flex items-center gap-1">
+                      <span className={`num text-[15px] font-semibold ${ratio >= baseline ? "text-acc" : "text-amber"}`}>
                         {ratio.toFixed(2)} km/%
-                      </div>
+                      </span>
                       <RowActions kind="trip" id={t.id} />
                     </div>
                   </div>
-                  <div className="mt-1 flex items-center gap-2 text-xs text-neutral-500">
-                    <span className="rounded bg-neutral-800 px-1.5 py-0.5 tabular-nums text-neutral-300">
-                      {t.start_pct}%
-                    </span>
-                    <span>→</span>
-                    <span className="rounded bg-neutral-800 px-1.5 py-0.5 tabular-nums text-neutral-300">
-                      {t.end_pct}%
-                    </span>
+                  <div className="mt-1 flex items-center gap-1.5 pr-2 text-xs text-dim">
+                    <span className="num rounded-md bg-white/[0.06] px-1.5 py-0.5 text-[13px] text-fg">{t.start_pct}%</span>
+                    <IconArrowRight size={13} stroke={1.75} aria-hidden />
+                    <span className="num rounded-md bg-white/[0.06] px-1.5 py-0.5 text-[13px] text-fg">{t.end_pct}%</span>
                     <span className="ml-auto">
-                      {formatLocalDateTime(t.trip_at, {
-                        day: "numeric",
-                        month: "short",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {formatLocalDateTime(t.trip_at, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                     </span>
                   </div>
-                  {t.note && <div className="mt-1 text-xs text-neutral-400">{t.note}</div>}
+                  {t.note && <div className="mt-1 text-xs text-muted">{t.note}</div>}
                 </li>
               );
             })}
