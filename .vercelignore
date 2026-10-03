@@ -1,0 +1,7 @@
+.env*
+!.env.example
+design
+.next
+node_modules
+tsconfig.tsbuildinfo
+.claude
