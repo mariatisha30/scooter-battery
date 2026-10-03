@@ -2,6 +2,7 @@ import Link from "next/link";
 import { BatteryRing } from "@/components/BatteryRing";
 import { BmsCard } from "@/components/BmsCard";
 import { DashboardHero } from "@/components/DashboardHero";
+import { HealthAlert } from "@/components/HealthAlert";
 import { HistoryPanel } from "@/components/HistoryPanel";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { RideSuggestionCard } from "@/components/RideSuggestionCard";
@@ -73,6 +74,8 @@ export default async function Dashboard() {
         passenger={{ ...cal.passenger, kmLeft: passengerKmLeft, hint: passengerHint }}
         lastLoggedAt={latest?.logged_at ?? null}
       />
+
+      <HealthAlert logs={allLogs} />
 
       <BmsCard />
 

@@ -14,9 +14,15 @@ export const CMD_READ_BASIC_INFO = new Uint8Array([
   0xdd, 0xa5, 0x03, 0x00, 0xff, 0xfd, 0x77,
 ]);
 
+// Request: DD A5 04 00 FF FC 77 — read cell voltages (2 bytes per cell, mV)
+export const CMD_READ_CELL_VOLTAGES = new Uint8Array([
+  0xdd, 0xa5, 0x04, 0x00, 0xff, 0xfc, 0x77,
+]);
+
 const FRAME_START = 0xdd;
 const FRAME_END = 0x77;
-const CMD_BASIC_INFO_RESPONSE = 0x03;
+export const RESP_BASIC_INFO = 0x03;
+export const RESP_CELL_VOLTAGES = 0x04;
 
 export type BmsReading = {
   /** State of charge, 0-100% */
@@ -37,7 +43,17 @@ export type BmsReading = {
   chargingEnabled: boolean;
   /** Discharge MOSFET on */
   dischargingEnabled: boolean;
+  /** Cells in series, as reported by the BMS */
+  cellCount: number;
+  /** One bit per cell (bit 0 = cell 1): that cell is being balanced right now */
+  balanceMask: number;
+  /** Protection status bits — 0 means no alarm. Decode with protectionLabels(). */
+  protection: number;
 };
+
+export type BmsFrame =
+  | { cmd: typeof RESP_BASIC_INFO; reading: BmsReading }
+  | { cmd: typeof RESP_CELL_VOLTAGES; cellsMv: number[] };
 
 /**
  * Accumulates BLE notify chunks into full frames and parses them.
@@ -47,7 +63,7 @@ export type BmsReading = {
 export class BmsFrameAssembler {
   private buffer: number[] = [];
 
-  push(chunk: Uint8Array): BmsReading | null {
+  push(chunk: Uint8Array): BmsFrame | null {
     for (const byte of chunk) this.buffer.push(byte);
 
     // Discard any leading garbage until we see a start byte.
@@ -67,14 +83,79 @@ export class BmsFrameAssembler {
     this.buffer = this.buffer.slice(expectedTotal);
 
     if (frame[frame.length - 1] !== FRAME_END) return null;
-    if (frame[1] !== CMD_BASIC_INFO_RESPONSE) return null;
     if (frame[2] !== 0x00) return null; // status: 0 = OK
 
-    return parseBasicInfo(frame, dataLen);
+    if (frame[1] === RESP_BASIC_INFO) {
+      const reading = parseBasicInfo(frame, dataLen);
+      return reading ? { cmd: RESP_BASIC_INFO, reading } : null;
+    }
+    if (frame[1] === RESP_CELL_VOLTAGES) {
+      const cellsMv = parseCellVoltages(frame, dataLen);
+      return cellsMv ? { cmd: RESP_CELL_VOLTAGES, cellsMv } : null;
+    }
+    return null;
   }
 
   reset() {
     this.buffer = [];
+  }
+}
+
+/**
+ * One request in flight at a time over the notify + write characteristics.
+ * Feed every notify chunk to handleChunk(); the response frame whose command
+ * byte matches the pending request resolves it.
+ */
+export class BmsRequester {
+  private assembler = new BmsFrameAssembler();
+  private pending: { cmd: number; resolve: (frame: BmsFrame) => void } | null = null;
+  private write: (bytes: Uint8Array<ArrayBuffer>) => Promise<void>;
+
+  constructor(write: (bytes: Uint8Array<ArrayBuffer>) => Promise<void>) {
+    this.write = write;
+  }
+
+  handleChunk(chunk: Uint8Array) {
+    const frame = this.assembler.push(chunk);
+    if (frame && this.pending && frame.cmd === this.pending.cmd) {
+      const { resolve } = this.pending;
+      this.pending = null;
+      resolve(frame);
+    }
+  }
+
+  async readBasicInfo(timeoutMs: number): Promise<BmsReading> {
+    const frame = await this.request(CMD_READ_BASIC_INFO, timeoutMs);
+    if (frame.cmd !== RESP_BASIC_INFO) throw new Error("Unexpected BMS response");
+    return frame.reading;
+  }
+
+  async readCellVoltages(timeoutMs: number): Promise<number[]> {
+    const frame = await this.request(CMD_READ_CELL_VOLTAGES, timeoutMs);
+    if (frame.cmd !== RESP_CELL_VOLTAGES) throw new Error("Unexpected BMS response");
+    return frame.cellsMv;
+  }
+
+  private request(command: Uint8Array<ArrayBuffer>, timeoutMs: number): Promise<BmsFrame> {
+    return new Promise<BmsFrame>((resolve, reject) => {
+      this.assembler.reset();
+      const settle = (frame: BmsFrame) => {
+        clearTimeout(timeoutId);
+        resolve(frame);
+      };
+      const timeoutId = setTimeout(() => {
+        if (this.pending?.resolve === settle) {
+          this.pending = null;
+          reject(new Error("Timed out waiting for BMS response"));
+        }
+      }, timeoutMs);
+      this.pending = { cmd: command[2], resolve: settle };
+      this.write(command).catch((e) => {
+        clearTimeout(timeoutId);
+        if (this.pending?.resolve === settle) this.pending = null;
+        reject(e);
+      });
+    });
   }
 }
 
@@ -95,14 +176,15 @@ function parseBasicInfo(frame: number[], dataLen: number): BmsReading | null {
   const nominalAh = u16(6) / 100;
   const cycles = u16(8);
   // bytes 10-11: production date
-  // bytes 12-15: balance status (32 bits across 4 bytes)
-  // bytes 16-17: protection status
+  // bytes 12-13: balance status, cells 1-16 · bytes 14-15: cells 17-32
+  const balanceMask = ((u16(14) << 16) | u16(12)) >>> 0;
+  const protection = u16(16);
   // byte 18: software version
   const soc = p(19);
   const fetStatus = p(20);
   const chargingEnabled = (fetStatus & 0x01) !== 0;
   const dischargingEnabled = (fetStatus & 0x02) !== 0;
-  // byte 21: cell count
+  const cellCount = p(21);
   const ntcCount = p(22);
 
   const temperatures: number[] = [];
@@ -122,7 +204,19 @@ function parseBasicInfo(frame: number[], dataLen: number): BmsReading | null {
     temperatures,
     chargingEnabled,
     dischargingEnabled,
+    cellCount,
+    balanceMask,
+    protection,
   };
+}
+
+function parseCellVoltages(frame: number[], dataLen: number): number[] | null {
+  if (dataLen < 2 || dataLen % 2 !== 0) return null;
+  const cells: number[] = [];
+  for (let i = 0; i < dataLen; i += 2) {
+    cells.push((frame[4 + i] << 8) | frame[4 + i + 1]);
+  }
+  return cells;
 }
 
 /** Time-to-full or time-to-empty estimate in minutes, derived from current draw. */

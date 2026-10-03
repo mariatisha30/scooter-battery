@@ -20,6 +20,14 @@ export type BatteryLog = {
   current_a: number | null;
   cycles: number | null;
   max_temp_c: number | null;
+  /** Per-cell voltages in mV, pack order (BMS readings since cell support) */
+  cell_mv: number[] | null;
+  /** JBD protection status bits — 0 = no alarm */
+  protection: number | null;
+  /** One bit per cell that was balancing */
+  balance_mask: number | null;
+  remaining_ah: number | null;
+  nominal_ah: number | null;
   note: string | null;
   created_at: string;
 };

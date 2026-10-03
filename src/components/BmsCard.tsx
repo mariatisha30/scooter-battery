@@ -3,17 +3,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { logBatteryFromBms } from "@/lib/actions";
 import {
-  BmsFrameAssembler,
-  CMD_READ_BASIC_INFO,
+  BmsRequester,
   JBD_NOTIFY_CHAR_UUID,
   JBD_SERVICE_UUID,
   JBD_WRITE_CHAR_UUID,
-  formatMinutes,
-  timeEstimateMinutes,
   type BmsReading,
 } from "@/lib/bms";
 import { relativeAgo } from "@/lib/datetime";
 import { enqueueReading } from "@/lib/queue";
+import { BmsReadingView } from "./BmsReadingView";
 import { Spinner } from "./Spinner";
 
 const AUTOSYNC_STORAGE_KEY = "scooter-bms-autosync";
@@ -23,6 +21,10 @@ const POLL_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 const READ_TIMEOUT_MS = 10_000;
 const READ_ATTEMPTS = 2;
 const READ_RETRY_PAUSE_MS = 500;
+// Cell voltages are read right after basic info: one short attempt, and a
+// miss never blocks saving the reading itself.
+const CELL_READ_TIMEOUT_MS = 5_000;
+const COMMAND_GAP_MS = 150;
 // After GATT connect, give Android a moment to fully activate the
 // notification subscription before sending the first command — otherwise the
 // BMS response can land before the OS has wired up our listener, which
@@ -45,6 +47,8 @@ export function BmsCard() {
   const [lastSyncAt, setLastSyncAt] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [deviceName, setDeviceName] = useState<string | null>(null);
+  // Last good cell voltages — kept when a later cell read misses.
+  const [cellsMv, setCellsMv] = useState<number[] | null>(null);
   const [autoSync, setAutoSync] = useState<boolean>(() => {
     // Lazy initializer: read once on mount. Guarded for SSR where window
     // doesn't exist. Default to true (on) for first-time users.
@@ -62,52 +66,31 @@ export function BmsCard() {
   const deviceRef = useRef<BluetoothDevice | null>(null);
   const writeCharRef = useRef<BluetoothRemoteGATTCharacteristic | null>(null);
   const notifyCharRef = useRef<BluetoothRemoteGATTCharacteristic | null>(null);
-  const assemblerRef = useRef(new BmsFrameAssembler());
-  const pendingResolveRef = useRef<((r: BmsReading) => void) | null>(null);
+  const requesterRef = useRef<BmsRequester | null>(null);
+  if (requesterRef.current === null) {
+    requesterRef.current = new BmsRequester((bytes) => {
+      const write = writeCharRef.current;
+      if (!write) return Promise.reject(new Error("Not connected"));
+      return write.writeValueWithoutResponse(bytes);
+    });
+  }
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cancelledRef = useRef(false);
   const disconnectListenerSetRef = useRef<WeakSet<BluetoothDevice>>(new WeakSet());
 
   const handleNotify = useCallback((event: Event) => {
-    const target = event.target as BluetoothRemoteGATTCharacteristic;
-    const value = target.value;
+    const value = (event.target as BluetoothRemoteGATTCharacteristic).value;
     if (!value) return;
-    const chunk = new Uint8Array(value.buffer);
-    const parsed = assemblerRef.current.push(chunk);
-    if (parsed && pendingResolveRef.current) {
-      pendingResolveRef.current(parsed);
-      pendingResolveRef.current = null;
-    }
-  }, []);
-
-  // Send one read command, wait for the BMS response.
-  const readOnce = useCallback((): Promise<BmsReading> => {
-    const write = writeCharRef.current;
-    if (!write) return Promise.reject(new Error("Not connected"));
-    return new Promise<BmsReading>((resolve, reject) => {
-      assemblerRef.current.reset();
-      const timeoutId = setTimeout(() => {
-        if (pendingResolveRef.current) {
-          pendingResolveRef.current = null;
-          reject(new Error("Timed out waiting for BMS response"));
-        }
-      }, READ_TIMEOUT_MS);
-      pendingResolveRef.current = (r) => {
-        clearTimeout(timeoutId);
-        resolve(r);
-      };
-      write.writeValueWithoutResponse(CMD_READ_BASIC_INFO).catch((e) => {
-        clearTimeout(timeoutId);
-        pendingResolveRef.current = null;
-        reject(e);
-      });
-    });
+    requesterRef.current?.handleChunk(
+      new Uint8Array(value.buffer, value.byteOffset, value.byteLength)
+    );
   }, []);
 
   // Read + persist (with offline queue fallback). Used by auto-sync, manual
   // Sync button, pull-to-refresh, and as the first action after connecting.
   const readAndSave = useCallback(async () => {
-    if (!writeCharRef.current) return;
+    const requester = requesterRef.current;
+    if (!writeCharRef.current || !requester) return;
     setStatus("syncing");
     // Try a few times before surfacing failure — BLE notifications can be
     // briefly missed (especially the very first read after a fresh GATT
@@ -116,7 +99,7 @@ export function BmsCard() {
     let lastErr: unknown;
     for (let attempt = 0; attempt < READ_ATTEMPTS; attempt++) {
       try {
-        r = await readOnce();
+        r = await requester.readBasicInfo(READ_TIMEOUT_MS);
         break;
       } catch (err) {
         lastErr = err;
@@ -130,12 +113,27 @@ export function BmsCard() {
       setStatus("connected");
       return;
     }
+    let cells: number[] | null = null;
+    try {
+      await new Promise((res) => setTimeout(res, COMMAND_GAP_MS));
+      cells = await requester.readCellVoltages(CELL_READ_TIMEOUT_MS);
+    } catch {
+      /* cells are a bonus — save the reading without them */
+    }
     try {
       setReading(r);
+      if (cells) setCellsMv(cells);
       const now = new Date().toISOString();
       setLastSyncAt(Date.now());
       setError(null);
       const maxTempC = r.temperatures.length > 0 ? Math.max(...r.temperatures) : null;
+      const extras = {
+        cellsMv: cells,
+        protection: r.protection,
+        balanceMask: r.balanceMask,
+        remainingAh: r.remainingAh,
+        nominalAh: r.nominalAh,
+      };
       try {
         await logBatteryFromBms({
           pct: r.soc,
@@ -144,6 +142,7 @@ export function BmsCard() {
           cycles: r.cycles,
           maxTempC,
           loggedAtIso: now,
+          ...extras,
         });
       } catch (uploadErr) {
         const looksNetworky =
@@ -158,6 +157,7 @@ export function BmsCard() {
           cycles: r.cycles,
           maxTempC,
           loggedAtIso: now,
+          ...extras,
         });
         window.dispatchEvent(new Event("scooter-queue-changed"));
       }
@@ -169,7 +169,7 @@ export function BmsCard() {
       setError(err instanceof Error ? err.message : "Couldn't reach BMS");
       setStatus("connected");
     }
-  }, [readOnce]);
+  }, []);
 
   // Connect to a known device. On failure schedules a retry; on success kicks
   // off an initial read. Also wires up the disconnect listener so the next
@@ -392,20 +392,6 @@ export function BmsCard() {
   }
 
   // connected / syncing / error — populated readings card
-  const est = reading ? timeEstimateMinutes(reading) : null;
-  const stateLabel =
-    est?.state === "charging"
-      ? "Charging"
-      : est?.state === "discharging"
-      ? "Discharging"
-      : "Idle";
-  const stateColor =
-    est?.state === "charging"
-      ? "text-emerald-300"
-      : est?.state === "discharging"
-      ? "text-amber-300"
-      : "text-neutral-400";
-
   return (
     <Card>
       <div className="flex items-center justify-between gap-2">
@@ -438,47 +424,7 @@ export function BmsCard() {
       </div>
 
       {reading && (
-        <>
-          <div className="mt-3 grid grid-cols-3 gap-3">
-            <Stat label="SOC" value={`${reading.soc}%`} accent="text-emerald-300" />
-            <Stat label="Voltage" value={`${reading.voltage.toFixed(2)} V`} />
-            <Stat
-              label="Current"
-              value={`${reading.current >= 0 ? "+" : ""}${reading.current.toFixed(2)} A`}
-              accent={
-                reading.current > 0.05
-                  ? "text-emerald-300"
-                  : reading.current < -0.05
-                  ? "text-amber-300"
-                  : "text-neutral-300"
-              }
-            />
-          </div>
-          <div className="mt-3 flex items-baseline justify-between text-xs">
-            <span className={`uppercase tracking-wider ${stateColor}`}>
-              {stateLabel}
-              {est?.minutes != null && est.state !== "idle" && (
-                <>
-                  {" "}· {est.state === "charging" ? "full in" : "empty in"}{" "}
-                  <span className="tabular-nums text-neutral-200">
-                    {formatMinutes(est.minutes)}
-                  </span>
-                </>
-              )}
-            </span>
-            <span className="text-neutral-500">
-              {lastSyncAt ? `synced ${relativeAgo(lastSyncAt)}` : ""}
-            </span>
-          </div>
-          {reading.temperatures.length > 0 && (
-            <div className="mt-2 text-[11px] text-neutral-500">
-              MOS {reading.temperatures.map((t) => `${t.toFixed(1)}°C`).join(" · ")}
-              {" · "}
-              cycles{" "}
-              <span className="tabular-nums text-neutral-300">{reading.cycles}</span>
-            </div>
-          )}
-        </>
+        <BmsReadingView reading={reading} cellsMv={cellsMv} lastSyncAt={lastSyncAt} />
       )}
 
       <div className="mt-3 flex items-center justify-between border-t border-neutral-800 pt-2 text-[11px]">
@@ -515,21 +461,3 @@ function Card({ children }: { children: React.ReactNode }) {
     </section>
   );
 }
-
-function Stat({
-  label,
-  value,
-  accent = "text-neutral-200",
-}: {
-  label: string;
-  value: string;
-  accent?: string;
-}) {
-  return (
-    <div className="rounded-lg bg-neutral-950/60 px-2.5 py-2">
-      <div className="text-[9px] uppercase tracking-wider text-neutral-500">{label}</div>
-      <div className={`mt-0.5 text-base font-semibold tabular-nums ${accent}`}>{value}</div>
-    </div>
-  );
-}
-

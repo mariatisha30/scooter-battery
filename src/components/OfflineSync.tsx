@@ -59,6 +59,11 @@ export function OfflineSync() {
             cycles: item.cycles,
             maxTempC: item.maxTempC,
             loggedAtIso: item.loggedAtIso,
+            cellsMv: item.cellsMv,
+            protection: item.protection,
+            balanceMask: item.balanceMask,
+            remainingAh: item.remainingAh,
+            nominalAh: item.nominalAh,
           });
           if (item.id !== undefined) await removeQueued(item.id);
           drained++;

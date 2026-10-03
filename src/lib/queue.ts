@@ -16,6 +16,11 @@ export type QueuedReading = {
   cycles?: number | null;
   maxTempC?: number | null;
   loggedAtIso: string;
+  cellsMv?: number[] | null;
+  protection?: number | null;
+  balanceMask?: number | null;
+  remainingAh?: number | null;
+  nominalAh?: number | null;
 };
 
 function openDb(): Promise<IDBDatabase> {

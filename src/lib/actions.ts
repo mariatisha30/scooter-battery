@@ -167,7 +167,8 @@ export async function logTrip(formData: FormData) {
  *
  * - Skips when the latest existing reading has the same SOC AND was logged
  *   within the last 30 minutes (no point spamming identical rows when the
- *   scooter sits idle).
+ *   scooter sits idle) — unless this reading carries a BMS alarm, or brings
+ *   the first cell voltages since the last saved row.
  * - Does NOT auto-create an estimated trip on a drop — at 5-minute polling
  *   that would generate dozens of micro-trips per ride. Real trip km still
  *   come from manual trip entries.
@@ -180,7 +181,20 @@ export type BmsReadingInput = {
   maxTempC?: number | null;
   /** ISO timestamp of when the reading happened. Defaults to server time. */
   loggedAtIso?: string;
+  /** Per-cell voltages in mV, pack order */
+  cellsMv?: number[] | null;
+  /** JBD protection status bits (0 = no alarm) */
+  protection?: number | null;
+  /** One bit per cell currently balancing */
+  balanceMask?: number | null;
+  remainingAh?: number | null;
+  nominalAh?: number | null;
 };
+
+const intIn = (v: unknown, min: number, max: number): number | null =>
+  typeof v === "number" && Number.isInteger(v) && v >= min && v <= max ? v : null;
+const ahOrNull = (v: unknown): number | null =>
+  typeof v === "number" && Number.isFinite(v) && v >= 0 && v < 10000 ? Math.round(v * 100) / 100 : null;
 
 export async function logBatteryFromBms(
   reading: BmsReadingInput
@@ -192,6 +206,15 @@ export async function logBatteryFromBms(
   if (!Number.isInteger(pct) || pct < 0 || pct > 100) {
     throw new Error("Battery percentage must be 0–100");
   }
+  const cellMv =
+    Array.isArray(reading.cellsMv) &&
+    reading.cellsMv.length > 0 &&
+    reading.cellsMv.length <= 32 &&
+    reading.cellsMv.every((mv) => intIn(mv, 0, 5000) !== null)
+      ? reading.cellsMv
+      : null;
+  const protection = intIn(reading.protection, 0, 0xffff);
+  const balanceMask = intIn(reading.balanceMask, 0, 0xffffffff);
 
   // Use the caller-provided time if present (queued offline reads carry their
   // original moment), otherwise the server's wall clock.
@@ -202,7 +225,7 @@ export async function logBatteryFromBms(
   // overall latest — important when draining a queue of older readings.
   const { data: latest } = await supabase
     .from("battery_logs")
-    .select("battery_pct, logged_at")
+    .select("battery_pct, logged_at, cell_mv")
     .lt("logged_at", newAtIso)
     .order("logged_at", { ascending: false })
     .limit(1)
@@ -217,7 +240,9 @@ export async function logBatteryFromBms(
     // stretches mid-ride still get sampled.
     const isIdle = current !== null && Math.abs(current) <= 0.05;
     const dedupeWindowMs = isIdle ? 3 * 60 * 60 * 1000 : 30 * 60 * 1000;
-    if (latest.battery_pct === pct && ageMs < dedupeWindowMs) {
+    const hasAlarm = protection !== null && protection !== 0;
+    const addsCells = cellMv !== null && latest.cell_mv == null;
+    if (latest.battery_pct === pct && ageMs < dedupeWindowMs && !hasAlarm && !addsCells) {
       return { saved: false, reason: "unchanged" };
     }
   }
@@ -228,6 +253,11 @@ export async function logBatteryFromBms(
     current_a: current,
     cycles: cycles ?? null,
     max_temp_c: maxTempC ?? null,
+    cell_mv: cellMv,
+    protection,
+    balance_mask: balanceMask,
+    remaining_ah: ahOrNull(reading.remainingAh),
+    nominal_ah: ahOrNull(reading.nominalAh),
     logged_at: newAtIso,
     note: "BMS",
   });

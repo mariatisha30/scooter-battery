@@ -91,6 +91,7 @@ The dashboard's **JBD BMS** card handles Bluetooth:
 - **First time:** tap **Connect** → Android shows the device chooser → pick your BMS (it'll be named something like `DB24SA08L24S80ABU`).
 - **After that:** it auto-reconnects on its own — no tapping. If the scooter is out of range or the BMS is busy, the card shows "looking for device…" and retries every 5 s until it's reachable.
 - **Auto-sync:** reads every 5 minutes while the page is open (toggle persists across reloads).
+- **What each sync reads:** basic info (SOC, voltage, current, Ah, cycles, temps, alarm + balancing flags), then every cell's voltage. If the cell read misses, the reading is still saved without cells.
 - **Pull-to-refresh:** swipe down on the dashboard for an immediate read.
 
 Requirements (same as the Xiaoxiang app): **Bluetooth on** and **Location permission granted** (Android requires Location for any BLE scan). Also **close the Xiaoxiang app first** — a JBD BMS allows only one BLE connection at a time.
@@ -104,7 +105,7 @@ Requirements (same as the Xiaoxiang app): **Bluetooth on** and **Location permis
 
 ### Data model
 
-- A **battery log** is a single SOC reading at a moment in time (plus voltage, current, cycles, max temp when it comes from the BMS).
+- A **battery log** is a single SOC reading at a moment in time (plus voltage, current, cycles, max temp, every cell's voltage, BMS alarm + balancing bits, and remaining/full Ah when it comes from the BMS).
 - A **trip** has start %, end %, distance, time, and a passenger flag.
 - They're linked by `battery_logs.trip_id`:
   - Logging a **trip** auto-inserts a paired battery log at the end %.
@@ -120,6 +121,7 @@ Requirements (same as the Xiaoxiang app): **Bluetooth on** and **Location permis
 
 - **Ride suggestions:** the app spots SOC drops in BMS history that no trip covers and offers a one-tap "log this ride — just add km" card. Add the km whenever; the suggestion waits in the data until you do (or dismiss it).
 - **Charge detection:** consecutive rising-SOC readings are auto-grouped into charge sessions shown on `/health`. No manual logging.
+- **Cell balance (LiFePO4):** spread = highest cell minus lowest. LFP voltage is nearly flat mid-charge, so a reading near full (any cell ≥ 3.45 V) is the real test: ≤ 50 mV balanced, ≤ 120 mV slightly uneven, above that uneven. Mid-charge limits are 20 / 50 mV. The dashboard shows a banner only for a BMS alarm or uneven cells at full charge.
 - **Idle dedupe:** when the scooter sits unused (current ≈ 0), readings dedupe over a 3-hour window instead of 30 min, so a parked weekend doesn't bloat the table.
 
 ---
@@ -130,7 +132,7 @@ Requirements (same as the Xiaoxiang app): **Bluetooth on** and **Location permis
 |---|---|
 | `/` | Dashboard — battery ring, range, BMS card, ride suggestions, last charge, history chart, recent readings |
 | `/trips` | Log + browse trips; per-trip and overall km/% calibration |
-| `/health` | Cycle count, capacity-health estimate, temperature highs, pack-voltage trend, charge sessions |
+| `/health` | Cell balance (all cells, spread, the cell to watch), BMS alarms, cycles, temperature highs, balance + pack-voltage trends, charge sessions |
 | `/login` | Password gate |
 | `/log/[id]/edit` · `/trips/[id]/edit` | Edit an existing battery reading or trip (entered via the pencil icon on each row) |
 
@@ -147,7 +149,8 @@ If you're deploying your own instance from this code:
 
 - [`src/middleware.ts`](src/middleware.ts) — password-cookie gate, redirects to `/login`
 - [`src/lib/actions.ts`](src/lib/actions.ts) — all server actions (login/out, BMS log, trip CRUD)
-- [`src/lib/bms.ts`](src/lib/bms.ts) — JBD/Xiaoxiang protocol: command bytes, frame assembler, parser, ETA helpers
+- [`src/lib/bms.ts`](src/lib/bms.ts) — JBD/Xiaoxiang protocol: command bytes (basic info + cell voltages), frame assembler, request/response, parser, ETA helpers
+- [`src/lib/cells.ts`](src/lib/cells.ts) — cell spread, LFP balance limits, BMS alarm labels
 - [`src/lib/calibration.ts`](src/lib/calibration.ts) — range / km-per-% / daily-km math
 - [`src/lib/charging.ts`](src/lib/charging.ts) · [`src/lib/rides.ts`](src/lib/rides.ts) — charge-session + unlogged-ride detection
 - [`src/components/BmsCard.tsx`](src/components/BmsCard.tsx) — Web Bluetooth connect, auto-reconnect, live readings
