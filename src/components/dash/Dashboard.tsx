@@ -47,6 +47,9 @@ type Props = {
 };
 
 const fmtTemp = (t: number | null) => (t == null ? "—" : `${t.toFixed(1)}°`);
+// Big-number sizes are capped so the hanging unit always clears the ticks
+// (3 digits step down: "135 km", "100%").
+const orbSize = (soc: number) => (soc >= 100 ? 70 : 84);
 
 export function Dashboard({ floor, rates, stored, storedCells, lastPeak, health, points, alert }: Props) {
   const { reading, cellsMv, mode, rideStart } = useBms();
@@ -95,12 +98,15 @@ export function Dashboard({ floor, rates, stored, storedCells, lastPeak, health,
       <>
         <Gauge soc={live.soc} floor={floor} ramp="teal">
           <LiquidOrb soc={live.soc} />
-          <div className="pointer-events-none absolute inset-x-0 top-[100px] flex flex-col items-center">
+          <div
+            className="pointer-events-none absolute inset-x-0 flex flex-col items-center"
+            style={{ top: 100 + (72 - 0.82 * orbSize(live.soc)) / 2 }}
+          >
             <BigNumber
               value={String(live.soc)}
               unit="%"
-              size={88}
-              unitSize={30}
+              size={orbSize(live.soc)}
+              unitSize={26}
               className="text-white [text-shadow:0_2px_20px_rgb(2_44_34/0.5)]"
               unitClassName="text-white/75"
             />
@@ -181,11 +187,17 @@ export function Dashboard({ floor, rates, stored, storedCells, lastPeak, health,
       }
     }
 
+    const rangeText = fmtKm(rangeKm);
+    const size = rangeText.length >= 3 ? 84 : 96;
     hero = (
       <Gauge soc={pct} floor={floor} power={power}>
-        <div className="absolute inset-x-0 top-[64px] flex flex-col items-center">
+        <div className="absolute inset-x-0 flex flex-col items-center" style={{ top: 64 + (92 - 0.82 * size) / 2 }}>
           <span className="eyebrow">Range · {rider === "solo" ? "solo" : "+1 rider"}</span>
-          <BigNumber value={fmtKm(rangeKm)} unit="km" size={112} unitSize={26} className="mt-2 text-fg" />
+          {pct === null ? (
+            <span className="num mt-4 mb-2 text-5xl font-semibold leading-none text-dim">–</span>
+          ) : (
+            <BigNumber value={rangeText} unit="km" size={size} unitSize={22} className="mt-2 text-fg" />
+          )}
           <div className="mt-3.5">{pill}</div>
         </div>
       </Gauge>
