@@ -5,7 +5,7 @@ import { Area, AreaChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YA
 
 type Point = { t: number; pct: number };
 
-export function HistoryChart({ data, floor }: { data: Point[]; floor: number }) {
+export function HistoryChart({ data, floor }: { data: Point[]; floor?: number }) {
   const id = useId().replace(/:/g, "");
   return (
     <div className="mt-3 h-40 w-full">
@@ -58,7 +58,7 @@ export function HistoryChart({ data, floor }: { data: Point[]; floor: number }) 
             }
             formatter={(value) => [`${value}%`, "Battery"]}
           />
-          <ReferenceLine y={floor} stroke="#ff5e5e" strokeOpacity={0.6} strokeDasharray="4 4" />
+          {floor != null && <ReferenceLine y={floor} stroke="#ff5e5e" strokeOpacity={0.6} strokeDasharray="4 4" />}
           <Area
             type="monotone"
             dataKey="pct"

@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Scooter Battery",
-    short_name: "Scooter",
+    name: "Arif's Hammer",
+    short_name: "Hammer",
     description: "Live battery, range and cell health for your e-scooter",
     start_url: "/",
     display: "standalone",

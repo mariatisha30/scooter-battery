@@ -11,13 +11,13 @@ const barlow = Barlow_Condensed({
 });
 
 export const metadata: Metadata = {
-  title: "Scooter Battery",
+  title: "Arif's Hammer",
   description: "Live battery, range and cell health for your e-scooter",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Scooter",
+    title: "Arif's Hammer",
   },
 };
 

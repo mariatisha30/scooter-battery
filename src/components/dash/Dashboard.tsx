@@ -1,58 +1,58 @@
 "use client";
 
-import {
-  IconAlertTriangle,
-  IconBattery1,
-  IconBatteryExclamation,
-  IconBolt,
-  IconClock,
-  IconParking,
-  IconScooterElectric,
-} from "@tabler/icons-react";
+import { IconAlertTriangle, IconBattery3, IconBolt, IconPlugConnected, IconRoad, IconScooterElectric } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { formatMinutes, timeEstimateMinutes } from "@/lib/bms";
-import { protectionLabels } from "@/lib/cells";
-import { relativeAgo } from "@/lib/datetime";
+import { protectionLabels, type BalanceLevel } from "@/lib/cells";
+import { formatDuration } from "@/lib/datetime";
 import { useBms } from "../bms/BmsProvider";
 import { HistoryCard } from "../HistoryCard";
 import { PullToRefresh } from "../PullToRefresh";
 import { BigNumber, Gauge, LiquidOrb } from "./Gauge";
-import { CellsCard, Pill, RangeToggle, StatsRow, Telemetry, type Rider } from "./parts";
+import { MiniBattery, RangeToggle, StatsList, type Rider, type StatRow } from "./parts";
 
-// BMS "DB24SA08L24S80A": 24 cells, 80 A continuous. The riding arc shows
-// the current draw against that limit.
-const MAX_CURRENT_A = 80;
 const RIDER_KEY = "scooter-rider";
 
 export type StoredReading = {
   pct: number;
   at: string;
-  voltage: number | null;
-  remainingAh: number | null;
-  tempC: number | null;
   cycles: number | null;
 };
 
 type Props = {
-  floor: number;
   rates: { solo: number; pax: number };
   stored: StoredReading | null;
-  storedCells: { cells: number[]; balanceMask: number | null } | null;
   /** Top of the current discharge run (the last charge's end). */
   lastPeak: { pct: number; at: string } | null;
-  health: { cycles: number | null; alarms: number | null; peakTemp: number | null };
+  /** When the last charge ended, plus its start→end if a session was seen. */
+  lastCharge: { endAt: string; endPct: number; startPct: number | null; durationMin: number | null } | null;
+  health: { cycles: number | null; alarms: number | null; peakTemp: number | null; balance: BalanceLevel | null };
   points: { t: number; pct: number }[];
   /** Server-rendered banner for stored alarms / uneven cells. */
   alert?: React.ReactNode;
 };
 
-const fmtTemp = (t: number | null) => (t == null ? "—" : `${t.toFixed(1)}°`);
-// Big-number sizes are capped so the hanging unit always clears the ticks
-// (3 digits step down: "135 km", "100%").
+// Big numbers step down at three digits so they stay inside the ticks.
 const orbSize = (soc: number) => (soc >= 100 ? 70 : 84);
+const rangeSize = (text: string) => (text.length >= 3 ? 84 : 96);
 
-export function Dashboard({ floor, rates, stored, storedCells, lastPeak, health, points, alert }: Props) {
-  const { reading, cellsMv, mode, rideStart } = useBms();
+function ago(iso: string, now: number): [string, string] {
+  const min = Math.max(0, Math.round((now - new Date(iso).getTime()) / 60000));
+  if (min < 60) return [String(min), "min ago"];
+  const h = Math.round(min / 60);
+  if (h < 24) return [String(h), h === 1 ? "hour ago" : "hours ago"];
+  const d = Math.round(h / 24);
+  return [String(d), d === 1 ? "day ago" : "days ago"];
+}
+
+const BATTERY_STATUS: Record<BalanceLevel, [string, string, string]> = {
+  good: ["Healthy", "Cells balanced", "text-acc"],
+  watch: ["Check", "Cells drifting apart", "text-amber"],
+  uneven: ["Uneven", "Cells uneven", "text-red"],
+};
+
+export function Dashboard({ rates, stored, lastPeak, lastCharge, health, points, alert }: Props) {
+  const { reading, mode } = useBms();
   const [rider, setRider] = useState<Rider>("solo");
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -75,136 +75,124 @@ export function Dashboard({ floor, rates, stored, storedCells, lastPeak, health,
 
   // A fresh live reading wins; otherwise show the last saved one.
   const live = mode !== null ? reading : null;
-  const state = mode ?? "parked";
+  const charging = mode === "charging" && live !== null;
   const pct = live?.soc ?? stored?.pct ?? null;
-  const kmLeft = (rate: number) => (pct === null ? null : Math.max(0, pct - floor) * rate);
+  // Range uses the whole battery, 100% down to 0.
+  const kmLeft = (rate: number) => (pct === null ? null : pct * rate);
   const fmtKm = (v: number | null) => (v === null ? "—" : String(Math.round(v)));
   const soloKm = kmLeft(rates.solo);
   const paxKm = kmLeft(rates.pax);
-  const rangeKm = rider === "solo" ? soloKm : paxKm;
-  const tempC = live
-    ? live.temperatures.length
-      ? Math.max(...live.temperatures)
-      : null
-    : stored?.tempC ?? null;
+  const rangeText = fmtKm(rider === "solo" ? soloKm : paxKm);
 
   let hero: React.ReactNode;
-  let context: React.ReactNode = null;
-  let tele: [string, string, boolean?][] | null = null;
-
-  if (state === "charging" && live) {
+  if (charging && live) {
     const est = timeEstimateMinutes(live);
     hero = (
-      <>
-        <Gauge soc={live.soc} floor={floor} ramp="teal">
-          <LiquidOrb soc={live.soc} />
-          <div
-            className="pointer-events-none absolute inset-x-0 flex flex-col items-center"
-            style={{ top: 100 + (72 - 0.82 * orbSize(live.soc)) / 2 }}
-          >
-            <BigNumber
-              value={String(live.soc)}
-              unit="%"
-              size={orbSize(live.soc)}
-              unitSize={26}
-              className="text-white [text-shadow:0_2px_20px_rgb(2_44_34/0.5)]"
-              unitClassName="text-white/75"
-            />
-            {est.minutes != null && (
-              <span className="mt-2.5 text-xs font-medium text-white/85 [text-shadow:0_1px_8px_rgb(0_0_0/0.4)]">
-                Full in {formatMinutes(est.minutes)}
-              </span>
-            )}
-          </div>
-        </Gauge>
-        <div className="flex justify-center">
-          <Pill tone="acc" icon={IconBolt}>
-            Charging · {live.current.toFixed(2)} A
-          </Pill>
+      <Gauge soc={live.soc} ramp="teal">
+        <LiquidOrb soc={live.soc} />
+        <div
+          className="pointer-events-none absolute inset-x-0 flex flex-col items-center"
+          style={{ top: 100 + (72 - 0.82 * orbSize(live.soc)) / 2 }}
+        >
+          <BigNumber
+            value={String(live.soc)}
+            unit="%"
+            size={orbSize(live.soc)}
+            unitSize={26}
+            className="text-white [text-shadow:0_2px_20px_rgb(2_44_34/0.5)]"
+            unitClassName="text-white/75"
+          />
+          {est.minutes != null && (
+            <span className="mt-2.5 text-xs font-medium text-white/85 [text-shadow:0_1px_8px_rgb(0_0_0/0.4)]">
+              Full in {formatMinutes(est.minutes)}
+            </span>
+          )}
         </div>
-      </>
+      </Gauge>
     );
-    tele = [
-      ["Volt", live.voltage.toFixed(2)],
-      ["Amp", `+${live.current.toFixed(2)}`, true],
-      ["Watt", String(Math.round(live.voltage * live.current))],
-      ["Temp", fmtTemp(tempC)],
-    ];
   } else {
-    let pill: React.ReactNode;
-    let power: number | null = null;
-    if (state === "riding" && live) {
-      const kw = (Math.abs(live.current) * live.voltage) / 1000;
-      power = Math.abs(live.current) / MAX_CURRENT_A;
-      pill = (
-        <Pill tone="acc" icon={IconScooterElectric}>
-          Riding · {kw.toFixed(1)} kW
-        </Pill>
-      );
-      if (rideStart) {
-        const used = Math.max(0, rideStart.soc - live.soc);
-        const mins = Math.max(1, Math.round((now - rideStart.at) / 60000));
-        context = (
-          <>
-            This ride: <b className="font-semibold text-fg">{used}% used</b> · {mins} min
-          </>
-        );
-      }
-      tele = [
-        ["Volt", live.voltage.toFixed(2)],
-        ["Amp", `−${Math.abs(live.current).toFixed(1)}`, true],
-        ["kW", kw.toFixed(2)],
-        ["Temp", fmtTemp(tempC)],
-      ];
-    } else {
-      if (pct === null) pill = <Pill tone="idle" icon={IconClock}>No reading yet</Pill>;
-      else if (pct <= floor) pill = <Pill tone="red" icon={IconBatteryExclamation}>{pct}% · reserve</Pill>;
-      else if (pct <= floor + 15) pill = <Pill tone="amber" icon={IconBattery1}>{pct}% · charge soon</Pill>;
-      else if (live) pill = <Pill tone="idle" icon={IconParking}>{pct}% · parked</Pill>;
-      else pill = <Pill tone="idle" icon={IconClock}>{pct}% · {stored ? relativeAgo(stored.at) : ""}</Pill>;
-
-      if (lastPeak && pct !== null) {
-        const used = lastPeak.pct - pct;
-        if (used > 0) {
-          context = (
-            <>
-              {lastPeak.pct >= 99 ? "Since full charge" : `Since last charge (${lastPeak.pct}%)`}:{" "}
-              <b className="font-semibold text-fg">{used}% used</b> · about {Math.round(used * rates.solo)} km ridden
-            </>
-          );
-        } else if (pct >= 99) {
-          context = <>Fully charged</>;
-        }
-      }
-      const volt = live?.voltage ?? stored?.voltage ?? null;
-      const ah = live?.remainingAh ?? stored?.remainingAh ?? null;
-      if (volt != null) {
-        tele = [
-          ["Volt", Number(volt).toFixed(2)],
-          ...(ah != null ? ([["Ah left", Number(ah).toFixed(1)]] as [string, string][]) : []),
-          ["Temp", fmtTemp(tempC)],
-        ];
-      }
-    }
-
-    const rangeText = fmtKm(rangeKm);
-    const size = rangeText.length >= 3 ? 84 : 96;
+    const size = rangeSize(rangeText);
+    // Eyebrow + number + battery, centred just below the dial's middle.
+    const groupH = 15 + 8 + 0.82 * size + 16 + 22;
     hero = (
-      <Gauge soc={pct} floor={floor} power={power}>
-        <div className="absolute inset-x-0 flex flex-col items-center" style={{ top: 64 + (92 - 0.82 * size) / 2 }}>
+      <Gauge soc={pct}>
+        <div className="absolute inset-x-0 flex flex-col items-center" style={{ top: 140 - groupH / 2 }}>
           <span className="eyebrow">Range · {rider === "solo" ? "solo" : "+1 rider"}</span>
           {pct === null ? (
-            <span className="num mt-4 mb-2 text-5xl font-semibold leading-none text-dim">–</span>
+            <span className="num mb-2 mt-4 text-5xl font-semibold leading-none text-dim">–</span>
           ) : (
-            <BigNumber value={rangeText} unit="km" size={size} unitSize={22} className="mt-2 text-fg" />
+            <BigNumber value={rangeText} unit="km" size={size} unitSize={22} inlineUnit className="mt-2 text-fg" />
           )}
-          <div className="mt-3.5">{pill}</div>
+          <div className="mt-4">
+            <MiniBattery pct={pct} />
+          </div>
         </div>
       </Gauge>
     );
   }
 
-  const cells = live && cellsMv ? { cells: cellsMv, balanceMask: live.balanceMask } : storedCells;
+  // Stats list
+  const rows: StatRow[] = [];
+  if (charging && live) {
+    const est = timeEstimateMinutes(live);
+    rows.push({
+      icon: IconBolt,
+      title: "Charging at",
+      sub: `${live.current.toFixed(2)} A${est.minutes != null ? ` · full in ${formatMinutes(est.minutes)}` : ""}`,
+      value: String(Math.round(live.voltage * live.current)),
+      unit: "W",
+    });
+  } else {
+    const used = lastPeak && pct !== null ? Math.max(0, lastPeak.pct - pct) : null;
+    rows.push({
+      icon: IconScooterElectric,
+      title: "Ridden since last charge",
+      sub: used === null ? "Shows after your next reading" : used === 0 ? "Not ridden yet" : `${used}% used`,
+      value: used === null ? "—" : `~${Math.round(used * rates.solo)}`,
+      unit: used === null ? "" : "km",
+    });
+  }
+  if (lastCharge) {
+    const [n, unit] = ago(lastCharge.endAt, now);
+    rows.push({
+      icon: IconPlugConnected,
+      title: "Last charged",
+      sub:
+        lastCharge.startPct != null && lastCharge.durationMin != null
+          ? `${lastCharge.startPct}% → ${lastCharge.endPct}% · ${formatDuration(lastCharge.durationMin)}`
+          : `Charged to ${lastCharge.endPct}%`,
+      value: n,
+      unit,
+    });
+  } else {
+    rows.push({ icon: IconPlugConnected, title: "Last charged", sub: "No charge seen yet", value: "—", unit: "" });
+  }
+  const cycles = live?.cycles ?? health.cycles;
+  const fullKm = Math.round(100 * rates.solo);
+  rows.push({
+    icon: IconRoad,
+    title: "Lifetime",
+    sub: cycles != null ? `${cycles} cycles × ${fullKm} km` : "Shows after your next reading",
+    value: cycles != null ? `~${(cycles * fullKm).toLocaleString("en-US")}` : "—",
+    unit: cycles != null ? "km" : "",
+  });
+  const [bLabel, bSub, bTone] =
+    health.alarms
+      ? (["Alarm", "BMS alarm recorded", "text-red"] as const)
+      : health.balance
+      ? BATTERY_STATUS[health.balance]
+      : (["—", "Cells on your next sync", "text-muted"] as const);
+  rows.push({
+    icon: IconBattery3,
+    title: "Battery",
+    sub: `${bSub}${health.peakTemp != null ? ` · ${health.peakTemp.toFixed(1)}° peak` : ""}`,
+    value: bLabel,
+    unit: "",
+    tone: bTone,
+    href: "/health",
+    iconTone: "text-acc",
+  });
+
   const liveAlarms = live ? protectionLabels(live.protection) : [];
   const switchedOff = live
     ? [!live.chargingEnabled && "charging", !live.dischargingEnabled && "output"].filter(Boolean)
@@ -212,33 +200,24 @@ export function Dashboard({ floor, rates, stored, storedCells, lastPeak, health,
 
   return (
     <PullToRefresh>
-      <div className="pt-1">{hero}</div>
+      <div className="pt-2">{hero}</div>
       <div className="mt-1">
         <RangeToggle rider={rider} onChange={chooseRider} solo={fmtKm(soloKm)} pax={fmtKm(paxKm)} />
       </div>
-      {context && <p className="mt-2.5 text-center text-xs text-muted">{context}</p>}
 
       {liveAlarms.length > 0 ? (
         <Banner tone="red">BMS alarm: {liveAlarms.join(" · ")}</Banner>
       ) : switchedOff.length > 0 ? (
         <Banner tone="amber">The BMS has switched {switchedOff.join(" and ")} off.</Banner>
       ) : (
-        alert && <div className="mt-4">{alert}</div>
+        alert && <div className="mt-2.5">{alert}</div>
       )}
 
-      {tele && (
-        <div className="mt-4">
-          <Telemetry items={tele} />
-        </div>
-      )}
       <div className="mt-2.5">
-        <CellsCard cells={cells?.cells ?? null} balanceMask={cells?.balanceMask} underLoad={state === "riding"} />
+        <HistoryCard points={points} />
       </div>
       <div className="mt-2.5">
-        <StatsRow cycles={live?.cycles ?? health.cycles} alarms={health.alarms} peakTemp={health.peakTemp} />
-      </div>
-      <div className="mt-2.5">
-        <HistoryCard points={points} floor={floor} />
+        <StatsList rows={rows} />
       </div>
     </PullToRefresh>
   );
@@ -248,7 +227,7 @@ function Banner({ tone, children }: { tone: "red" | "amber"; children: React.Rea
   return (
     <div
       role="alert"
-      className={`mt-4 flex items-start gap-2 rounded-2xl px-4 py-3 text-xs ${
+      className={`mt-2.5 flex items-start gap-2 rounded-2xl px-4 py-3 text-xs ${
         tone === "red" ? "bg-red/12 text-red" : "bg-amber/12 text-amber"
       }`}
     >

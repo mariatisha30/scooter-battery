@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { IconUser, IconUsers } from "@tabler/icons-react";
+import { IconChevronRight, IconUser, IconUsers } from "@tabler/icons-react";
 import {
   BALANCE_CHIP_CLASS,
   BALANCE_LABEL,
@@ -15,23 +15,6 @@ export type IconType = React.ComponentType<{
   className?: string;
   "aria-hidden"?: boolean;
 }>;
-
-export type Tone = "acc" | "idle" | "amber" | "red";
-const TONES: Record<Tone, string> = {
-  acc: "bg-acc/15 text-acc",
-  idle: "bg-white/[0.07] text-fg",
-  amber: "bg-amber/15 text-amber",
-  red: "bg-red/15 text-red",
-};
-
-export function Pill({ tone, icon: I, children }: { tone: Tone; icon: IconType; children: React.ReactNode }) {
-  return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full py-1.5 pl-[9px] pr-3 text-xs font-semibold ${TONES[tone]}`}>
-      <I size={15} stroke={2} aria-hidden />
-      {children}
-    </span>
-  );
-}
 
 export type Rider = "solo" | "pax";
 
@@ -142,32 +125,72 @@ export function CellsCard({
   );
 }
 
-export function StatsRow({
-  cycles,
-  alarms,
-  peakTemp,
-}: {
-  cycles: number | null;
-  /** null = not tracked yet */
-  alarms: number | null;
-  peakTemp: number | null;
-}) {
-  const stats: [string, string, string][] = [
-    [cycles != null ? String(cycles) : "—", "cycles", "text-fg"],
-    [alarms != null ? String(alarms) : "—", "alarms", alarms ? "text-red" : alarms === 0 ? "text-acc" : "text-fg"],
-    [peakTemp != null ? `${peakTemp.toFixed(1)}°` : "—", "peak temp", "text-fg"],
-  ];
+/** Charge left as a small battery: lime normally, amber under 25%, red under 10%. */
+export function MiniBattery({ pct }: { pct: number | null }) {
+  const fill =
+    pct === null
+      ? "bg-white/20"
+      : pct < 10
+      ? "bg-red"
+      : pct < 25
+      ? "bg-amber"
+      : "bg-linear-to-r from-acc2 to-acc";
   return (
-    <Link
-      href="/health"
-      className="glass grid grid-cols-3 rounded-[22px] px-1 py-3.5 text-center transition-colors hover:bg-white/[0.06]"
-    >
-      {stats.map(([v, l, tone]) => (
-        <div key={l}>
-          <b className={`num block text-[30px] font-semibold leading-[1.05] ${tone}`}>{v}</b>
-          <span className="text-[11px] text-dim">{l}</span>
-        </div>
-      ))}
-    </Link>
+    <div className="flex items-center gap-2" aria-label={pct === null ? "No reading yet" : `${pct}% charge left`}>
+      <span className="relative h-[18px] w-[46px] rounded-[6px] p-[2px] shadow-[inset_0_0_0_1.5px_rgb(255_255_255/0.28)]">
+        <span className={`block h-full rounded-[3.5px] ${fill}`} style={{ width: `${pct ?? 0}%` }} />
+        <span className="absolute -right-[4px] top-[5px] h-2 w-[3px] rounded-r-[2px] bg-white/28" />
+      </span>
+      <b className="num text-[22px] font-semibold leading-none">{pct === null ? "—" : `${pct}%`}</b>
+    </div>
+  );
+}
+
+export type StatRow = {
+  icon: IconType;
+  title: string;
+  sub: string;
+  value: string;
+  unit: string;
+  tone?: string;
+  iconTone?: string;
+  href?: string;
+};
+
+/** Scooter stats as one glass list: label + detail on the left, value right. */
+export function StatsList({ rows }: { rows: StatRow[] }) {
+  return (
+    <section className="glass overflow-hidden rounded-[22px] py-1">
+      {rows.map((r, i) => {
+        const body = (
+          <>
+            <span
+              className={`grid h-[34px] w-[34px] shrink-0 place-items-center rounded-[11px] bg-white/[0.05] ${r.iconTone ?? "text-muted"}`}
+            >
+              <r.icon size={17} stroke={1.75} aria-hidden />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[13px]">{r.title}</span>
+              <span className="block truncate text-[11px] text-dim">{r.sub}</span>
+            </span>
+            <span className={`num flex shrink-0 items-baseline gap-1 text-[22px] font-semibold leading-none ${r.tone ?? "text-fg"}`}>
+              {r.value}
+              {r.unit && <small className="text-sm font-semibold text-muted">{r.unit}</small>}
+              {r.href && <IconChevronRight size={14} stroke={1.75} className="self-center text-dim" aria-hidden />}
+            </span>
+          </>
+        );
+        const cls = `flex items-center gap-3 px-4 py-3 ${i ? "shadow-[inset_0_1px_0_var(--color-line)]" : ""}`;
+        return r.href ? (
+          <Link key={r.title} href={r.href} className={`${cls} transition-colors hover:bg-white/[0.04]`}>
+            {body}
+          </Link>
+        ) : (
+          <div key={r.title} className={cls}>
+            {body}
+          </div>
+        );
+      })}
+    </section>
   );
 }

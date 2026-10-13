@@ -29,7 +29,7 @@ export type BmsStatus =
   | "syncing"
   | "error";
 
-export type LiveMode = "charging" | "riding" | "parked";
+export type LiveMode = "charging" | "parked";
 
 type BmsContext = {
   status: BmsStatus;
@@ -43,8 +43,6 @@ type BmsContext = {
   setAutoSync: (on: boolean) => void;
   /** What the scooter is doing right now; null without a fresh live reading. */
   mode: LiveMode | null;
-  /** Where the current ride started (riding mode only). */
-  rideStart: { soc: number; at: number } | null;
   connect: () => Promise<void>;
   retry: () => void;
   sync: () => Promise<void>;
@@ -59,8 +57,8 @@ export function useBms(): BmsContext {
 }
 
 const AUTOSYNC_STORAGE_KEY = "scooter-bms-autosync";
-// Parked, the pack barely changes: read every 5 min. While charging or
-// riding, read every 15 s so the dial and the numbers feel live.
+// Parked, the pack barely changes: read every 5 min. While charging, read
+// every 15 s so the dial and the numbers feel live.
 const IDLE_POLL_MS = 5 * 60 * 1000;
 const LIVE_POLL_MS = 15 * 1000;
 // Each read attempt waits up to this long. Worst case per sync =
@@ -84,11 +82,9 @@ const SAVE_EVERY_MS = 5 * 60 * 1000;
 const LIVE_MAX_AGE_MS = 10 * 60 * 1000;
 // Current thresholds for the live mode (A). Positive = into the pack.
 const CHARGING_MIN_A = 0.3;
-const RIDING_MIN_A = 1.0;
 
 function modeOf(r: BmsReading): LiveMode {
   if (r.current > CHARGING_MIN_A) return "charging";
-  if (r.current < -RIDING_MIN_A) return "riding";
   return "parked";
 }
 
@@ -100,7 +96,6 @@ export function BmsProvider({ children }: { children: React.ReactNode }) {
   const [lastSyncAt, setLastSyncAt] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [deviceName, setDeviceName] = useState<string | null>(null);
-  const [rideStart, setRideStart] = useState<{ soc: number; at: number } | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const [autoSync, setAutoSyncState] = useState(true);
   // Read the saved toggle after mount so server and client render the same.
@@ -332,10 +327,10 @@ export function BmsProvider({ children }: { children: React.ReactNode }) {
     (status === "connected" || status === "syncing");
   const mode: LiveMode | null = liveFresh && reading ? modeOf(reading) : null;
 
-  // Auto-sync: fast while charging/riding, slow when parked.
+  // Auto-sync: fast while charging, slow when parked.
   useEffect(() => {
     if (!autoSync || !(status === "connected" || status === "syncing")) return;
-    const interval = mode === "charging" || mode === "riding" ? LIVE_POLL_MS : IDLE_POLL_MS;
+    const interval = mode === "charging" ? LIVE_POLL_MS : IDLE_POLL_MS;
     const id = setInterval(() => void readAndSave(), interval);
     return () => clearInterval(id);
   }, [status, autoSync, mode, readAndSave]);
@@ -345,15 +340,6 @@ export function BmsProvider({ children }: { children: React.ReactNode }) {
     const id = setInterval(() => setNow(Date.now()), 60_000);
     return () => clearInterval(id);
   }, []);
-
-  // Track where the current ride started.
-  useEffect(() => {
-    if (mode === "riding" && reading) {
-      setRideStart((s) => s ?? { soc: reading.soc, at: lastSyncAt ?? Date.now() });
-    } else if (mode !== null && mode !== "riding") {
-      setRideStart(null);
-    }
-  }, [mode, reading, lastSyncAt]);
 
   // Theme the whole app by the live state (accent, glow).
   useEffect(() => {
@@ -415,12 +401,11 @@ export function BmsProvider({ children }: { children: React.ReactNode }) {
       autoSync,
       setAutoSync,
       mode,
-      rideStart,
       connect,
       retry,
       sync,
     }),
-    [status, reading, cellsMv, lastSyncAt, error, deviceName, autoSync, setAutoSync, mode, rideStart, connect, retry, sync]
+    [status, reading, cellsMv, lastSyncAt, error, deviceName, autoSync, setAutoSync, mode, connect, retry, sync]
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

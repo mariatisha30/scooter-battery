@@ -90,7 +90,7 @@ The BMS link lives in the header pill and stays connected while you move between
 
 - **First time:** tap **Connect BMS** in the header → Android shows the device chooser → pick your BMS (named something like `DB24SA08L24S80ABU`).
 - **After that:** the app reconnects on its own whenever Chrome still remembers the BMS. If Chrome has forgotten it (some Android Chrome versions drop the permission when Chrome restarts), the pill turns back into **Connect BMS** — one tap. If that happens every time, enable `chrome://flags/#enable-web-bluetooth-new-permissions-backend` on the phone.
-- **Auto-sync:** every 5 min when parked, every 15 s while charging or riding (toggle on the Health page). Readings are saved when the % moves, an alarm appears, or 5 min pass.
+- **Auto-sync:** every 5 min when parked, every 15 s while charging (toggle on the Battery page). Readings are saved when the % moves, an alarm appears, or 5 min pass.
 - **Pull-to-refresh** on the dashboard (or tap the pill) for an immediate read.
 - **What each sync reads:** basic info (SOC, voltage, current, Ah, cycles, temps, alarm + balancing flags), then every cell's voltage. If the cell read misses, the reading is still saved without cells.
 
@@ -98,12 +98,11 @@ Requirements (same as the Xiaoxiang app): **Bluetooth on** and **Location permis
 
 ### Live states
 
-The whole app follows what the scooter is doing (current from the BMS):
+Two states, read from the BMS current:
 
 | State | When | Look |
 |---|---|---|
-| Parked | \|current\| ≤ 1 A, or no live reading | Lime. Gauge shows range; "since last charge" line |
-| Riding | drawing more than 1 A | Amber. Inner arc = power draw vs the BMS's 80 A limit; "this ride" line |
+| Parked | anything but charging, or no live reading | Lime. Gauge shows range (whole battery, 100% → 0) with a mini battery for charge left |
 | Charging | more than 0.3 A going in | Teal. The dial fills with liquid; "full in" countdown |
 
 > [!NOTE]
@@ -141,9 +140,9 @@ The whole app follows what the scooter is doing (current from the BMS):
 
 | Route | What |
 |---|---|
-| `/` | Dashboard — live gauge (or liquid dial while charging), range solo / +1, live numbers, cells, health stats, history |
+| `/` | Dashboard — gauge with range + charge left (liquid dial while charging), solo / +1 toggle, history, stats list (ridden since charge, last charged, lifetime, battery status) |
 | `/trips` | Log + browse trips, unlogged-ride suggestions, km/% calibration |
-| `/health` | Cell balance (all cells, spread, the cell to watch), BMS alarms, cycles, temperatures, balance + voltage trends, charges, readings (edit/delete), BMS connection + auto-sync, log out |
+| `/health` (Battery tab) | Live volt / Ah / temp, cell balance (all cells, spread, the cell to watch), BMS alarms, cycles, temperatures, balance + voltage trends, charges, readings (edit/delete), BMS connection + auto-sync, log out |
 | `/login` | Password gate |
 | `/log/[id]/edit` · `/trips/[id]/edit` | Edit an existing battery reading or trip (entered via the pencil icon on each row) |
 
@@ -164,7 +163,7 @@ If you're deploying your own instance from this code:
 - [`src/lib/cells.ts`](src/lib/cells.ts) — cell spread, LFP balance limits, BMS alarm labels
 - [`src/lib/calibration.ts`](src/lib/calibration.ts) — range / km-per-% / daily-km math
 - [`src/lib/charging.ts`](src/lib/charging.ts) · [`src/lib/rides.ts`](src/lib/rides.ts) — charge-session + unlogged-ride detection
-- [`src/components/bms/BmsProvider.tsx`](src/components/bms/BmsProvider.tsx) — Web Bluetooth connect, auto-reconnect, polling, live state (parked / riding / charging) that themes the app
+- [`src/components/bms/BmsProvider.tsx`](src/components/bms/BmsProvider.tsx) — Web Bluetooth connect, auto-reconnect, polling, live state (parked / charging) that themes the app
 - [`src/components/dash/`](src/components/dash) — dashboard: gauge, liquid dial, live numbers, cells card
 - [`src/components/OfflineSync.tsx`](src/components/OfflineSync.tsx) · [`src/lib/queue.ts`](src/lib/queue.ts) — offline queue + drain
 - [`public/sw.js`](public/sw.js) — service worker (app-shell cache)

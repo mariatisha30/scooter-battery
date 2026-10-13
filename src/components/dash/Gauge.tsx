@@ -1,6 +1,6 @@
-// Dashboard dial: 53 ticks over a 260° sweep, lit up to the SOC. Optional
-// inner arc shows live power draw while riding; the charging variant puts a
-// liquid orb inside the same dial so plugging in doesn't move the layout.
+// Dashboard dial: 53 ticks over a 260° sweep, lit up to the charge. The
+// charging variant puts a liquid orb inside the same dial so plugging in
+// doesn't move the layout.
 
 type Ramp = "lime" | "teal";
 
@@ -20,26 +20,8 @@ function pt(r: number, deg: number): [number, number] {
 function mix(a: number[], b: number[], t: number) {
   return `rgb(${a.map((x, i) => Math.round(x + (b[i] - x) * t)).join(" ")})`;
 }
-function arc(from: number, to: number, r: number) {
-  const [ax, ay] = pt(r, from);
-  const [bx, by] = pt(r, to);
-  return `M ${ax} ${ay} A ${r} ${r} 0 ${to - from > 180 ? 1 : 0} 1 ${bx} ${by}`;
-}
 
-export function Gauge({
-  soc,
-  floor,
-  ramp = "lime",
-  power,
-  children,
-}: {
-  soc: number | null;
-  floor: number;
-  ramp?: Ramp;
-  /** 0–1 share of the BMS current limit, drawn as the inner arc */
-  power?: number | null;
-  children?: React.ReactNode;
-}) {
+export function Gauge({ soc, ramp = "lime", children }: { soc: number | null; ramp?: Ramp; children?: React.ReactNode }) {
   const [from, to] = RAMPS[ramp];
   return (
     <div className="relative mx-auto h-[252px] w-[300px]">
@@ -51,14 +33,6 @@ export function Gauge({
           const [x1, y1] = pt(major ? 106 : 113, deg);
           const [x2, y2] = pt(128, deg);
           const lit = soc !== null && pct <= soc;
-          const stroke =
-            pct < floor
-              ? lit
-                ? "#ff5e5e"
-                : "rgb(255 94 94 / 0.25)"
-              : lit
-              ? mix(from, to, (pct - floor) / (100 - floor))
-              : "rgb(255 255 255 / 0.07)";
           return (
             <line
               key={i}
@@ -66,24 +40,12 @@ export function Gauge({
               y1={y1}
               x2={x2}
               y2={y2}
-              stroke={stroke}
+              stroke={lit ? mix(from, to, pct / 100) : "rgb(255 255 255 / 0.07)"}
               strokeWidth={major ? 3.2 : 2.4}
               strokeLinecap="round"
             />
           );
         })}
-        {power != null && power > 0 && (
-          <>
-            <path d={arc(START, START + SWEEP, 96)} fill="none" stroke="rgb(255 255 255 / 0.06)" strokeWidth={5} strokeLinecap="round" />
-            <path
-              d={arc(START, START + SWEEP * Math.min(1, power), 96)}
-              fill="none"
-              style={{ stroke: "var(--acc)" }}
-              strokeWidth={5}
-              strokeLinecap="round"
-            />
-          </>
-        )}
       </svg>
       {children}
       <span className="num absolute left-[72px] top-[226px] text-[13px] font-semibold text-dim" aria-hidden>
@@ -97,8 +59,9 @@ export function Gauge({
 }
 
 /**
- * A big condensed number whose unit hangs off to the right in a zero-width
- * box — so the DIGITS are what's centred, not digits + unit.
+ * A big condensed number. By default the unit hangs off to the right in a
+ * zero-width box so the DIGITS are centred; `inlineUnit` centres number and
+ * unit together.
  */
 export function BigNumber({
   value,
@@ -107,6 +70,7 @@ export function BigNumber({
   unitSize,
   className = "",
   unitClassName = "text-muted",
+  inlineUnit = false,
 }: {
   value: string;
   unit: string;
@@ -114,11 +78,12 @@ export function BigNumber({
   unitSize: number;
   className?: string;
   unitClassName?: string;
+  inlineUnit?: boolean;
 }) {
   return (
     <span className={`num font-bold tracking-[-0.02em] ${className}`} style={{ fontSize: size, lineHeight: 0.82 }}>
       {value}
-      <span className="inline-block w-0 whitespace-nowrap">
+      <span className={inlineUnit ? "" : "inline-block w-0 whitespace-nowrap"}>
         <span className={`ml-[3px] font-semibold tracking-normal ${unitClassName}`} style={{ fontSize: unitSize }}>
           {unit}
         </span>

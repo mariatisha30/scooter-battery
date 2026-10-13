@@ -43,8 +43,8 @@
 }
 
 /* The accent follows the scooter's live state: BmsProvider sets
-   <html data-state="parked|riding|charging">. Parked = lime, riding =
-   amber, charging = teal. --hi is the "highest cell" colour. */
+   <html data-state="parked|charging">. Parked = lime, charging = teal.
+   --hi is the "highest cell" colour. */
 @theme inline {
   --color-acc: var(--acc);
   --color-acc2: var(--acc2);
@@ -60,14 +60,6 @@
   --glow1: rgb(160 232 80 / 0.13);
   --glow2: rgb(52 211 153 / 0.07);
   color-scheme: dark;
-}
-:root[data-state="riding"] {
-  --acc: #ffb648;
-  --acc2: #f59e0b;
-  --acc-ink: #2a1600;
-  --hi: #f1f5f2;
-  --glow1: rgb(255 170 60 / 0.11);
-  --glow2: rgb(52 211 153 / 0.04);
 }
 :root[data-state="charging"] {
   --acc: #5eead4;

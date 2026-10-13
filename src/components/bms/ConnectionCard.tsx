@@ -64,7 +64,7 @@ export function ConnectionCard() {
       <div className="mt-4 flex items-center justify-between gap-4 border-t border-line pt-3.5">
         <div>
           <div className="text-sm">Auto-sync</div>
-          <div className="text-xs text-muted">Every 5 min parked, every 15 s charging or riding</div>
+          <div className="text-xs text-muted">Every 5 min parked, every 15 s while charging</div>
         </div>
         <button
           type="button"

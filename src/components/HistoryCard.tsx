@@ -20,7 +20,7 @@ const RANGES: { key: RangeKey; label: string; title: string; days: number | null
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-export function HistoryCard({ points, floor }: { points: Point[]; floor: number }) {
+export function HistoryCard({ points, floor }: { points: Point[]; floor?: number }) {
   const [range, setRange] = useState<RangeKey>("7d");
   const active = RANGES.find((r) => r.key === range)!;
 

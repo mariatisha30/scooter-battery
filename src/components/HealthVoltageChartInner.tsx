@@ -14,7 +14,7 @@ export function HealthVoltageChartInner({ points }: { points: Point[] }) {
   return (
     <div className="glass h-48 w-full rounded-[22px] p-2">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={points} margin={{ top: 12, right: 12, bottom: 4, left: -4 }}>
+        <LineChart data={points} margin={{ top: 12, right: 12, bottom: 4, left: 4 }}>
           <defs>
             <linearGradient id={`v${id}`} x1="0" y1="0" x2="1" y2="0">
               <stop offset="0" style={{ stopColor: "var(--acc2)" }} />

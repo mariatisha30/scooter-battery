@@ -21,6 +21,7 @@ import { detectChargeSessions, formatChargeDuration } from "@/lib/charging";
 import { formatLocalDateTime } from "@/lib/datetime";
 import type { BatteryLog } from "@/lib/supabase";
 import { BalanceTrendChart, type BalancePoint } from "./BalanceTrendChart";
+import { BatteryTelemetry } from "./bms/BatteryTelemetry";
 import { ConnectionCard } from "./bms/ConnectionCard";
 import { CellBars, CellGrid } from "./CellBars";
 import { HealthVoltageChart } from "./HealthVoltageChart";
@@ -106,7 +107,7 @@ export function HealthView({ logs }: { logs: BatteryLog[] }) {
   return (
     <div className="space-y-7 pt-2">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Battery health</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Battery</h1>
         <div className="mt-2.5 flex flex-wrap gap-1.5">
           {chips.map((c) => (
             <span key={c} className="rounded-full bg-white/[0.06] px-2.5 py-0.5 text-[11px] font-semibold tracking-wide text-muted">
@@ -116,6 +117,63 @@ export function HealthView({ logs }: { logs: BatteryLog[] }) {
         </div>
         <p className="mt-2.5 text-sm text-muted">Long-term signals from your BMS. Watch the trend over weeks, not minutes.</p>
       </div>
+
+      <BatteryTelemetry
+        stored={
+          logs[0]
+            ? {
+                voltage: logs[0].voltage_v != null ? Number(logs[0].voltage_v) : null,
+                remainingAh: logs[0].remaining_ah != null ? Number(logs[0].remaining_ah) : null,
+                tempC: logs[0].max_temp_c != null ? Number(logs[0].max_temp_c) : null,
+              }
+            : null
+        }
+      />
+
+      {/* Cells */}
+      <section className="space-y-2.5">
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="eyebrow">Cells</h2>
+          {latestCells && (
+            <span className="text-[11px] text-dim">
+              {shortDateTime(latestCells.log.logged_at)} · {latestCells.log.battery_pct}%
+            </span>
+          )}
+        </div>
+        {latestCells ? (
+          <>
+            <div className="glass rounded-[22px] p-4">
+              <CellBars cellsMv={latestCells.cells} balanceMask={latestCells.log.balance_mask} height={88} detailed />
+              <div className="mt-4 grid grid-cols-3 gap-2 border-t border-line pt-3 text-center">
+                <Mini label="Lowest" value={formatCellVolts(latestCells.stats.min)} sub={`cell ${latestCells.stats.minCell}`} tone="text-amber" />
+                <Mini label="Average" value={formatCellVolts(latestCells.stats.avg)} sub="volts" />
+                <Mini label="Highest" value={formatCellVolts(latestCells.stats.max)} sub={`cell ${latestCells.stats.maxCell}`} tone="text-hi" />
+              </div>
+              {runner && (
+                <p className="mt-3 rounded-xl bg-white/[0.04] px-3 py-2 text-xs text-fg">
+                  Cell {runner.cell} was the highest in {runner.count} of {runner.total} full-charge readings. It&apos;s the
+                  one to watch.
+                </p>
+              )}
+              <details className="group mt-3 border-t border-line pt-3">
+                <summary className="flex cursor-pointer list-none items-center justify-between text-xs text-muted hover:text-fg [&::-webkit-details-marker]:hidden">
+                  All {latestCells.stats.count} cell voltages
+                  <IconChevronDown size={15} stroke={1.75} className="transition-transform group-open:rotate-180" aria-hidden />
+                </summary>
+                <div className="mt-3">
+                  <CellGrid cellsMv={latestCells.cells} balanceMask={latestCells.log.balance_mask} />
+                </div>
+              </details>
+            </div>
+            <p className="text-xs text-dim">
+              {ZONE_NOTE[balanceZone(latestCells.stats)]}
+              {balancingNow && " Green dots mark cells the BMS was balancing."}
+            </p>
+          </>
+        ) : (
+          <Empty>Cell voltages appear after your next sync. Open the app near the scooter and it reads all of them automatically.</Empty>
+        )}
+      </section>
 
       {/* Headline cards */}
       <section className="grid grid-cols-2 gap-2.5">
@@ -163,51 +221,6 @@ export function HealthView({ logs }: { logs: BatteryLog[] }) {
               : `latest ${shortDate(alarmEvents[0].logged_at)}`}
           </Sub>
         </Card>
-      </section>
-
-      {/* Cells */}
-      <section className="space-y-2.5">
-        <div className="flex items-baseline justify-between gap-3">
-          <h2 className="eyebrow">Cells</h2>
-          {latestCells && (
-            <span className="text-[11px] text-dim">
-              {shortDateTime(latestCells.log.logged_at)} · {latestCells.log.battery_pct}%
-            </span>
-          )}
-        </div>
-        {latestCells ? (
-          <>
-            <div className="glass rounded-[22px] p-4">
-              <CellBars cellsMv={latestCells.cells} balanceMask={latestCells.log.balance_mask} height={88} detailed />
-              <div className="mt-4 grid grid-cols-3 gap-2 border-t border-line pt-3 text-center">
-                <Mini label="Lowest" value={formatCellVolts(latestCells.stats.min)} sub={`cell ${latestCells.stats.minCell}`} tone="text-amber" />
-                <Mini label="Average" value={formatCellVolts(latestCells.stats.avg)} sub="volts" />
-                <Mini label="Highest" value={formatCellVolts(latestCells.stats.max)} sub={`cell ${latestCells.stats.maxCell}`} tone="text-hi" />
-              </div>
-              {runner && (
-                <p className="mt-3 rounded-xl bg-white/[0.04] px-3 py-2 text-xs text-fg">
-                  Cell {runner.cell} was the highest in {runner.count} of {runner.total} full-charge readings. It&apos;s the
-                  one to watch.
-                </p>
-              )}
-              <details className="group mt-3 border-t border-line pt-3">
-                <summary className="flex cursor-pointer list-none items-center justify-between text-xs text-muted hover:text-fg [&::-webkit-details-marker]:hidden">
-                  All {latestCells.stats.count} cell voltages
-                  <IconChevronDown size={15} stroke={1.75} className="transition-transform group-open:rotate-180" aria-hidden />
-                </summary>
-                <div className="mt-3">
-                  <CellGrid cellsMv={latestCells.cells} balanceMask={latestCells.log.balance_mask} />
-                </div>
-              </details>
-            </div>
-            <p className="text-xs text-dim">
-              {ZONE_NOTE[balanceZone(latestCells.stats)]}
-              {balancingNow && " Green dots mark cells the BMS was balancing."}
-            </p>
-          </>
-        ) : (
-          <Empty>Cell voltages appear after your next sync. Open the app near the scooter and it reads all of them automatically.</Empty>
-        )}
       </section>
 
       {/* Balance trend */}
@@ -340,7 +353,7 @@ export function HealthView({ logs }: { logs: BatteryLog[] }) {
 export function HealthEmpty({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div className="space-y-6 pt-2">
-      <h1 className="text-2xl font-semibold tracking-tight">Battery health</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Battery</h1>
       <div className="rounded-[22px] border border-dashed border-line px-4 py-12 text-center">
         <div className="text-base font-medium">{title}</div>
         <div className="mt-1 text-sm text-muted">{subtitle}</div>

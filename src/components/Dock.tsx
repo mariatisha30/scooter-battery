@@ -2,15 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconGauge, IconHeartRateMonitor, IconRoute } from "@tabler/icons-react";
+import { IconBattery3, IconGauge, IconRoute } from "@tabler/icons-react";
 
 const TABS = [
   { href: "/", label: "Dash", icon: IconGauge, match: (p: string) => p === "/" || p.startsWith("/log") },
-  { href: "/health", label: "Health", icon: IconHeartRateMonitor, match: (p: string) => p.startsWith("/health") },
+  { href: "/health", label: "Battery", icon: IconBattery3, match: (p: string) => p.startsWith("/health") },
   { href: "/trips", label: "Trips", icon: IconRoute, match: (p: string) => p.startsWith("/trips") },
 ];
 
-/** Floating bottom navigation. The active tab shows its label. */
+/** Floating bottom navigation (Dash, Battery, Trips). The active tab shows its label. */
 export function Dock() {
   const pathname = usePathname() ?? "/";
   return (

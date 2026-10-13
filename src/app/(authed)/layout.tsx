@@ -16,7 +16,7 @@ export default function AuthedLayout({ children }: { children: React.ReactNode }
         <header className="flex h-[52px] items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 text-base font-semibold tracking-tight">
             <BrandMark />
-            Scooter
+            Arif&apos;s Hammer
           </Link>
           <BmsPill />
         </header>

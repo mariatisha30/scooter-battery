@@ -15,7 +15,7 @@ export default async function LoginPage({
       <div className="w-full max-w-xs">
         <div className="mb-8 flex flex-col items-center text-center">
           <BrandMark size={56} />
-          <h1 className="mt-4 text-xl font-semibold tracking-tight">Scooter Battery</h1>
+          <h1 className="mt-4 text-xl font-semibold tracking-tight">Arif&apos;s Hammer</h1>
           <p className="mt-1 text-xs text-muted">Enter your password to continue</p>
         </div>
 
