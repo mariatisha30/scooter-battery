@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Scooter UI concepts · Figma import</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin: 0; background: #1E1E1E; }
+  .board { display: flex; gap: 120px; padding: 96px; align-items: flex-start; width: max-content; font-family: Inter, sans-serif; }
+  .group h2 { margin: 0; font: 600 28px/1.2 Inter, sans-serif; color: #FFFFFF; }
+  .group > p { margin: 6px 0 28px; font: 400 15px/1.4 Inter, sans-serif; color: #9A9A9A; }
+  .pair { display: flex; gap: 48px; align-items: flex-start; }
+  figure { margin: 0; }
+  figcaption { margin: 0 0 14px; font: 500 14px Inter, sans-serif; color: #BDBDBD; }
+  .ti { display: inline-flex; align-items: center; justify-content: center; font-style: normal; line-height: 1; }
+  .ti svg { display: block; width: 1em; height: 1em; }
+#a-charging {--bg: #050607; --surface: #0C0E11; --surface-2: #121519; --line: #1A1E24;
+    --text: #EEF0F3; --muted: #8B929D; --dim: #4F5660;
+    --lime: #C4F24B; --amber: #FFB648; --red: #FF5E5E;}
+#a-charging * {box-sizing: border-box; margin: 0; padding: 0;}
+#a-charging {background: var(--bg);}
+#a-charging {color: var(--text); font: 14px/1.4 Inter, system-ui, sans-serif; -webkit-font-smoothing: antialiased;}
+#a-charging .app {width: 375px; min-height: 812px; margin: 0 auto; padding: 8px 16px 108px; position: relative; overflow: hidden;}
+#a-charging .cond {font-family: "Barlow Condensed", Inter, sans-serif;}
+#a-charging .eyebrow {font-family: "Barlow Condensed"; font-weight: 600; font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted);}
+#a-charging header {display: flex; align-items: center; justify-content: space-between; height: 48px;}
+#a-charging .brand {display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px; letter-spacing: -.01em;}
+#a-charging .mark {width: 28px; height: 28px; border-radius: 8px; background: var(--lime); color: #0A0C05; display: grid; place-items: center; font-size: 17px;}
+#a-charging .link {display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 12px;}
+#a-charging .dot {width: 6px; height: 6px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 0 3px rgba(196,242,75,.16);}
+#a-charging .gauge {position: relative; width: 300px; height: 252px; margin: 6px auto 0;}
+#a-charging .gauge > svg {position: absolute; left: 0; top: 0; width: 300px; height: 300px;}
+#a-charging .center {position: absolute; left: 0; right: 0; top: 64px; display: flex; flex-direction: column; align-items: center;}
+#a-charging .big {font-family: "Barlow Condensed"; font-weight: 700; font-size: 112px; line-height: .8; letter-spacing: -.02em; margin-top: 8px;}
+#a-charging .big small {font-size: 26px; font-weight: 600; color: var(--muted); margin-left: 3px; letter-spacing: 0;}
+#a-charging .pill {margin-top: 14px; display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px 5px 8px; border-radius: 999px; background: rgba(196,242,75,.1); color: var(--lime); font-weight: 600; font-size: 13px;}
+#a-charging .pill i {font-size: 15px;}
+#a-charging .ef {position: absolute; top: 226px; font-family: "Barlow Condensed"; font-weight: 600; font-size: 13px; color: var(--dim);}
+#a-charging .ef.e {left: 72px;}
+#a-charging .ef.f {right: 72px;}
+#a-charging .seg {display: flex; gap: 4px; padding: 4px; margin: 4px auto 0; width: 100%; border-radius: 14px; background: var(--surface);}
+#a-charging .seg button {flex: 1; border: 0; background: none; color: var(--muted); font: 600 13px Inter; padding: 9px 0; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 6px;}
+#a-charging .seg button.on {background: var(--surface-2); color: var(--text);}
+#a-charging .seg b {font-family: "Barlow Condensed"; font-size: 16px; color: var(--text); font-weight: 600;}
+#a-charging .eta {text-align: center; color: var(--muted); font-size: 12px; margin-top: 10px;}
+#a-charging .eta b {color: var(--text); font-weight: 600;}
+#a-charging .telemetry {display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 18px; background: var(--surface); border-radius: 16px; padding: 12px 4px;}
+#a-charging .telemetry div {text-align: center;}
+#a-charging .telemetry div + div {box-shadow: -1px 0 0 var(--line);}
+#a-charging .k {display: block; font-family: "Barlow Condensed"; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--dim); font-weight: 600;}
+#a-charging .v {display: block; font-family: "Barlow Condensed"; font-size: 24px; font-weight: 600; margin-top: 2px;}
+#a-charging .lime {color: var(--lime);}
+#a-charging .card {margin-top: 12px; background: var(--surface); border-radius: 18px; padding: 14px 14px 12px;}
+#a-charging .card-head {display: flex; align-items: baseline; justify-content: space-between;}
+#a-charging .ok {font-family: "Barlow Condensed"; font-weight: 600; font-size: 14px; color: var(--lime); letter-spacing: .02em;}
+#a-charging .cells {position: relative; display: flex; gap: 3px; height: 54px; margin-top: 12px;}
+#a-charging .cells .mid {position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--line);}
+#a-charging .cells span {position: relative; flex: 1;}
+#a-charging .cells span i {position: absolute; left: 0; right: 0; border-radius: 2px; background: #39404A;}
+#a-charging .legend {display: flex; justify-content: space-between; margin-top: 10px; font-size: 11px; color: var(--muted);}
+#a-charging .legend b {color: var(--text); font-weight: 500; font-variant-numeric: tabular-nums;}
+#a-charging .tiles {display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px;}
+#a-charging .tile {background: var(--surface); border-radius: 16px; padding: 12px;}
+#a-charging .tile b {display: block; font-family: "Barlow Condensed"; font-size: 30px; font-weight: 600; line-height: 1; margin-top: 6px;}
+#a-charging .tile .s {display: block; font-size: 11px; color: var(--dim); margin-top: 4px;}
+#a-charging .spark {width: 100%; height: 64px; margin-top: 10px; display: block;}
+#a-charging .tabbar {position: absolute; left: 0; right: 0; bottom: 0; height: 84px; padding: 10px 28px 26px; display: flex; justify-content: space-between; background: rgba(5,6,7,.86); backdrop-filter: blur(16px);}
+#a-charging .tabbar a {flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; font-weight: 500; color: var(--dim);}
+#a-charging .tabbar a i {font-size: 24px;}
+#a-charging .tabbar a.on {color: var(--lime);}
+#a-parked {--bg: #050607; --surface: #0C0E11; --surface-2: #121519; --line: #1A1E24;
+    --text: #EEF0F3; --muted: #8B929D; --dim: #4F5660;
+    --lime: #C4F24B; --amber: #FFB648; --red: #FF5E5E;}
+#a-parked * {box-sizing: border-box; margin: 0; padding: 0;}
+#a-parked {background: var(--bg);}
+#a-parked {color: var(--text); font: 14px/1.4 Inter, system-ui, sans-serif; -webkit-font-smoothing: antialiased;}
+#a-parked .app {width: 375px; min-height: 812px; margin: 0 auto; padding: 8px 16px 108px; position: relative; overflow: hidden;}
+#a-parked .cond {font-family: "Barlow Condensed", Inter, sans-serif;}
+#a-parked .eyebrow {font-family: "Barlow Condensed"; font-weight: 600; font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted);}
+#a-parked header {display: flex; align-items: center; justify-content: space-between; height: 48px;}
+#a-parked .brand {display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px; letter-spacing: -.01em;}
+#a-parked .mark {width: 28px; height: 28px; border-radius: 8px; background: var(--lime); color: #0A0C05; display: grid; place-items: center; font-size: 17px;}
+#a-parked .link {display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 12px;}
+#a-parked .dot {width: 6px; height: 6px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 0 3px rgba(196,242,75,.16);}
+#a-parked .gauge {position: relative; width: 300px; height: 252px; margin: 6px auto 0;}
+#a-parked .gauge > svg {position: absolute; left: 0; top: 0; width: 300px; height: 300px;}
+#a-parked .center {position: absolute; left: 0; right: 0; top: 64px; display: flex; flex-direction: column; align-items: center;}
+#a-parked .big {font-family: "Barlow Condensed"; font-weight: 700; font-size: 112px; line-height: .8; letter-spacing: -.02em; margin-top: 8px;}
+#a-parked .big small {font-size: 26px; font-weight: 600; color: var(--muted); margin-left: 3px; letter-spacing: 0;}
+#a-parked .pill {margin-top: 14px; display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px 5px 8px; border-radius: 999px; background: rgba(196,242,75,.1); color: var(--lime); font-weight: 600; font-size: 13px;}
+#a-parked .pill i {font-size: 15px;}
+#a-parked .pill.idle {background: rgba(255,255,255,.07); color: var(--text);}
+#a-parked .ef {position: absolute; top: 226px; font-family: "Barlow Condensed"; font-weight: 600; font-size: 13px; color: var(--dim);}
+#a-parked .ef.e {left: 72px;}
+#a-parked .ef.f {right: 72px;}
+#a-parked .seg {display: flex; gap: 4px; padding: 4px; margin: 4px auto 0; width: 100%; border-radius: 14px; background: var(--surface);}
+#a-parked .seg button {flex: 1; border: 0; background: none; color: var(--muted); font: 600 13px Inter; padding: 9px 0; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 6px;}
+#a-parked .seg button.on {background: var(--surface-2); color: var(--text);}
+#a-parked .seg b {font-family: "Barlow Condensed"; font-size: 16px; color: var(--text); font-weight: 600;}
+#a-parked .eta {text-align: center; color: var(--muted); font-size: 12px; margin-top: 10px;}
+#a-parked .eta b {color: var(--text); font-weight: 600;}
+#a-parked .telemetry {display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 18px; background: var(--surface); border-radius: 16px; padding: 12px 4px;}
+#a-parked .telemetry div {text-align: center;}
+#a-parked .telemetry div + div {box-shadow: -1px 0 0 var(--line);}
+#a-parked .k {display: block; font-family: "Barlow Condensed"; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--dim); font-weight: 600;}
+#a-parked .v {display: block; font-family: "Barlow Condensed"; font-size: 24px; font-weight: 600; margin-top: 2px;}
+#a-parked .lime {color: var(--lime);}
+#a-parked .card {margin-top: 12px; background: var(--surface); border-radius: 18px; padding: 14px 14px 12px;}
+#a-parked .card-head {display: flex; align-items: baseline; justify-content: space-between;}
+#a-parked .ok {font-family: "Barlow Condensed"; font-weight: 600; font-size: 14px; color: var(--lime); letter-spacing: .02em;}
+#a-parked .cells {position: relative; display: flex; gap: 3px; height: 54px; margin-top: 12px;}
+#a-parked .cells .mid {position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--line);}
+#a-parked .cells span {position: relative; flex: 1;}
+#a-parked .cells span i {position: absolute; left: 0; right: 0; border-radius: 2px; background: #39404A;}
+#a-parked .legend {display: flex; justify-content: space-between; margin-top: 10px; font-size: 11px; color: var(--muted);}
+#a-parked .legend b {color: var(--text); font-weight: 500; font-variant-numeric: tabular-nums;}
+#a-parked .tiles {display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px;}
+#a-parked .tile {background: var(--surface); border-radius: 16px; padding: 12px;}
+#a-parked .tile b {display: block; font-family: "Barlow Condensed"; font-size: 30px; font-weight: 600; line-height: 1; margin-top: 6px;}
+#a-parked .tile .s {display: block; font-size: 11px; color: var(--dim); margin-top: 4px;}
+#a-parked .spark {width: 100%; height: 64px; margin-top: 10px; display: block;}
+#a-parked .tabbar {position: absolute; left: 0; right: 0; bottom: 0; height: 84px; padding: 10px 28px 26px; display: flex; justify-content: space-between; background: rgba(5,6,7,.86); backdrop-filter: blur(16px);}
+#a-parked .tabbar a {flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; font-weight: 500; color: var(--dim);}
+#a-parked .tabbar a i {font-size: 24px;}
+#a-parked .tabbar a.on {color: var(--lime);}
+#b-charging {--bg: #030607; --glass: rgba(255,255,255,.045); --glass-line: rgba(255,255,255,.08);
+    --text: #F2F6F5; --muted: #8E9C99; --dim: #56635F;
+    --em: #34D399; --teal: #5EEAD4; --amber: #FBBF24; --sky: #7DD3FC;}
+#b-charging * {box-sizing: border-box; margin: 0; padding: 0;}
+#b-charging {background: var(--bg);}
+#b-charging {color: var(--text); font: 14px/1.45 Sora, system-ui, sans-serif; -webkit-font-smoothing: antialiased;}
+#b-charging .app {width: 375px; min-height: 812px; margin: 0 auto; padding: 8px 16px 112px; position: relative; overflow: hidden;
+         background: radial-gradient(120% 60% at 30% 12%, rgba(16,185,129,.16), transparent 60%), radial-gradient(80% 40% at 100% 40%, rgba(45,212,191,.07), transparent 70%), var(--bg);}
+#b-charging header {display: flex; align-items: center; justify-content: space-between; height: 52px;}
+#b-charging .brand {display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 16px;}
+#b-charging .mark {width: 32px; height: 32px; border-radius: 11px; background: linear-gradient(135deg, var(--teal), #059669); display: grid; place-items: center; color: #022C22; font-size: 18px; box-shadow: 0 6px 20px rgba(16,185,129,.35);}
+#b-charging .icon-btn {width: 40px; height: 40px; border-radius: 14px; background: var(--glass); box-shadow: inset 0 0 0 1px var(--glass-line); display: grid; place-items: center; color: var(--muted); font-size: 19px; border: 0;}
+#b-charging .hero {display: grid; grid-template-columns: 124px 1fr; gap: 22px; align-items: center; margin-top: 14px; position: relative;}
+#b-charging .capsule-wrap {position: relative; display: flex; flex-direction: column; align-items: center;}
+#b-charging .nub {width: 40px; height: 9px; border-radius: 6px 6px 2px 2px; background: rgba(255,255,255,.1);}
+#b-charging .capsule {position: relative; width: 120px; height: 252px; border-radius: 40px; padding: 6px; margin-top: 3px; background: var(--glass); box-shadow: inset 0 0 0 1px var(--glass-line), 0 20px 60px rgba(16,185,129,.18);}
+#b-charging .tank {position: relative; height: 100%; border-radius: 34px; overflow: hidden; background: rgba(255,255,255,.02);}
+#b-charging .liquid {position: absolute; left: 0; right: 0; bottom: 0; height: 61%; background: linear-gradient(180deg, #5EEAD4 0%, #10B981 50%, #065F46 100%);}
+#b-charging .liquid::after {content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(255,255,255,.14), transparent 35%, transparent 70%, rgba(0,0,0,.15));}
+#b-charging .wave {position: absolute; left: 0; top: -9px; width: 200%; height: 10px;}
+#b-charging .wave path {fill: #5EEAD4;}
+#b-charging .bubble {position: absolute; bottom: 10px; width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,.55);  opacity: 0;}
+#b-charging .reserve {position: absolute; left: 10px; right: 10px; bottom: 10%; border-top: 1px dashed rgba(255,255,255,.28);}
+#b-charging .chip {display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px 6px 9px; border-radius: 999px; background: rgba(52,211,153,.12); color: var(--em); font-size: 12px; font-weight: 600;}
+#b-charging .pct {font-size: 76px; font-weight: 600; letter-spacing: -.05em; line-height: 1; margin-top: 12px;
+         color: #F2F6F5;}
+#b-charging .pct span {font-size: 30px; font-weight: 500; letter-spacing: -.02em;}
+#b-charging .eta {color: var(--muted); font-size: 13px; margin-top: 6px;}
+#b-charging .eta b {color: var(--text); font-weight: 600;}
+#b-charging .range {display: grid; grid-template-columns: 1fr 1fr; margin-top: 18px; padding-top: 14px; box-shadow: inset 0 1px 0 var(--glass-line);}
+#b-charging .range b {display: block; font-size: 26px; font-weight: 600; letter-spacing: -.03em; line-height: 1.1;}
+#b-charging .range b small {font-size: 13px; font-weight: 500; color: var(--muted); margin-left: 2px; letter-spacing: 0;}
+#b-charging .range span {font-size: 11px; color: var(--dim);}
+#b-charging .glass {background: var(--glass); box-shadow: inset 0 0 0 1px var(--glass-line); border-radius: 24px; backdrop-filter: blur(20px);}
+#b-charging .grid4 {display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 24px;}
+#b-charging .metric {padding: 14px; display: flex; align-items: center; gap: 12px;}
+#b-charging .metric .ic {width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center; font-size: 18px; background: rgba(255,255,255,.05); color: var(--muted);}
+#b-charging .metric .ic.on {background: rgba(52,211,153,.14); color: var(--em);}
+#b-charging .metric b {display: block; font-size: 17px; font-weight: 600; letter-spacing: -.02em;}
+#b-charging .metric span {font-size: 11px; color: var(--dim);}
+#b-charging .card {margin-top: 10px; padding: 16px;}
+#b-charging .card-head {display: flex; align-items: center; justify-content: space-between;}
+#b-charging .card-head h3 {font-size: 14px; font-weight: 600;}
+#b-charging .card-head .chip {padding: 4px 10px; font-size: 11px;}
+#b-charging .pack {display: grid; grid-template-columns: repeat(12, 1fr); gap: 4px; margin-top: 14px;}
+#b-charging .pack i {height: 30px; border-radius: 7px;}
+#b-charging .pack-legend {display: flex; justify-content: space-between; margin-top: 12px; font-size: 11px; color: var(--muted);}
+#b-charging .pack-legend b {color: var(--text); font-weight: 500;}
+#b-charging .scale {display: flex; align-items: center; gap: 6px;}
+#b-charging .scale em {width: 54px; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--amber), var(--em), var(--sky));}
+#b-charging .stats {display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 10px; padding: 14px 4px; text-align: center;}
+#b-charging .stats b {display: block; font-size: 20px; font-weight: 600; letter-spacing: -.02em;}
+#b-charging .stats span {font-size: 11px; color: var(--dim);}
+#b-charging .stats .good {color: var(--em);}
+#b-charging .spark {width: 100%; height: 70px; display: block; margin-top: 12px;}
+#b-charging .dock {position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%); display: flex; gap: 6px; padding: 6px; border-radius: 999px; background: rgba(20,26,25,.72); box-shadow: inset 0 0 0 1px var(--glass-line), 0 12px 40px rgba(0,0,0,.5); backdrop-filter: blur(20px);}
+#b-charging .dock a {height: 48px; padding: 0 18px; border-radius: 999px; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; font-weight: 500;}
+#b-charging .dock a i {font-size: 21px;}
+#b-charging .dock a.on {background: linear-gradient(135deg, var(--teal), #10B981); color: #022C22; font-weight: 600;}
+#b-parked {--bg: #030607; --glass: rgba(255,255,255,.045); --glass-line: rgba(255,255,255,.08);
+    --text: #F2F6F5; --muted: #8E9C99; --dim: #56635F;
+    --em: #34D399; --teal: #5EEAD4; --amber: #FBBF24; --sky: #7DD3FC;}
+#b-parked * {box-sizing: border-box; margin: 0; padding: 0;}
+#b-parked {background: var(--bg);}
+#b-parked {color: var(--text); font: 14px/1.45 Sora, system-ui, sans-serif; -webkit-font-smoothing: antialiased;}
+#b-parked .app {width: 375px; min-height: 812px; margin: 0 auto; padding: 8px 16px 112px; position: relative; overflow: hidden;
+         background: radial-gradient(120% 60% at 30% 12%, rgba(16,185,129,.16), transparent 60%), radial-gradient(80% 40% at 100% 40%, rgba(45,212,191,.07), transparent 70%), var(--bg);}
+#b-parked header {display: flex; align-items: center; justify-content: space-between; height: 52px;}
+#b-parked .brand {display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 16px;}
+#b-parked .mark {width: 32px; height: 32px; border-radius: 11px; background: linear-gradient(135deg, var(--teal), #059669); display: grid; place-items: center; color: #022C22; font-size: 18px; box-shadow: 0 6px 20px rgba(16,185,129,.35);}
+#b-parked .icon-btn {width: 40px; height: 40px; border-radius: 14px; background: var(--glass); box-shadow: inset 0 0 0 1px var(--glass-line); display: grid; place-items: center; color: var(--muted); font-size: 19px; border: 0;}
+#b-parked .hero {display: grid; grid-template-columns: 124px 1fr; gap: 22px; align-items: center; margin-top: 14px; position: relative;}
+#b-parked .capsule-wrap {position: relative; display: flex; flex-direction: column; align-items: center;}
+#b-parked .nub {width: 40px; height: 9px; border-radius: 6px 6px 2px 2px; background: rgba(255,255,255,.1);}
+#b-parked .capsule {position: relative; width: 120px; height: 252px; border-radius: 40px; padding: 6px; margin-top: 3px; background: var(--glass); box-shadow: inset 0 0 0 1px var(--glass-line), 0 20px 60px rgba(16,185,129,.18);}
+#b-parked .tank {position: relative; height: 100%; border-radius: 34px; overflow: hidden; background: rgba(255,255,255,.02);}
+#b-parked .liquid {position: absolute; left: 0; right: 0; bottom: 0; height: 72%; background: linear-gradient(180deg, #5EEAD4 0%, #10B981 50%, #065F46 100%);}
+#b-parked .liquid::after {content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(255,255,255,.14), transparent 35%, transparent 70%, rgba(0,0,0,.15));}
+#b-parked .wave {position: absolute; left: 0; top: -9px; width: 200%; height: 10px;}
+#b-parked .wave path {fill: #5EEAD4;}
+#b-parked .bubble {position: absolute; bottom: 10px; width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,.55);  opacity: 0;}
+#b-parked .reserve {position: absolute; left: 10px; right: 10px; bottom: 10%; border-top: 1px dashed rgba(255,255,255,.28);}
+#b-parked .chip.idle {background: rgba(255,255,255,.07); color: var(--text);}
+#b-parked .chip {display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px 6px 9px; border-radius: 999px; background: rgba(52,211,153,.12); color: var(--em); font-size: 12px; font-weight: 600;}
+#b-parked .pct {font-size: 76px; font-weight: 600; letter-spacing: -.05em; line-height: 1; margin-top: 12px;
+         color: #F2F6F5;}
+#b-parked .pct span {font-size: 30px; font-weight: 500; letter-spacing: -.02em;}
+#b-parked .eta {color: var(--muted); font-size: 13px; margin-top: 6px;}
+#b-parked .eta b {color: var(--text); font-weight: 600;}
+#b-parked .range {display: grid; grid-template-columns: 1fr 1fr; margin-top: 18px; padding-top: 14px; box-shadow: inset 0 1px 0 var(--glass-line);}
+#b-parked .range b {display: block; font-size: 26px; font-weight: 600; letter-spacing: -.03em; line-height: 1.1;}
+#b-parked .range b small {font-size: 13px; font-weight: 500; color: var(--muted); margin-left: 2px; letter-spacing: 0;}
+#b-parked .range span {font-size: 11px; color: var(--dim);}
+#b-parked .glass {background: var(--glass); box-shadow: inset 0 0 0 1px var(--glass-line); border-radius: 24px; backdrop-filter: blur(20px);}
+#b-parked .grid4 {display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 24px;}
+#b-parked .metric {padding: 14px; display: flex; align-items: center; gap: 12px;}
+#b-parked .metric .ic {width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center; font-size: 18px; background: rgba(255,255,255,.05); color: var(--muted);}
+#b-parked .metric .ic.on {background: rgba(52,211,153,.14); color: var(--em);}
+#b-parked .metric b {display: block; font-size: 17px; font-weight: 600; letter-spacing: -.02em;}
+#b-parked .metric span {font-size: 11px; color: var(--dim);}
+#b-parked .card {margin-top: 10px; padding: 16px;}
+#b-parked .card-head {display: flex; align-items: center; justify-content: space-between;}
+#b-parked .card-head h3 {font-size: 14px; font-weight: 600;}
+#b-parked .card-head .chip {padding: 4px 10px; font-size: 11px;}
+#b-parked .pack {display: grid; grid-template-columns: repeat(12, 1fr); gap: 4px; margin-top: 14px;}
+#b-parked .pack i {height: 30px; border-radius: 7px;}
+#b-parked .pack-legend {display: flex; justify-content: space-between; margin-top: 12px; font-size: 11px; color: var(--muted);}
+#b-parked .pack-legend b {color: var(--text); font-weight: 500;}
+#b-parked .scale {display: flex; align-items: center; gap: 6px;}
+#b-parked .scale em {width: 54px; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--amber), var(--em), var(--sky));}
+#b-parked .stats {display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 10px; padding: 14px 4px; text-align: center;}
+#b-parked .stats b {display: block; font-size: 20px; font-weight: 600; letter-spacing: -.02em;}
+#b-parked .stats span {font-size: 11px; color: var(--dim);}
+#b-parked .stats .good {color: var(--em);}
+#b-parked .spark {width: 100%; height: 70px; display: block; margin-top: 12px;}
+#b-parked .dock {position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%); display: flex; gap: 6px; padding: 6px; border-radius: 999px; background: rgba(20,26,25,.72); box-shadow: inset 0 0 0 1px var(--glass-line), 0 12px 40px rgba(0,0,0,.5); backdrop-filter: blur(20px);}
+#b-parked .dock a {height: 48px; padding: 0 18px; border-radius: 999px; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; font-weight: 500;}
+#b-parked .dock a i {font-size: 21px;}
+#b-parked .dock a.on {background: linear-gradient(135deg, var(--teal), #10B981); color: #022C22; font-weight: 600;}
+#ab-charging {--bg: #040605; --glass: rgba(255,255,255,.045); --glass-line: rgba(255,255,255,.08);
+    --text: #F1F5F2; --muted: #8D9A94; --dim: #56615B;
+    --lime: #C4F24B; --em: #34D399; --amber: #FBBF24; --red: #FF5E5E;}
+#ab-charging * {box-sizing: border-box; margin: 0; padding: 0;}
+#ab-charging {background: var(--bg);}
+#ab-charging {color: var(--text); font: 14px/1.45 Sora, system-ui, sans-serif; -webkit-font-smoothing: antialiased;}
+#ab-charging .app {width: 375px; min-height: 812px; margin: 0 auto; padding: 8px 16px 112px; position: relative; overflow: hidden;
+          background: radial-gradient(85% 38% at 50% 22%, rgba(160,232,80,.14), transparent 68%), radial-gradient(70% 30% at 0% 62%, rgba(52,211,153,.07), transparent 70%), var(--bg);}
+#ab-charging .eyebrow {font-family: "Barlow Condensed"; font-weight: 600; font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted);}
+#ab-charging .glass {background: var(--glass); box-shadow: inset 0 0 0 1px var(--glass-line); backdrop-filter: blur(20px);}
+#ab-charging header {display: flex; align-items: center; justify-content: space-between; height: 52px;}
+#ab-charging .brand {display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 16px;}
+#ab-charging .mark {width: 32px; height: 32px; border-radius: 11px; background: linear-gradient(135deg, var(--lime), var(--em)); display: grid; place-items: center; color: #0B1A0E; font-size: 18px; box-shadow: 0 6px 20px rgba(160,232,80,.28);}
+#ab-charging .sync {display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 999px; color: var(--muted); font: 500 12px Sora; border: 0;}
+#ab-charging .sync i {font-size: 16px;}
+#ab-charging .dot {width: 6px; height: 6px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 0 3px rgba(196,242,75,.16);}
+#ab-charging .gauge {position: relative; width: 300px; height: 252px; margin: 4px auto 0;}
+#ab-charging .gauge > svg {position: absolute; left: 0; top: 0; width: 300px; height: 300px;}
+#ab-charging .center {position: absolute; left: 0; right: 0; top: 64px; display: flex; flex-direction: column; align-items: center;}
+#ab-charging .big {font-family: "Barlow Condensed"; font-weight: 700; font-size: 112px; line-height: .8; letter-spacing: -.02em; margin-top: 8px;}
+#ab-charging .big small {font-size: 26px; font-weight: 600; color: var(--muted); margin-left: 3px; letter-spacing: 0;}
+#ab-charging .pill {margin-top: 14px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px 6px 9px; border-radius: 999px; font-weight: 600; font-size: 12px;}
+#ab-charging .pill i {font-size: 15px;}
+#ab-charging .pill.charging {background: rgba(196,242,75,.12); color: var(--lime);}
+#ab-charging .pill.idle {background: rgba(255,255,255,.07); color: var(--text);}
+#ab-charging .ef {position: absolute; top: 226px; font-family: "Barlow Condensed"; font-weight: 600; font-size: 13px; color: var(--dim);}
+#ab-charging .ef.e {left: 72px;}
+#ab-charging .ef.f {right: 72px;}
+#ab-charging .seg {display: flex; gap: 4px; padding: 4px; margin-top: 4px; border-radius: 16px;}
+#ab-charging .seg button {flex: 1; border: 0; background: none; color: var(--muted); font: 500 13px Sora; padding: 9px 0; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 6px;}
+#ab-charging .seg button i {font-size: 16px;}
+#ab-charging .seg button.on {background: rgba(255,255,255,.08); color: var(--text);}
+#ab-charging .seg b {font-family: "Barlow Condensed"; font-size: 17px; font-weight: 600; color: var(--text);}
+#ab-charging .eta {text-align: center; color: var(--muted); font-size: 12px; margin-top: 10px;}
+#ab-charging .eta b {color: var(--text); font-weight: 600;}
+#ab-charging .telemetry {display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 18px; border-radius: 20px; padding: 12px 4px;}
+#ab-charging .telemetry div {text-align: center;}
+#ab-charging .telemetry div + div {box-shadow: -1px 0 0 var(--glass-line);}
+#ab-charging .k {display: block; font-family: "Barlow Condensed"; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--dim); font-weight: 600;}
+#ab-charging .v {display: block; font-family: "Barlow Condensed"; font-size: 24px; font-weight: 600; margin-top: 2px;}
+#ab-charging .lime {color: var(--lime);}
+#ab-charging .card {margin-top: 10px; border-radius: 22px; padding: 14px 14px 12px;}
+#ab-charging .card-head {display: flex; align-items: center; justify-content: space-between;}
+#ab-charging .card-head h3 {font-size: 14px; font-weight: 600;}
+#ab-charging .chip {padding: 4px 10px; border-radius: 999px; background: rgba(196,242,75,.12); color: var(--lime); font-size: 11px; font-weight: 600;}
+#ab-charging .cells {position: relative; display: flex; gap: 3px; height: 54px; margin-top: 12px;}
+#ab-charging .cells .mid {position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--glass-line);}
+#ab-charging .cells span {position: relative; flex: 1;}
+#ab-charging .cells span i {position: absolute; left: 0; right: 0; border-radius: 2px; background: rgba(255,255,255,.2);}
+#ab-charging .legend {display: flex; justify-content: space-between; margin-top: 10px; font-size: 11px; color: var(--muted);}
+#ab-charging .legend b {color: var(--text); font-weight: 500;}
+#ab-charging .stats {display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 10px; padding: 14px 4px; border-radius: 22px; text-align: center;}
+#ab-charging .stats b {display: block; font-family: "Barlow Condensed"; font-size: 30px; font-weight: 600; line-height: 1.05;}
+#ab-charging .stats span {font-size: 11px; color: var(--dim);}
+#ab-charging .spark {width: 100%; height: 66px; display: block; margin-top: 12px;}
+#ab-charging .dock {position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%); display: flex; gap: 6px; padding: 6px; border-radius: 999px; background: rgba(18,24,20,.74); box-shadow: inset 0 0 0 1px var(--glass-line), 0 12px 40px rgba(0,0,0,.5); backdrop-filter: blur(20px);}
+#ab-charging .dock a {height: 48px; padding: 0 18px; border-radius: 999px; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; font-weight: 500;}
+#ab-charging .dock a i {font-size: 21px;}
+#ab-charging .dock a.on {background: linear-gradient(135deg, var(--lime), var(--em)); color: #0B1A0E; font-weight: 600;}
+#ab-parked {--bg: #040605; --glass: rgba(255,255,255,.045); --glass-line: rgba(255,255,255,.08);
+    --text: #F1F5F2; --muted: #8D9A94; --dim: #56615B;
+    --lime: #C4F24B; --em: #34D399; --amber: #FBBF24; --red: #FF5E5E;}
+#ab-parked * {box-sizing: border-box; margin: 0; padding: 0;}
+#ab-parked {background: var(--bg);}
+#ab-parked {color: var(--text); font: 14px/1.45 Sora, system-ui, sans-serif; -webkit-font-smoothing: antialiased;}
+#ab-parked .app {width: 375px; min-height: 812px; margin: 0 auto; padding: 8px 16px 112px; position: relative; overflow: hidden;
+          background: radial-gradient(85% 38% at 50% 22%, rgba(160,232,80,.14), transparent 68%), radial-gradient(70% 30% at 0% 62%, rgba(52,211,153,.07), transparent 70%), var(--bg);}
+#ab-parked .eyebrow {font-family: "Barlow Condensed"; font-weight: 600; font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted);}
+#ab-parked .glass {background: var(--glass); box-shadow: inset 0 0 0 1px var(--glass-line); backdrop-filter: blur(20px);}
+#ab-parked header {display: flex; align-items: center; justify-content: space-between; height: 52px;}
+#ab-parked .brand {display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 16px;}
+#ab-parked .mark {width: 32px; height: 32px; border-radius: 11px; background: linear-gradient(135deg, var(--lime), var(--em)); display: grid; place-items: center; color: #0B1A0E; font-size: 18px; box-shadow: 0 6px 20px rgba(160,232,80,.28);}
+#ab-parked .sync {display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 999px; color: var(--muted); font: 500 12px Sora; border: 0;}
+#ab-parked .sync i {font-size: 16px;}
+#ab-parked .dot {width: 6px; height: 6px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 0 3px rgba(196,242,75,.16);}
+#ab-parked .gauge {position: relative; width: 300px; height: 252px; margin: 4px auto 0;}
+#ab-parked .gauge > svg {position: absolute; left: 0; top: 0; width: 300px; height: 300px;}
+#ab-parked .center {position: absolute; left: 0; right: 0; top: 64px; display: flex; flex-direction: column; align-items: center;}
+#ab-parked .big {font-family: "Barlow Condensed"; font-weight: 700; font-size: 112px; line-height: .8; letter-spacing: -.02em; margin-top: 8px;}
+#ab-parked .big small {font-size: 26px; font-weight: 600; color: var(--muted); margin-left: 3px; letter-spacing: 0;}
+#ab-parked .pill {margin-top: 14px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px 6px 9px; border-radius: 999px; font-weight: 600; font-size: 12px;}
+#ab-parked .pill i {font-size: 15px;}
+#ab-parked .pill.charging {background: rgba(196,242,75,.12); color: var(--lime);}
+#ab-parked .pill.idle {background: rgba(255,255,255,.07); color: var(--text);}
+#ab-parked .ef {position: absolute; top: 226px; font-family: "Barlow Condensed"; font-weight: 600; font-size: 13px; color: var(--dim);}
+#ab-parked .ef.e {left: 72px;}
+#ab-parked .ef.f {right: 72px;}
+#ab-parked .seg {display: flex; gap: 4px; padding: 4px; margin-top: 4px; border-radius: 16px;}
+#ab-parked .seg button {flex: 1; border: 0; background: none; color: var(--muted); font: 500 13px Sora; padding: 9px 0; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 6px;}
+#ab-parked .seg button i {font-size: 16px;}
+#ab-parked .seg button.on {background: rgba(255,255,255,.08); color: var(--text);}
+#ab-parked .seg b {font-family: "Barlow Condensed"; font-size: 17px; font-weight: 600; color: var(--text);}
+#ab-parked .eta {text-align: center; color: var(--muted); font-size: 12px; margin-top: 10px;}
+#ab-parked .eta b {color: var(--text); font-weight: 600;}
+#ab-parked .telemetry {display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 18px; border-radius: 20px; padding: 12px 4px;}
+#ab-parked .telemetry div {text-align: center;}
+#ab-parked .telemetry div + div {box-shadow: -1px 0 0 var(--glass-line);}
+#ab-parked .k {display: block; font-family: "Barlow Condensed"; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--dim); font-weight: 600;}
+#ab-parked .v {display: block; font-family: "Barlow Condensed"; font-size: 24px; font-weight: 600; margin-top: 2px;}
+#ab-parked .lime {color: var(--lime);}
+#ab-parked .card {margin-top: 10px; border-radius: 22px; padding: 14px 14px 12px;}
+#ab-parked .card-head {display: flex; align-items: center; justify-content: space-between;}
+#ab-parked .card-head h3 {font-size: 14px; font-weight: 600;}
+#ab-parked .chip {padding: 4px 10px; border-radius: 999px; background: rgba(196,242,75,.12); color: var(--lime); font-size: 11px; font-weight: 600;}
+#ab-parked .cells {position: relative; display: flex; gap: 3px; height: 54px; margin-top: 12px;}
+#ab-parked .cells .mid {position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--glass-line);}
+#ab-parked .cells span {position: relative; flex: 1;}
+#ab-parked .cells span i {position: absolute; left: 0; right: 0; border-radius: 2px; background: rgba(255,255,255,.2);}
+#ab-parked .legend {display: flex; justify-content: space-between; margin-top: 10px; font-size: 11px; color: var(--muted);}
+#ab-parked .legend b {color: var(--text); font-weight: 500;}
+#ab-parked .stats {display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 10px; padding: 14px 4px; border-radius: 22px; text-align: center;}
+#ab-parked .stats b {display: block; font-family: "Barlow Condensed"; font-size: 30px; font-weight: 600; line-height: 1.05;}
+#ab-parked .stats span {font-size: 11px; color: var(--dim);}
+#ab-parked .spark {width: 100%; height: 66px; display: block; margin-top: 12px;}
+#ab-parked .dock {position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%); display: flex; gap: 6px; padding: 6px; border-radius: 999px; background: rgba(18,24,20,.74); box-shadow: inset 0 0 0 1px var(--glass-line), 0 12px 40px rgba(0,0,0,.5); backdrop-filter: blur(20px);}
+#ab-parked .dock a {height: 48px; padding: 0 18px; border-radius: 999px; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; font-weight: 500;}
+#ab-parked .dock a i {font-size: 21px;}
+#ab-parked .dock a.on {background: linear-gradient(135deg, var(--lime), var(--em)); color: #0B1A0E; font-weight: 600;}
+</style>
+</head>
+<body>
+<div class="board">
+<section class="group"><h2>A · Cockpit</h2><p>Instrument-cluster gauge, condensed numerals, electric lime</p><div class="pair"><figure><figcaption>A · Cockpit · Charging</figcaption><div id="a-charging"><div class="app">
+  <header>
+    <div class="brand"><span class="mark"><i class="ti ti-bolt"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-bolt"><path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11"></path></svg></i></span>Scooter</div>
+    <div class="link"><span class="dot"></span>BMS live · just now</div>
+  </header>
+
+  <section class="gauge">
+    <svg id="a-charging-gauge" viewBox="0 0 300 300" aria-hidden="true"><line x1="68.79928902938835" y1="218.13548662677317" x2="51.94631128077083" y2="232.27681403987705" stroke="#FF5E5E" stroke-width="3.2" stroke-linecap="round"></line><line x1="57.43581899534395" y1="214.81413730766826" x2="45.14853833100908" y2="223.41778385293395" stroke="#FF5E5E" stroke-width="2.4" stroke-linecap="round"></line><line x1="52.139129372358425" y1="206.5" x2="39.148748315591845" y2="214" stroke="#FF5E5E" stroke-width="2.4" stroke-linecap="round"></line><line x1="47.587220064858556" y1="197.75586357669903" x2="33.99260325930881" y2="204.09513750280954" stroke="#FF5E5E" stroke-width="2.4" stroke-linecap="round"></line><line x1="43.81473385119236" y1="188.64827619580058" x2="29.719344539403735" y2="193.77857834568562" stroke="#FF5E5E" stroke-width="2.4" stroke-linecap="round"></line><line x1="40.85038162933529" y1="179.24655209658488" x2="26.36149423499927" y2="183.12883777312268" stroke="#FF5E5E" stroke-width="2.4" stroke-linecap="round"></line><line x1="38.7167239096205" y1="169.62224407636313" x2="23.944607614437373" y2="172.22696674136708" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="37.429999115632754" y1="159.84859893048542" x2="22.48707864425657" y2="161.1559350717003" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="37" y1="150" x2="22" y2="150.00000000000003" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="37.429999115632754" y1="140.15140106951466" x2="22.48707864425657" y2="138.8440649282998" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="38.7167239096205" y1="130.37775592363687" x2="23.944607614437373" y2="127.77303325863289" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="40.850381629335274" y1="120.7534479034152" x2="26.361494234999242" y2="116.8711622268774" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="43.814733851192344" y1="111.35172380419945" x2="29.71934453940372" y2="106.22142165431441" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="53.9313745741151" y1="105.20246425548588" x2="33.992603259308794" y2="95.90486249719049" stroke="#C4F24B" stroke-width="3.2" stroke-linecap="round"></line><line x1="52.13912937235844" y1="93.49999999999999" x2="39.14874831559186" y2="85.99999999999999" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="57.43581899534391" y1="85.18586269233182" x2="45.14853833100902" y2="76.58221614706613" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="63.43697792755549" y1="77.36500010542106" x2="51.946311280770814" y2="67.72318596012298" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="70.09693372592011" y1="70.09693372592014" x2="59.4903320081219" y2="59.490332008121925" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="77.36500010542105" y1="63.4369779275555" x2="67.72318596012295" y2="51.94631128077083" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="85.18586269233175" y1="57.43581899534395" x2="76.58221614706606" y2="45.14853833100908" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="93.49999999999994" y1="52.13912937235847" x2="85.99999999999994" y2="39.14874831559189" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="102.24413642330092" y1="47.587220064858585" x2="95.90486249719041" y2="33.99260325930884" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="111.35172380419937" y1="43.81473385119237" x2="106.22142165431433" y2="29.71934453940375" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="120.75344790341516" y1="40.850381629335274" x2="116.87116222687736" y2="26.361494234999256" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="130.37775592363687" y1="38.7167239096205" x2="127.77303325863292" y2="23.944607614437373" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="140.1514010695146" y1="37.429999115632754" x2="138.84406492829976" y2="22.48707864425657" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="149.99999999999997" y1="44" x2="149.99999999999997" y2="22" stroke="#C4F24B" stroke-width="3.2" stroke-linecap="round"></line><line x1="159.84859893048534" y1="37.429999115632754" x2="161.1559350717002" y2="22.48707864425657" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="169.62224407636307" y1="38.716723909620484" x2="172.22696674136705" y2="23.94460761443736" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="179.24655209658488" y1="40.85038162933529" x2="183.1288377731227" y2="26.36149423499927" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="188.6482761958005" y1="43.81473385119233" x2="193.77857834568553" y2="29.719344539403707" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="197.75586357669906" y1="47.587220064858556" x2="204.09513750280956" y2="33.99260325930881" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="206.5" y1="52.13912937235844" x2="214" y2="39.14874831559186" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="214.8141373076682" y1="57.43581899534392" x2="223.4177838529339" y2="45.14853833100905" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="222.63499989457893" y1="63.436977927555475" x2="232.27681403987702" y2="51.9463112807708" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="229.90306627407983" y1="70.09693372592011" x2="240.50966799187808" y2="59.4903320081219" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="236.56302207244448" y1="77.36500010542103" x2="248.05368871922917" y2="67.72318596012293" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="242.56418100465606" y1="85.18586269233175" x2="254.8514616689909" y2="76.58221614706605" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="247.86087062764153" y1="93.49999999999994" x2="260.8512516844081" y2="85.99999999999994" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="246.06862542588487" y1="105.20246425548581" x2="266.00739674069115" y2="95.90486249719041" stroke="#1C2026" stroke-width="3.2" stroke-linecap="round"></line><line x1="256.18526614880767" y1="111.35172380419945" x2="270.2806554605963" y2="106.22142165431441" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="259.1496183706647" y1="120.75344790341516" x2="273.63850576500073" y2="116.87116222687735" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="261.2832760903795" y1="130.37775592363676" x2="276.05539238556264" y2="127.7730332586328" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="262.57000088436723" y1="140.1514010695146" x2="277.5129213557434" y2="138.84406492829973" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="263" y1="149.99999999999997" x2="278" y2="149.99999999999997" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="262.57000088436723" y1="159.84859893048542" x2="277.5129213557434" y2="161.15593507170033" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="261.2832760903795" y1="169.62224407636307" x2="276.05539238556264" y2="172.22696674136702" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="259.1496183706647" y1="179.2465520965848" x2="273.6385057650008" y2="183.1288377731226" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="256.1852661488076" y1="188.64827619580058" x2="270.2806554605963" y2="193.77857834568562" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="252.41277993514143" y1="197.75586357669906" x2="266.0073967406912" y2="204.09513750280954" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="247.86087062764162" y1="206.49999999999991" x2="260.8512516844082" y2="213.99999999999991" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="242.56418100465606" y1="214.8141373076682" x2="254.85146166899096" y2="223.4177838529339" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="231.20071097061168" y1="218.13548662677314" x2="248.0536887192292" y2="232.27681403987702" stroke="#1C2026" stroke-width="3.2" stroke-linecap="round"></line></svg>
+    <span class="ef e">E</span><span class="ef f">F</span>
+    <div class="center">
+      <div class="eyebrow">Range · solo</div>
+      <div class="big">77<small>km</small></div>
+      <div class="pill"><i class="ti ti-bolt"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-bolt"><path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11"></path></svg></i>61% · charging</div>
+    </div>
+  </section>
+
+  <div class="seg">
+    <button class="on"><i class="ti ti-user"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-user"><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"></path><path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path></svg></i>Solo <b>77</b></button>
+    <button><i class="ti ti-users"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-users"><path d="M5 7a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path><path d="M21 21v-2a4 4 0 0 0 -3 -3.85"></path></svg></i>+1 rider <b>70</b></button>
+  </div>
+  <p class="eta">Full in <b>2h 51m</b> · 52 Ah LiFePO4</p>
+
+  <section class="telemetry">
+    <div><span class="k">Volt</span><span class="v">80.28</span></div>
+    <div><span class="k">Amp</span><span class="v lime">+7.08</span></div>
+    <div><span class="k">Watt</span><span class="v">568</span></div>
+    <div><span class="k">Temp</span><span class="v">33.8°</span></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><span class="eyebrow">Cells · 24S</span><span class="ok">15 mV spread · balanced</span></div>
+    <div class="cells" id="a-charging-cells"><div class="mid"></div><span><i style="height: 19.9125px; top: 50%; background: rgb(255, 182, 72);"></i></span><span><i style="height: 3.7125px; top: 50%;"></i></span><span><i style="height: 9.1125px; top: 50%;"></i></span><span><i style="height: 15.1875px; bottom: 50%;"></i></span><span><i style="height: 3.7125px; top: 50%;"></i></span><span><i style="height: 9.1125px; top: 50%;"></i></span><span><i style="height: 2px; bottom: 50%;"></i></span><span><i style="height: 17.2125px; top: 50%;"></i></span><span><i style="height: 3.7125px; top: 50%;"></i></span><span><i style="height: 9.7875px; bottom: 50%;"></i></span><span><i style="height: 4.3875px; bottom: 50%;"></i></span><span><i style="height: 6.4125px; top: 50%;"></i></span><span><i style="height: 3.7125px; top: 50%;"></i></span><span><i style="height: 2px; top: 50%;"></i></span><span><i style="height: 2px; bottom: 50%;"></i></span><span><i style="height: 7.0875px; bottom: 50%;"></i></span><span><i style="height: 6.4125px; top: 50%;"></i></span><span><i style="height: 7.0875px; bottom: 50%;"></i></span><span><i style="height: 2px; top: 50%;"></i></span><span><i style="height: 2px; bottom: 50%;"></i></span><span><i style="height: 12.4875px; bottom: 50%;"></i></span><span><i style="height: 4.3875px; bottom: 50%;"></i></span><span><i style="height: 2px; top: 50%;"></i></span><span><i style="height: 20.5875px; bottom: 50%; background: rgb(196, 242, 75);"></i></span></div>
+    <div class="legend"><span>Low <b>3.338</b> #1</span><span>Avg <b>3.345 V</b></span><span>High <b>3.353</b> #24</span></div>
+  </section>
+
+  <section class="tiles">
+    <div class="tile"><span class="eyebrow">Cycles</span><b>21</b><span class="s">of ~2,500</span></div>
+    <div class="tile"><span class="eyebrow">Alarms</span><b class="lime">0</b><span class="s">none seen</span></div>
+    <div class="tile"><span class="eyebrow">Peak</span><b>37.9°</b><span class="s">since May</span></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><span class="eyebrow">Last 7 days</span><span class="eyebrow" style="letter-spacing:.1em">SOC %</span></div>
+    <svg class="spark" id="a-charging-spark" viewBox="0 0 343 64" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="a-charging-f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C4F24B" stop-opacity=".22"></stop><stop offset="1" stop-color="#C4F24B" stop-opacity="0"></stop></linearGradient></defs>
+    <path d="M0.0 4.0 L26.4 11.8 L52.8 19.7 L79.2 25.8 L105.5 35.4 L131.9 34.8 L158.3 12.4 L184.7 15.2 L211.1 34.8 L237.5 46.6 L263.8 54.4 L290.2 4.0 L316.6 8.5 L343.0 25.8 L 343 64 L 0 64 Z" fill="url(#a-charging-f)"></path><path d="M0.0 4.0 L26.4 11.8 L52.8 19.7 L79.2 25.8 L105.5 35.4 L131.9 34.8 L158.3 12.4 L184.7 15.2 L211.1 34.8 L237.5 46.6 L263.8 54.4 L290.2 4.0 L316.6 8.5 L343.0 25.8" fill="none" stroke="#C4F24B" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"></path>
+    <circle cx="340" cy="25.84" r="3.5" fill="#C4F24B"></circle></svg>
+  </section>
+
+  <nav class="tabbar">
+    <a class="on"><i class="ti ti-gauge"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-gauge"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"></path><path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path><path d="M13.41 10.59l2.59 -2.59"></path><path d="M7 12a5 5 0 0 1 5 -5"></path></svg></i>Dash</a>
+    <a><i class="ti ti-heart-rate-monitor"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-heart-rate-monitor"><path d="M3 5a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1l0 -10"></path><path d="M7 20h10"></path><path d="M9 16v4"></path><path d="M15 16v4"></path><path d="M7 10h2l2 3l2 -6l1 3h3"></path></svg></i>Health</a>
+    <a><i class="ti ti-route"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-route"><path d="M3 19a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"></path><path d="M19 7a2 2 0 1 0 0 -4a2 2 0 0 0 0 4"></path><path d="M11 19h5.5a3.5 3.5 0 0 0 0 -7h-8a3.5 3.5 0 0 1 0 -7h4.5"></path></svg></i>Trips</a>
+  </nav>
+</div></div></figure><figure><figcaption>A · Cockpit · Parked</figcaption><div id="a-parked"><div class="app">
+  <header>
+    <div class="brand"><span class="mark"><i class="ti ti-bolt"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-bolt"><path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11"></path></svg></i></span>Scooter</div>
+    <div class="link"><span class="dot"></span>BMS connected · just now</div>
+  </header>
+
+  <section class="gauge">
+    <svg id="a-parked-gauge" viewBox="0 0 300 300" aria-hidden="true"><line x1="68.79928902938835" y1="218.13548662677317" x2="51.94631128077083" y2="232.27681403987705" stroke="#FF5E5E" stroke-width="3.2" stroke-linecap="round"></line><line x1="57.43581899534395" y1="214.81413730766826" x2="45.14853833100908" y2="223.41778385293395" stroke="#FF5E5E" stroke-width="2.4" stroke-linecap="round"></line><line x1="52.139129372358425" y1="206.5" x2="39.148748315591845" y2="214" stroke="#FF5E5E" stroke-width="2.4" stroke-linecap="round"></line><line x1="47.587220064858556" y1="197.75586357669903" x2="33.99260325930881" y2="204.09513750280954" stroke="#FF5E5E" stroke-width="2.4" stroke-linecap="round"></line><line x1="43.81473385119236" y1="188.64827619580058" x2="29.719344539403735" y2="193.77857834568562" stroke="#FF5E5E" stroke-width="2.4" stroke-linecap="round"></line><line x1="40.85038162933529" y1="179.24655209658488" x2="26.36149423499927" y2="183.12883777312268" stroke="#FF5E5E" stroke-width="2.4" stroke-linecap="round"></line><line x1="38.7167239096205" y1="169.62224407636313" x2="23.944607614437373" y2="172.22696674136708" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="37.429999115632754" y1="159.84859893048542" x2="22.48707864425657" y2="161.1559350717003" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="37" y1="150" x2="22" y2="150.00000000000003" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="37.429999115632754" y1="140.15140106951466" x2="22.48707864425657" y2="138.8440649282998" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="38.7167239096205" y1="130.37775592363687" x2="23.944607614437373" y2="127.77303325863289" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="40.850381629335274" y1="120.7534479034152" x2="26.361494234999242" y2="116.8711622268774" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="43.814733851192344" y1="111.35172380419945" x2="29.71934453940372" y2="106.22142165431441" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="53.9313745741151" y1="105.20246425548588" x2="33.992603259308794" y2="95.90486249719049" stroke="#C4F24B" stroke-width="3.2" stroke-linecap="round"></line><line x1="52.13912937235844" y1="93.49999999999999" x2="39.14874831559186" y2="85.99999999999999" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="57.43581899534391" y1="85.18586269233182" x2="45.14853833100902" y2="76.58221614706613" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="63.43697792755549" y1="77.36500010542106" x2="51.946311280770814" y2="67.72318596012298" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="70.09693372592011" y1="70.09693372592014" x2="59.4903320081219" y2="59.490332008121925" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="77.36500010542105" y1="63.4369779275555" x2="67.72318596012295" y2="51.94631128077083" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="85.18586269233175" y1="57.43581899534395" x2="76.58221614706606" y2="45.14853833100908" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="93.49999999999994" y1="52.13912937235847" x2="85.99999999999994" y2="39.14874831559189" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="102.24413642330092" y1="47.587220064858585" x2="95.90486249719041" y2="33.99260325930884" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="111.35172380419937" y1="43.81473385119237" x2="106.22142165431433" y2="29.71934453940375" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="120.75344790341516" y1="40.850381629335274" x2="116.87116222687736" y2="26.361494234999256" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="130.37775592363687" y1="38.7167239096205" x2="127.77303325863292" y2="23.944607614437373" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="140.1514010695146" y1="37.429999115632754" x2="138.84406492829976" y2="22.48707864425657" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="149.99999999999997" y1="44" x2="149.99999999999997" y2="22" stroke="#C4F24B" stroke-width="3.2" stroke-linecap="round"></line><line x1="159.84859893048534" y1="37.429999115632754" x2="161.1559350717002" y2="22.48707864425657" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="169.62224407636307" y1="38.716723909620484" x2="172.22696674136705" y2="23.94460761443736" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="179.24655209658488" y1="40.85038162933529" x2="183.1288377731227" y2="26.36149423499927" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="188.6482761958005" y1="43.81473385119233" x2="193.77857834568553" y2="29.719344539403707" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="197.75586357669906" y1="47.587220064858556" x2="204.09513750280956" y2="33.99260325930881" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="206.5" y1="52.13912937235844" x2="214" y2="39.14874831559186" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="214.8141373076682" y1="57.43581899534392" x2="223.4177838529339" y2="45.14853833100905" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="222.63499989457893" y1="63.436977927555475" x2="232.27681403987702" y2="51.9463112807708" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="229.90306627407983" y1="70.09693372592011" x2="240.50966799187808" y2="59.4903320081219" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="236.56302207244448" y1="77.36500010542103" x2="248.05368871922917" y2="67.72318596012293" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="242.56418100465606" y1="85.18586269233175" x2="254.8514616689909" y2="76.58221614706605" stroke="#C4F24B" stroke-width="2.4" stroke-linecap="round"></line><line x1="247.86087062764153" y1="93.49999999999994" x2="260.8512516844081" y2="85.99999999999994" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="246.06862542588487" y1="105.20246425548581" x2="266.00739674069115" y2="95.90486249719041" stroke="#1C2026" stroke-width="3.2" stroke-linecap="round"></line><line x1="256.18526614880767" y1="111.35172380419945" x2="270.2806554605963" y2="106.22142165431441" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="259.1496183706647" y1="120.75344790341516" x2="273.63850576500073" y2="116.87116222687735" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="261.2832760903795" y1="130.37775592363676" x2="276.05539238556264" y2="127.7730332586328" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="262.57000088436723" y1="140.1514010695146" x2="277.5129213557434" y2="138.84406492829973" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="263" y1="149.99999999999997" x2="278" y2="149.99999999999997" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="262.57000088436723" y1="159.84859893048542" x2="277.5129213557434" y2="161.15593507170033" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="261.2832760903795" y1="169.62224407636307" x2="276.05539238556264" y2="172.22696674136702" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="259.1496183706647" y1="179.2465520965848" x2="273.6385057650008" y2="183.1288377731226" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="256.1852661488076" y1="188.64827619580058" x2="270.2806554605963" y2="193.77857834568562" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="252.41277993514143" y1="197.75586357669906" x2="266.0073967406912" y2="204.09513750280954" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="247.86087062764162" y1="206.49999999999991" x2="260.8512516844082" y2="213.99999999999991" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="242.56418100465606" y1="214.8141373076682" x2="254.85146166899096" y2="223.4177838529339" stroke="#1C2026" stroke-width="2.4" stroke-linecap="round"></line><line x1="231.20071097061168" y1="218.13548662677314" x2="248.0536887192292" y2="232.27681403987702" stroke="#1C2026" stroke-width="3.2" stroke-linecap="round"></line></svg>
+    <span class="ef e">E</span><span class="ef f">F</span>
+    <div class="center">
+      <div class="eyebrow">Range · solo</div>
+      <div class="big">93<small>km</small></div>
+      <div class="pill idle"><i class="ti ti-parking"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-parking"><path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14"></path><path d="M10 16v-8h2.667c.736 0 1.333 .895 1.333 2s-.597 2 -1.333 2h-2.667"></path></svg></i>72% · parked</div>
+    </div>
+  </section>
+
+  <div class="seg">
+    <button class="on"><i class="ti ti-user"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-user"><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"></path><path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path></svg></i>Solo <b>93</b></button>
+    <button><i class="ti ti-users"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-users"><path d="M5 7a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path><path d="M21 21v-2a4 4 0 0 0 -3 -3.85"></path></svg></i>+1 rider <b>86</b></button>
+  </div>
+  <p class="eta">Since full charge: <b>28% used</b> · about 42 km ridden</p>
+
+  <section class="telemetry" style="grid-template-columns:repeat(3,1fr)">
+    <div><span class="k">Volt</span><span class="v">80.08</span></div>
+    <div><span class="k">Ah left</span><span class="v">37.4</span></div>
+    <div><span class="k">Temp</span><span class="v">31.2°</span></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><span class="eyebrow">Cells · 24S</span><span class="ok">7 mV spread · balanced</span></div>
+    <div class="cells" id="a-parked-cells"><div class="mid"></div><span><i style="height: 6.75px; top: 50%;"></i></span><span><i style="height: 2px; bottom: 50%;"></i></span><span><i style="height: 4.05px; top: 50%;"></i></span><span><i style="height: 6.75px; bottom: 50%;"></i></span><span><i style="height: 2px; top: 50%;"></i></span><span><i style="height: 6.75px; top: 50%;"></i></span><span><i style="height: 2px; bottom: 50%;"></i></span><span><i style="height: 9.45px; top: 50%; background: rgb(255, 182, 72);"></i></span><span><i style="height: 2px; top: 50%;"></i></span><span><i style="height: 4.05px; bottom: 50%;"></i></span><span><i style="height: 2px; bottom: 50%;"></i></span><span><i style="height: 4.05px; top: 50%;"></i></span><span><i style="height: 2px; top: 50%;"></i></span><span><i style="height: 2px; top: 50%;"></i></span><span><i style="height: 2px; bottom: 50%;"></i></span><span><i style="height: 4.05px; bottom: 50%;"></i></span><span><i style="height: 4.05px; top: 50%;"></i></span><span><i style="height: 4.05px; bottom: 50%;"></i></span><span><i style="height: 2px; top: 50%;"></i></span><span><i style="height: 2px; bottom: 50%;"></i></span><span><i style="height: 6.75px; bottom: 50%;"></i></span><span><i style="height: 2px; bottom: 50%;"></i></span><span><i style="height: 2px; top: 50%;"></i></span><span><i style="height: 9.45px; bottom: 50%; background: rgb(196, 242, 75);"></i></span></div>
+    <div class="legend"><span>Low <b>3.333</b> #8</span><span>Avg <b>3.337 V</b></span><span>High <b>3.340</b> #24</span></div>
+  </section>
+
+  <section class="tiles">
+    <div class="tile"><span class="eyebrow">Cycles</span><b>21</b><span class="s">of ~2,500</span></div>
+    <div class="tile"><span class="eyebrow">Alarms</span><b class="lime">0</b><span class="s">none seen</span></div>
+    <div class="tile"><span class="eyebrow">Peak</span><b>37.9°</b><span class="s">since May</span></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><span class="eyebrow">Last 7 days</span><span class="eyebrow" style="letter-spacing:.1em">SOC %</span></div>
+    <svg class="spark" id="a-parked-spark" viewBox="0 0 343 64" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="a-parked-f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C4F24B" stop-opacity=".22"></stop><stop offset="1" stop-color="#C4F24B" stop-opacity="0"></stop></linearGradient></defs>
+    <path d="M0.0 4.0 L26.4 11.8 L52.8 19.7 L79.2 25.8 L105.5 35.4 L131.9 34.8 L158.3 12.4 L184.7 15.2 L211.1 34.8 L237.5 46.6 L263.8 54.4 L290.2 4.0 L316.6 11.8 L343.0 19.7 L 343 64 L 0 64 Z" fill="url(#a-parked-f)"></path><path d="M0.0 4.0 L26.4 11.8 L52.8 19.7 L79.2 25.8 L105.5 35.4 L131.9 34.8 L158.3 12.4 L184.7 15.2 L211.1 34.8 L237.5 46.6 L263.8 54.4 L290.2 4.0 L316.6 11.8 L343.0 19.7" fill="none" stroke="#C4F24B" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"></path>
+    <circle cx="340" cy="19.68" r="3.5" fill="#C4F24B"></circle></svg>
+  </section>
+
+  <nav class="tabbar">
+    <a class="on"><i class="ti ti-gauge"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-gauge"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"></path><path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path><path d="M13.41 10.59l2.59 -2.59"></path><path d="M7 12a5 5 0 0 1 5 -5"></path></svg></i>Dash</a>
+    <a><i class="ti ti-heart-rate-monitor"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-heart-rate-monitor"><path d="M3 5a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1l0 -10"></path><path d="M7 20h10"></path><path d="M9 16v4"></path><path d="M15 16v4"></path><path d="M7 10h2l2 3l2 -6l1 3h3"></path></svg></i>Health</a>
+    <a><i class="ti ti-route"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-route"><path d="M3 19a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"></path><path d="M19 7a2 2 0 1 0 0 -4a2 2 0 0 0 0 4"></path><path d="M11 19h5.5a3.5 3.5 0 0 0 0 -7h-8a3.5 3.5 0 0 1 0 -7h4.5"></path></svg></i>Trips</a>
+  </nav>
+</div></div></figure></div></section>
+<section class="group"><h2>B · Glow</h2><p>Liquid battery, frosted glass cards, emerald</p><div class="pair"><figure><figcaption>B · Glow · Charging</figcaption><div id="b-charging"><div class="app">
+  <header>
+    <div class="brand"><span class="mark"><i class="ti ti-bolt"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-bolt"><path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11"></path></svg></i></span>Scooter</div>
+    <button class="icon-btn" aria-label="Sync"><i class="ti ti-refresh"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-refresh"><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"></path><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"></path></svg></i></button>
+  </header>
+
+  <section class="hero">
+    <div class="capsule-wrap">
+      <div class="nub"></div>
+      <div class="capsule"><div class="tank">
+        <div class="liquid">
+          <svg class="wave" viewBox="0 0 240 10" preserveAspectRatio="none"><path d="M0 5 Q 15 0 30 5 T 60 5 T 90 5 T 120 5 T 150 5 T 180 5 T 210 5 T 240 5 V10 H0 Z"></path></svg>
+          <span class="bubble" style="left:24%;bottom:24%;opacity:.75;"></span>
+          <span class="bubble" style="left:58%;bottom:52%;opacity:.55;"></span>
+          <span class="bubble" style="left:40%;bottom:74%;opacity:.4;width:4px;height:4px"></span>
+        </div>
+        <div class="reserve"></div>
+      </div></div>
+    </div>
+    <div>
+      <span class="chip"><i class="ti ti-bolt"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-bolt"><path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11"></path></svg></i>Charging · 7.08 A</span>
+      <div class="pct">61<span>%</span></div>
+      <div class="eta">Full in <b>2h 51m</b></div>
+      <div class="range">
+        <div><b>77<small>km</small></b><span>solo</span></div>
+        <div><b>70<small>km</small></b><span>with +1</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid4">
+    <div class="glass metric"><span class="ic"><i class="ti ti-wave-sine"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-wave-sine"><path d="M21 12h-2c-.894 0 -1.662 -.857 -1.761 -2c-.296 -3.45 -.749 -6 -2.749 -6s-2.5 3.582 -2.5 8s-.5 8 -2.5 8s-2.452 -2.547 -2.749 -6c-.1 -1.147 -.867 -2 -1.763 -2h-2"></path></svg></i></span><div><b>80.28 V</b><span>Voltage</span></div></div>
+    <div class="glass metric"><span class="ic on"><i class="ti ti-bolt"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-bolt"><path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11"></path></svg></i></span><div><b>+7.08 A</b><span>Current</span></div></div>
+    <div class="glass metric"><span class="ic"><i class="ti ti-plug-connected"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-plug-connected"><path d="M7 12l5 5l-1.5 1.5a3.536 3.536 0 1 1 -5 -5l1.5 -1.5"></path><path d="M17 12l-5 -5l1.5 -1.5a3.536 3.536 0 1 1 5 5l-1.5 1.5"></path><path d="M3 21l2.5 -2.5"></path><path d="M18.5 5.5l2.5 -2.5"></path><path d="M10 11l-2 2"></path><path d="M13 14l-2 2"></path></svg></i></span><div><b>568 W</b><span>Power</span></div></div>
+    <div class="glass metric"><span class="ic"><i class="ti ti-temperature"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-temperature"><path d="M10 13.5a4 4 0 1 0 4 0v-8.5a2 2 0 0 0 -4 0v8.5"></path><path d="M10 9l4 0"></path></svg></i></span><div><b>33.8°</b><span>Temp</span></div></div>
+  </section>
+
+  <section class="glass card">
+    <div class="card-head"><h3>24 cells</h3><span class="chip">Balanced · 15 mV spread</span></div>
+    <div class="pack" id="b-charging-pack"><i title="3.338 V" style="background: rgb(251, 191, 36);"></i><i title="3.344 V" style="background: rgba(52, 211, 153, 0.275);"></i><i title="3.342 V" style="background: rgba(52, 211, 153, 0.357);"></i><i title="3.351 V" style="background: rgba(52, 211, 153, 0.443);"></i><i title="3.344 V" style="background: rgba(52, 211, 153, 0.275);"></i><i title="3.342 V" style="background: rgba(52, 211, 153, 0.357);"></i><i title="3.346 V" style="background: rgba(52, 211, 153, 0.243);"></i><i title="3.339 V" style="background: rgba(52, 211, 153, 0.475);"></i><i title="3.344 V" style="background: rgba(52, 211, 153, 0.275);"></i><i title="3.349 V" style="background: rgba(52, 211, 153, 0.365);"></i><i title="3.347 V" style="background: rgba(52, 211, 153, 0.286);"></i><i title="3.343 V" style="background: rgba(52, 211, 153, 0.314);"></i><i title="3.344 V" style="background: rgba(52, 211, 153, 0.275);"></i><i title="3.345 V" style="background: rgba(52, 211, 153, 0.235);"></i><i title="3.346 V" style="background: rgba(52, 211, 153, 0.243);"></i><i title="3.348 V" style="background: rgba(52, 211, 153, 0.325);"></i><i title="3.343 V" style="background: rgba(52, 211, 153, 0.314);"></i><i title="3.348 V" style="background: rgba(52, 211, 153, 0.325);"></i><i title="3.345 V" style="background: rgba(52, 211, 153, 0.235);"></i><i title="3.346 V" style="background: rgba(52, 211, 153, 0.243);"></i><i title="3.350 V" style="background: rgba(52, 211, 153, 0.404);"></i><i title="3.347 V" style="background: rgba(52, 211, 153, 0.286);"></i><i title="3.345 V" style="background: rgba(52, 211, 153, 0.235);"></i><i title="3.353 V" style="background: rgb(125, 211, 252);"></i></div>
+    <div class="pack-legend"><span><b>3.338</b> – <b>3.353</b> V</span><span class="scale"><i style="width:8px;height:8px;border-radius:3px;background:#FBBF24"></i>low <i style="width:8px;height:8px;border-radius:3px;background:#7DD3FC;margin-left:6px"></i>high</span></div>
+  </section>
+
+  <section class="glass stats">
+    <div><b>21</b><span>cycles</span></div>
+    <div><b class="good">None</b><span>alarms</span></div>
+    <div><b>37.9°</b><span>peak temp</span></div>
+  </section>
+
+  <section class="glass card">
+    <div class="card-head"><h3>Last 7 days</h3><span style="font-size:12px;color:var(--dim)">battery %</span></div>
+    <svg class="spark" id="b-charging-spark" viewBox="0 0 311 70" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="b-charging-f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#34D399" stop-opacity=".3"></stop><stop offset="1" stop-color="#34D399" stop-opacity="0"></stop></linearGradient>
+    <linearGradient id="b-charging-s" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5EEAD4"></stop><stop offset="1" stop-color="#34D399"></stop></linearGradient></defs>
+    <path d="M 0 6 C 11.961538461538462 6, 11.961538461538462 14.120000000000001, 23.923076923076923 14.120000000000001 C 35.88461538461539 14.120000000000001, 35.88461538461539 22.240000000000002, 47.84615384615385 22.240000000000002 C 59.80769230769231 22.240000000000002, 59.80769230769231 28.62, 71.76923076923077 28.62 C 83.73076923076923 28.62, 83.73076923076923 38.480000000000004, 95.6923076923077 38.480000000000004 C 107.65384615384616 38.480000000000004, 107.65384615384616 37.900000000000006, 119.61538461538463 37.900000000000006 C 131.5769230769231 37.900000000000006, 131.5769230769231 14.700000000000001, 143.53846153846155 14.700000000000001 C 155.5 14.700000000000001, 155.5 17.599999999999998, 167.46153846153845 17.599999999999998 C 179.4230769230769 17.599999999999998, 179.4230769230769 37.900000000000006, 191.3846153846154 37.900000000000006 C 203.34615384615384 37.900000000000006, 203.34615384615384 50.08, 215.3076923076923 50.08 C 227.26923076923077 50.08, 227.26923076923077 58.2, 239.23076923076925 58.2 C 251.19230769230768 58.2, 251.19230769230768 6, 263.15384615384613 6 C 275.11538461538464 6, 275.11538461538464 10.639999999999997, 287.0769230769231 10.639999999999997 C 299.03846153846155 10.639999999999997, 299.03846153846155 28.62, 311 28.62 L 311 70 L 0 70 Z" fill="url(#b-charging-f)"></path><path d="M 0 6 C 11.961538461538462 6, 11.961538461538462 14.120000000000001, 23.923076923076923 14.120000000000001 C 35.88461538461539 14.120000000000001, 35.88461538461539 22.240000000000002, 47.84615384615385 22.240000000000002 C 59.80769230769231 22.240000000000002, 59.80769230769231 28.62, 71.76923076923077 28.62 C 83.73076923076923 28.62, 83.73076923076923 38.480000000000004, 95.6923076923077 38.480000000000004 C 107.65384615384616 38.480000000000004, 107.65384615384616 37.900000000000006, 119.61538461538463 37.900000000000006 C 131.5769230769231 37.900000000000006, 131.5769230769231 14.700000000000001, 143.53846153846155 14.700000000000001 C 155.5 14.700000000000001, 155.5 17.599999999999998, 167.46153846153845 17.599999999999998 C 179.4230769230769 17.599999999999998, 179.4230769230769 37.900000000000006, 191.3846153846154 37.900000000000006 C 203.34615384615384 37.900000000000006, 203.34615384615384 50.08, 215.3076923076923 50.08 C 227.26923076923077 50.08, 227.26923076923077 58.2, 239.23076923076925 58.2 C 251.19230769230768 58.2, 251.19230769230768 6, 263.15384615384613 6 C 275.11538461538464 6, 275.11538461538464 10.639999999999997, 287.0769230769231 10.639999999999997 C 299.03846153846155 10.639999999999997, 299.03846153846155 28.62, 311 28.62" fill="none" stroke="url(#b-charging-s)" stroke-width="2.2" vector-effect="non-scaling-stroke"></path></svg>
+  </section>
+
+  <nav class="dock">
+    <a class="on"><i class="ti ti-battery-charging-2"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-battery-charging-2"><path d="M4 9a2 2 0 0 1 2 -2h11a2 2 0 0 1 2 2v.5a.5 .5 0 0 0 .5 .5a.5 .5 0 0 1 .5 .5v3a.5 .5 0 0 1 -.5 .5a.5 .5 0 0 0 -.5 .5v.5a2 2 0 0 1 -2 2h-4.5"></path><path d="M3 15h6v2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2v-2"></path><path d="M6 22v-3"></path><path d="M4 15v-2.5"></path><path d="M8 15v-2.5"></path></svg></i>Home</a>
+    <a><i class="ti ti-heart-rate-monitor"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-heart-rate-monitor"><path d="M3 5a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1l0 -10"></path><path d="M7 20h10"></path><path d="M9 16v4"></path><path d="M15 16v4"></path><path d="M7 10h2l2 3l2 -6l1 3h3"></path></svg></i></a>
+    <a><i class="ti ti-route"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-route"><path d="M3 19a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"></path><path d="M19 7a2 2 0 1 0 0 -4a2 2 0 0 0 0 4"></path><path d="M11 19h5.5a3.5 3.5 0 0 0 0 -7h-8a3.5 3.5 0 0 1 0 -7h4.5"></path></svg></i></a>
+  </nav>
+</div></div></figure><figure><figcaption>B · Glow · Parked</figcaption><div id="b-parked"><div class="app">
+  <header>
+    <div class="brand"><span class="mark"><i class="ti ti-bolt"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-bolt"><path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11"></path></svg></i></span>Scooter</div>
+    <button class="icon-btn" aria-label="Sync"><i class="ti ti-refresh"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-refresh"><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"></path><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"></path></svg></i></button>
+  </header>
+
+  <section class="hero">
+    <div class="capsule-wrap">
+      <div class="nub"></div>
+      <div class="capsule"><div class="tank">
+        <div class="liquid">
+          <svg class="wave" viewBox="0 0 240 10" preserveAspectRatio="none"><path d="M0 5 Q 15 0 30 5 T 60 5 T 90 5 T 120 5 T 150 5 T 180 5 T 210 5 T 240 5 V10 H0 Z"></path></svg>
+        </div>
+        <div class="reserve"></div>
+      </div></div>
+    </div>
+    <div>
+      <span class="chip idle"><i class="ti ti-parking"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-parking"><path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14"></path><path d="M10 16v-8h2.667c.736 0 1.333 .895 1.333 2s-.597 2 -1.333 2h-2.667"></path></svg></i>Parked · synced just now</span>
+      <div class="pct">72<span>%</span></div>
+      <div class="eta"><b>28%</b> used since full charge</div>
+      <div class="range">
+        <div><b>93<small>km</small></b><span>solo</span></div>
+        <div><b>86<small>km</small></b><span>with +1</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid4">
+    <div class="glass metric"><span class="ic"><i class="ti ti-wave-sine"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-wave-sine"><path d="M21 12h-2c-.894 0 -1.662 -.857 -1.761 -2c-.296 -3.45 -.749 -6 -2.749 -6s-2.5 3.582 -2.5 8s-.5 8 -2.5 8s-2.452 -2.547 -2.749 -6c-.1 -1.147 -.867 -2 -1.763 -2h-2"></path></svg></i></span><div><b>80.08 V</b><span>Voltage</span></div></div>
+    <div class="glass metric"><span class="ic on"><i class="ti ti-battery-3"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-battery-3"><path d="M6 7h11a2 2 0 0 1 2 2v.5a.5 .5 0 0 0 .5 .5a.5 .5 0 0 1 .5 .5v3a.5 .5 0 0 1 -.5 .5a.5 .5 0 0 0 -.5 .5v.5a2 2 0 0 1 -2 2h-11a2 2 0 0 1 -2 -2v-6a2 2 0 0 1 2 -2"></path><path d="M7 10l0 4"></path><path d="M10 10l0 4"></path><path d="M13 10l0 4"></path></svg></i></span><div><b>37.4 Ah</b><span>Left of 52</span></div></div>
+    <div class="glass metric"><span class="ic"><i class="ti ti-temperature"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-temperature"><path d="M10 13.5a4 4 0 1 0 4 0v-8.5a2 2 0 0 0 -4 0v8.5"></path><path d="M10 9l4 0"></path></svg></i></span><div><b>31.2°</b><span>Temp</span></div></div>
+    <div class="glass metric"><span class="ic"><i class="ti ti-route"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-route"><path d="M3 19a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"></path><path d="M19 7a2 2 0 1 0 0 -4a2 2 0 0 0 0 4"></path><path d="M11 19h5.5a3.5 3.5 0 0 0 0 -7h-8a3.5 3.5 0 0 1 0 -7h4.5"></path></svg></i></span><div><b>~42 km</b><span>Since charge</span></div></div>
+  </section>
+
+  <section class="glass card">
+    <div class="card-head"><h3>24 cells</h3><span class="chip">Balanced · 7 mV spread</span></div>
+    <div class="pack" id="b-parked-pack"><i title="3.334 V" style="background: rgba(52, 211, 153, 0.32);"></i><i title="3.337 V" style="background: rgba(52, 211, 153, 0.24);"></i><i title="3.335 V" style="background: rgba(52, 211, 153, 0.28);"></i><i title="3.339 V" style="background: rgba(52, 211, 153, 0.32);"></i><i title="3.336 V" style="background: rgba(52, 211, 153, 0.24);"></i><i title="3.334 V" style="background: rgba(52, 211, 153, 0.32);"></i><i title="3.337 V" style="background: rgba(52, 211, 153, 0.24);"></i><i title="3.333 V" style="background: rgb(251, 191, 36);"></i><i title="3.336 V" style="background: rgba(52, 211, 153, 0.24);"></i><i title="3.338 V" style="background: rgba(52, 211, 153, 0.28);"></i><i title="3.337 V" style="background: rgba(52, 211, 153, 0.24);"></i><i title="3.335 V" style="background: rgba(52, 211, 153, 0.28);"></i><i title="3.336 V" style="background: rgba(52, 211, 153, 0.24);"></i><i title="3.336 V" style="background: rgba(52, 211, 153, 0.24);"></i><i title="3.337 V" style="background: rgba(52, 211, 153, 0.24);"></i><i title="3.338 V" style="background: rgba(52, 211, 153, 0.28);"></i><i title="3.335 V" style="background: rgba(52, 211, 153, 0.28);"></i><i title="3.338 V" style="background: rgba(52, 211, 153, 0.28);"></i><i title="3.336 V" style="background: rgba(52, 211, 153, 0.24);"></i><i title="3.337 V" style="background: rgba(52, 211, 153, 0.24);"></i><i title="3.339 V" style="background: rgba(52, 211, 153, 0.32);"></i><i title="3.337 V" style="background: rgba(52, 211, 153, 0.24);"></i><i title="3.336 V" style="background: rgba(52, 211, 153, 0.24);"></i><i title="3.340 V" style="background: rgb(125, 211, 252);"></i></div>
+    <div class="pack-legend"><span><b>3.333</b> – <b>3.340</b> V</span><span class="scale"><i style="width:8px;height:8px;border-radius:3px;background:#FBBF24"></i>low <i style="width:8px;height:8px;border-radius:3px;background:#7DD3FC;margin-left:6px"></i>high</span></div>
+  </section>
+
+  <section class="glass stats">
+    <div><b>21</b><span>cycles</span></div>
+    <div><b class="good">None</b><span>alarms</span></div>
+    <div><b>37.9°</b><span>peak temp</span></div>
+  </section>
+
+  <section class="glass card">
+    <div class="card-head"><h3>Last 7 days</h3><span style="font-size:12px;color:var(--dim)">battery %</span></div>
+    <svg class="spark" id="b-parked-spark" viewBox="0 0 311 70" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="b-parked-f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#34D399" stop-opacity=".3"></stop><stop offset="1" stop-color="#34D399" stop-opacity="0"></stop></linearGradient>
+    <linearGradient id="b-parked-s" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5EEAD4"></stop><stop offset="1" stop-color="#34D399"></stop></linearGradient></defs>
+    <path d="M 0 6 C 11.961538461538462 6, 11.961538461538462 14.120000000000001, 23.923076923076923 14.120000000000001 C 35.88461538461539 14.120000000000001, 35.88461538461539 22.240000000000002, 47.84615384615385 22.240000000000002 C 59.80769230769231 22.240000000000002, 59.80769230769231 28.62, 71.76923076923077 28.62 C 83.73076923076923 28.62, 83.73076923076923 38.480000000000004, 95.6923076923077 38.480000000000004 C 107.65384615384616 38.480000000000004, 107.65384615384616 37.900000000000006, 119.61538461538463 37.900000000000006 C 131.5769230769231 37.900000000000006, 131.5769230769231 14.700000000000001, 143.53846153846155 14.700000000000001 C 155.5 14.700000000000001, 155.5 17.599999999999998, 167.46153846153845 17.599999999999998 C 179.4230769230769 17.599999999999998, 179.4230769230769 37.900000000000006, 191.3846153846154 37.900000000000006 C 203.34615384615384 37.900000000000006, 203.34615384615384 50.08, 215.3076923076923 50.08 C 227.26923076923077 50.08, 227.26923076923077 58.2, 239.23076923076925 58.2 C 251.19230769230768 58.2, 251.19230769230768 6, 263.15384615384613 6 C 275.11538461538464 6, 275.11538461538464 14.120000000000001, 287.0769230769231 14.120000000000001 C 299.03846153846155 14.120000000000001, 299.03846153846155 22.240000000000002, 311 22.240000000000002 L 311 70 L 0 70 Z" fill="url(#b-parked-f)"></path><path d="M 0 6 C 11.961538461538462 6, 11.961538461538462 14.120000000000001, 23.923076923076923 14.120000000000001 C 35.88461538461539 14.120000000000001, 35.88461538461539 22.240000000000002, 47.84615384615385 22.240000000000002 C 59.80769230769231 22.240000000000002, 59.80769230769231 28.62, 71.76923076923077 28.62 C 83.73076923076923 28.62, 83.73076923076923 38.480000000000004, 95.6923076923077 38.480000000000004 C 107.65384615384616 38.480000000000004, 107.65384615384616 37.900000000000006, 119.61538461538463 37.900000000000006 C 131.5769230769231 37.900000000000006, 131.5769230769231 14.700000000000001, 143.53846153846155 14.700000000000001 C 155.5 14.700000000000001, 155.5 17.599999999999998, 167.46153846153845 17.599999999999998 C 179.4230769230769 17.599999999999998, 179.4230769230769 37.900000000000006, 191.3846153846154 37.900000000000006 C 203.34615384615384 37.900000000000006, 203.34615384615384 50.08, 215.3076923076923 50.08 C 227.26923076923077 50.08, 227.26923076923077 58.2, 239.23076923076925 58.2 C 251.19230769230768 58.2, 251.19230769230768 6, 263.15384615384613 6 C 275.11538461538464 6, 275.11538461538464 14.120000000000001, 287.0769230769231 14.120000000000001 C 299.03846153846155 14.120000000000001, 299.03846153846155 22.240000000000002, 311 22.240000000000002" fill="none" stroke="url(#b-parked-s)" stroke-width="2.2" vector-effect="non-scaling-stroke"></path></svg>
+  </section>
+
+  <nav class="dock">
+    <a class="on"><i class="ti ti-battery-charging-2"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-battery-charging-2"><path d="M4 9a2 2 0 0 1 2 -2h11a2 2 0 0 1 2 2v.5a.5 .5 0 0 0 .5 .5a.5 .5 0 0 1 .5 .5v3a.5 .5 0 0 1 -.5 .5a.5 .5 0 0 0 -.5 .5v.5a2 2 0 0 1 -2 2h-4.5"></path><path d="M3 15h6v2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2v-2"></path><path d="M6 22v-3"></path><path d="M4 15v-2.5"></path><path d="M8 15v-2.5"></path></svg></i>Home</a>
+    <a><i class="ti ti-heart-rate-monitor"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-heart-rate-monitor"><path d="M3 5a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1l0 -10"></path><path d="M7 20h10"></path><path d="M9 16v4"></path><path d="M15 16v4"></path><path d="M7 10h2l2 3l2 -6l1 3h3"></path></svg></i></a>
+    <a><i class="ti ti-route"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-route"><path d="M3 19a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"></path><path d="M19 7a2 2 0 1 0 0 -4a2 2 0 0 0 0 4"></path><path d="M11 19h5.5a3.5 3.5 0 0 0 0 -7h-8a3.5 3.5 0 0 1 0 -7h4.5"></path></svg></i></a>
+  </nav>
+</div></div></figure></div></section>
+<section class="group"><h2>A+B</h2><p>A's gauge + numerals inside B's glow, glass and floating nav</p><div class="pair"><figure><figcaption>A+B · Charging</figcaption><div id="ab-charging"><div class="app">
+  <header>
+    <div class="brand"><span class="mark"><i class="ti ti-bolt"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-bolt"><path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11"></path></svg></i></span>Scooter</div>
+    <button class="sync glass"><span class="dot"></span>Live<i class="ti ti-refresh"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-refresh"><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"></path><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"></path></svg></i></button>
+  </header>
+
+  <section class="gauge">
+    <svg id="ab-charging-gauge" viewBox="0 0 300 300" aria-hidden="true"><line x1="68.79928902938835" y1="218.13548662677317" x2="51.94631128077083" y2="232.27681403987705" stroke="#FF5E5E" stroke-width="3.2" stroke-linecap="round"></line><line x1="57.43581899534395" y1="214.81413730766826" x2="45.14853833100908" y2="223.41778385293395" stroke="#FF5E5E" stroke-width="2.4" stroke-linecap="round"></line><line x1="52.139129372358425" y1="206.5" x2="39.148748315591845" y2="214" stroke="#FF5E5E" stroke-width="2.4" stroke-linecap="round"></line><line x1="47.587220064858556" y1="197.75586357669903" x2="33.99260325930881" y2="204.09513750280954" stroke="#FF5E5E" stroke-width="2.4" stroke-linecap="round"></line><line x1="43.81473385119236" y1="188.64827619580058" x2="29.719344539403735" y2="193.77857834568562" stroke="#FF5E5E" stroke-width="2.4" stroke-linecap="round"></line><line x1="40.85038162933529" y1="179.24655209658488" x2="26.36149423499927" y2="183.12883777312268" stroke="#FF5E5E" stroke-width="2.4" stroke-linecap="round"></line><line x1="38.7167239096205" y1="169.62224407636313" x2="23.944607614437373" y2="172.22696674136708" stroke="rgb(54,212,152)" stroke-width="2.4" stroke-linecap="round"></line><line x1="37.429999115632754" y1="159.84859893048542" x2="22.48707864425657" y2="161.1559350717003" stroke="rgb(58,212,150)" stroke-width="2.4" stroke-linecap="round"></line><line x1="37" y1="150" x2="22" y2="150.00000000000003" stroke="rgb(61,213,148)" stroke-width="2.4" stroke-linecap="round"></line><line x1="37.429999115632754" y1="140.15140106951466" x2="22.48707864425657" y2="138.8440649282998" stroke="rgb(64,214,147)" stroke-width="2.4" stroke-linecap="round"></line><line x1="38.7167239096205" y1="130.37775592363687" x2="23.944607614437373" y2="127.77303325863289" stroke="rgb(67,214,145)" stroke-width="2.4" stroke-linecap="round"></line><line x1="40.850381629335274" y1="120.7534479034152" x2="26.361494234999242" y2="116.8711622268774" stroke="rgb(70,215,143)" stroke-width="2.4" stroke-linecap="round"></line><line x1="43.814733851192344" y1="111.35172380419945" x2="29.71934453940372" y2="106.22142165431441" stroke="rgb(73,216,142)" stroke-width="2.4" stroke-linecap="round"></line><line x1="53.9313745741151" y1="105.20246425548588" x2="33.992603259308794" y2="95.90486249719049" stroke="rgb(76,216,140)" stroke-width="3.2" stroke-linecap="round"></line><line x1="52.13912937235844" y1="93.49999999999999" x2="39.14874831559186" y2="85.99999999999999" stroke="rgb(79,217,138)" stroke-width="2.4" stroke-linecap="round"></line><line x1="57.43581899534391" y1="85.18586269233182" x2="45.14853833100902" y2="76.58221614706613" stroke="rgb(82,217,137)" stroke-width="2.4" stroke-linecap="round"></line><line x1="63.43697792755549" y1="77.36500010542106" x2="51.946311280770814" y2="67.72318596012298" stroke="rgb(85,218,135)" stroke-width="2.4" stroke-linecap="round"></line><line x1="70.09693372592011" y1="70.09693372592014" x2="59.4903320081219" y2="59.490332008121925" stroke="rgb(88,219,133)" stroke-width="2.4" stroke-linecap="round"></line><line x1="77.36500010542105" y1="63.4369779275555" x2="67.72318596012295" y2="51.94631128077083" stroke="rgb(91,219,132)" stroke-width="2.4" stroke-linecap="round"></line><line x1="85.18586269233175" y1="57.43581899534395" x2="76.58221614706606" y2="45.14853833100908" stroke="rgb(94,220,130)" stroke-width="2.4" stroke-linecap="round"></line><line x1="93.49999999999994" y1="52.13912937235847" x2="85.99999999999994" y2="39.14874831559189" stroke="rgb(98,221,128)" stroke-width="2.4" stroke-linecap="round"></line><line x1="102.24413642330092" y1="47.587220064858585" x2="95.90486249719041" y2="33.99260325930884" stroke="rgb(101,221,127)" stroke-width="2.4" stroke-linecap="round"></line><line x1="111.35172380419937" y1="43.81473385119237" x2="106.22142165431433" y2="29.71934453940375" stroke="rgb(104,222,125)" stroke-width="2.4" stroke-linecap="round"></line><line x1="120.75344790341516" y1="40.850381629335274" x2="116.87116222687736" y2="26.361494234999256" stroke="rgb(107,223,123)" stroke-width="2.4" stroke-linecap="round"></line><line x1="130.37775592363687" y1="38.7167239096205" x2="127.77303325863292" y2="23.944607614437373" stroke="rgb(110,223,122)" stroke-width="2.4" stroke-linecap="round"></line><line x1="140.1514010695146" y1="37.429999115632754" x2="138.84406492829976" y2="22.48707864425657" stroke="rgb(113,224,120)" stroke-width="2.4" stroke-linecap="round"></line><line x1="149.99999999999997" y1="44" x2="149.99999999999997" y2="22" stroke="rgb(116,225,118)" stroke-width="3.2" stroke-linecap="round"></line><line x1="159.84859893048534" y1="37.429999115632754" x2="161.1559350717002" y2="22.48707864425657" stroke="rgb(119,225,117)" stroke-width="2.4" stroke-linecap="round"></line><line x1="169.62224407636307" y1="38.716723909620484" x2="172.22696674136705" y2="23.94460761443736" stroke="rgb(122,226,115)" stroke-width="2.4" stroke-linecap="round"></line><line x1="179.24655209658488" y1="40.85038162933529" x2="183.1288377731227" y2="26.36149423499927" stroke="rgb(125,227,113)" stroke-width="2.4" stroke-linecap="round"></line><line x1="188.6482761958005" y1="43.81473385119233" x2="193.77857834568553" y2="29.719344539403707" stroke="rgb(128,227,112)" stroke-width="2.4" stroke-linecap="round"></line><line x1="197.75586357669906" y1="47.587220064858556" x2="204.09513750280956" y2="33.99260325930881" stroke="rgb(131,228,110)" stroke-width="2.4" stroke-linecap="round"></line><line x1="206.5" y1="52.13912937235844" x2="214" y2="39.14874831559186" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="214.8141373076682" y1="57.43581899534392" x2="223.4177838529339" y2="45.14853833100905" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="222.63499989457893" y1="63.436977927555475" x2="232.27681403987702" y2="51.9463112807708" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="229.90306627407983" y1="70.09693372592011" x2="240.50966799187808" y2="59.4903320081219" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="236.56302207244448" y1="77.36500010542103" x2="248.05368871922917" y2="67.72318596012293" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="242.56418100465606" y1="85.18586269233175" x2="254.8514616689909" y2="76.58221614706605" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="247.86087062764153" y1="93.49999999999994" x2="260.8512516844081" y2="85.99999999999994" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="246.06862542588487" y1="105.20246425548581" x2="266.00739674069115" y2="95.90486249719041" stroke="rgba(255,255,255,.07)" stroke-width="3.2" stroke-linecap="round"></line><line x1="256.18526614880767" y1="111.35172380419945" x2="270.2806554605963" y2="106.22142165431441" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="259.1496183706647" y1="120.75344790341516" x2="273.63850576500073" y2="116.87116222687735" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="261.2832760903795" y1="130.37775592363676" x2="276.05539238556264" y2="127.7730332586328" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="262.57000088436723" y1="140.1514010695146" x2="277.5129213557434" y2="138.84406492829973" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="263" y1="149.99999999999997" x2="278" y2="149.99999999999997" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="262.57000088436723" y1="159.84859893048542" x2="277.5129213557434" y2="161.15593507170033" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="261.2832760903795" y1="169.62224407636307" x2="276.05539238556264" y2="172.22696674136702" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="259.1496183706647" y1="179.2465520965848" x2="273.6385057650008" y2="183.1288377731226" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="256.1852661488076" y1="188.64827619580058" x2="270.2806554605963" y2="193.77857834568562" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="252.41277993514143" y1="197.75586357669906" x2="266.0073967406912" y2="204.09513750280954" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="247.86087062764162" y1="206.49999999999991" x2="260.8512516844082" y2="213.99999999999991" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="242.56418100465606" y1="214.8141373076682" x2="254.85146166899096" y2="223.4177838529339" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="231.20071097061168" y1="218.13548662677314" x2="248.0536887192292" y2="232.27681403987702" stroke="rgba(255,255,255,.07)" stroke-width="3.2" stroke-linecap="round"></line></svg>
+    <span class="ef e">E</span><span class="ef f">F</span>
+    <div class="center">
+      <div class="eyebrow">Range · solo</div>
+      <div class="big">77<small>km</small></div>
+      <div class="pill charging"><i class="ti ti-bolt"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-bolt"><path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11"></path></svg></i>61% · charging</div>
+    </div>
+  </section>
+
+  <div class="seg glass">
+    <button class="on"><i class="ti ti-user"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-user"><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"></path><path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path></svg></i>Solo <b>77</b></button>
+    <button><i class="ti ti-users"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-users"><path d="M5 7a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path><path d="M21 21v-2a4 4 0 0 0 -3 -3.85"></path></svg></i>+1 rider <b>70</b></button>
+  </div>
+  <p class="eta">Full in <b>2h 51m</b> · 52 Ah LiFePO4</p>
+
+  <section class="telemetry glass">
+    <div><span class="k">Volt</span><span class="v">80.28</span></div>
+    <div><span class="k">Amp</span><span class="v lime">+7.08</span></div>
+    <div><span class="k">Watt</span><span class="v">568</span></div>
+    <div><span class="k">Temp</span><span class="v">33.8°</span></div>
+  </section>
+
+  <section class="card glass">
+    <div class="card-head"><h3>24 cells</h3><span class="chip">Balanced · 15 mV spread</span></div>
+    <div class="cells" id="ab-charging-cells"><div class="mid"></div><span><i style="height: 19.9125px; top: 50%; background: rgb(251, 191, 36);"></i></span><span><i style="height: 3.7125px; top: 50%;"></i></span><span><i style="height: 9.1125px; top: 50%;"></i></span><span><i style="height: 15.1875px; bottom: 50%;"></i></span><span><i style="height: 3.7125px; top: 50%;"></i></span><span><i style="height: 9.1125px; top: 50%;"></i></span><span><i style="height: 2px; bottom: 50%;"></i></span><span><i style="height: 17.2125px; top: 50%;"></i></span><span><i style="height: 3.7125px; top: 50%;"></i></span><span><i style="height: 9.7875px; bottom: 50%;"></i></span><span><i style="height: 4.3875px; bottom: 50%;"></i></span><span><i style="height: 6.4125px; top: 50%;"></i></span><span><i style="height: 3.7125px; top: 50%;"></i></span><span><i style="height: 2px; top: 50%;"></i></span><span><i style="height: 2px; bottom: 50%;"></i></span><span><i style="height: 7.0875px; bottom: 50%;"></i></span><span><i style="height: 6.4125px; top: 50%;"></i></span><span><i style="height: 7.0875px; bottom: 50%;"></i></span><span><i style="height: 2px; top: 50%;"></i></span><span><i style="height: 2px; bottom: 50%;"></i></span><span><i style="height: 12.4875px; bottom: 50%;"></i></span><span><i style="height: 4.3875px; bottom: 50%;"></i></span><span><i style="height: 2px; top: 50%;"></i></span><span><i style="height: 20.5875px; bottom: 50%; background: rgb(196, 242, 75);"></i></span></div>
+    <div class="legend"><span>Low <b>3.338</b> #1</span><span>Avg <b>3.345 V</b></span><span>High <b>3.353</b> #24</span></div>
+  </section>
+
+  <section class="stats glass">
+    <div><b>21</b><span>cycles</span></div>
+    <div><b class="lime">0</b><span>alarms</span></div>
+    <div><b>37.9°</b><span>peak temp</span></div>
+  </section>
+
+  <section class="card glass">
+    <div class="card-head"><h3>Last 7 days</h3><span style="font-size:11px;color:var(--dim)">battery %</span></div>
+    <svg class="spark" id="ab-charging-spark" viewBox="0 0 311 66" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="ab-charging-f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9BE36A" stop-opacity=".26"></stop><stop offset="1" stop-color="#9BE36A" stop-opacity="0"></stop></linearGradient>
+    <linearGradient id="ab-charging-s" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#34D399"></stop><stop offset="1" stop-color="#C4F24B"></stop></linearGradient></defs>
+    <path d="M 0 6 C 11.961538461538462 6, 11.961538461538462 13.56, 23.923076923076923 13.56 C 35.88461538461539 13.56, 35.88461538461539 21.12, 47.84615384615385 21.12 C 59.80769230769231 21.12, 59.80769230769231 27.060000000000002, 71.76923076923077 27.060000000000002 C 83.73076923076923 27.060000000000002, 83.73076923076923 36.24, 95.6923076923077 36.24 C 107.65384615384616 36.24, 107.65384615384616 35.7, 119.61538461538463 35.7 C 131.5769230769231 35.7, 131.5769230769231 14.100000000000001, 143.53846153846155 14.100000000000001 C 155.5 14.100000000000001, 155.5 16.799999999999997, 167.46153846153845 16.799999999999997 C 179.4230769230769 16.799999999999997, 179.4230769230769 35.7, 191.3846153846154 35.7 C 203.34615384615384 35.7, 203.34615384615384 47.04, 215.3076923076923 47.04 C 227.26923076923077 47.04, 227.26923076923077 54.6, 239.23076923076925 54.6 C 251.19230769230768 54.6, 251.19230769230768 6, 263.15384615384613 6 C 275.11538461538464 6, 275.11538461538464 10.319999999999997, 287.0769230769231 10.319999999999997 C 299.03846153846155 10.319999999999997, 299.03846153846155 27.060000000000002, 311 27.060000000000002 L 311 66 L 0 66 Z" fill="url(#ab-charging-f)"></path><path d="M 0 6 C 11.961538461538462 6, 11.961538461538462 13.56, 23.923076923076923 13.56 C 35.88461538461539 13.56, 35.88461538461539 21.12, 47.84615384615385 21.12 C 59.80769230769231 21.12, 59.80769230769231 27.060000000000002, 71.76923076923077 27.060000000000002 C 83.73076923076923 27.060000000000002, 83.73076923076923 36.24, 95.6923076923077 36.24 C 107.65384615384616 36.24, 107.65384615384616 35.7, 119.61538461538463 35.7 C 131.5769230769231 35.7, 131.5769230769231 14.100000000000001, 143.53846153846155 14.100000000000001 C 155.5 14.100000000000001, 155.5 16.799999999999997, 167.46153846153845 16.799999999999997 C 179.4230769230769 16.799999999999997, 179.4230769230769 35.7, 191.3846153846154 35.7 C 203.34615384615384 35.7, 203.34615384615384 47.04, 215.3076923076923 47.04 C 227.26923076923077 47.04, 227.26923076923077 54.6, 239.23076923076925 54.6 C 251.19230769230768 54.6, 251.19230769230768 6, 263.15384615384613 6 C 275.11538461538464 6, 275.11538461538464 10.319999999999997, 287.0769230769231 10.319999999999997 C 299.03846153846155 10.319999999999997, 299.03846153846155 27.060000000000002, 311 27.060000000000002" fill="none" stroke="url(#ab-charging-s)" stroke-width="2.2" vector-effect="non-scaling-stroke"></path></svg>
+  </section>
+
+  <nav class="dock">
+    <a class="on"><i class="ti ti-gauge"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-gauge"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"></path><path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path><path d="M13.41 10.59l2.59 -2.59"></path><path d="M7 12a5 5 0 0 1 5 -5"></path></svg></i>Dash</a>
+    <a><i class="ti ti-heart-rate-monitor"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-heart-rate-monitor"><path d="M3 5a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1l0 -10"></path><path d="M7 20h10"></path><path d="M9 16v4"></path><path d="M15 16v4"></path><path d="M7 10h2l2 3l2 -6l1 3h3"></path></svg></i></a>
+    <a><i class="ti ti-route"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-route"><path d="M3 19a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"></path><path d="M19 7a2 2 0 1 0 0 -4a2 2 0 0 0 0 4"></path><path d="M11 19h5.5a3.5 3.5 0 0 0 0 -7h-8a3.5 3.5 0 0 1 0 -7h4.5"></path></svg></i></a>
+  </nav>
+</div></div></figure><figure><figcaption>A+B · Parked</figcaption><div id="ab-parked"><div class="app">
+  <header>
+    <div class="brand"><span class="mark"><i class="ti ti-bolt"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-bolt"><path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11"></path></svg></i></span>Scooter</div>
+    <button class="sync glass"><span class="dot"></span>just now<i class="ti ti-refresh"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-refresh"><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"></path><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"></path></svg></i></button>
+  </header>
+
+  <section class="gauge">
+    <svg id="ab-parked-gauge" viewBox="0 0 300 300" aria-hidden="true"><line x1="68.79928902938835" y1="218.13548662677317" x2="51.94631128077083" y2="232.27681403987705" stroke="#FF5E5E" stroke-width="3.2" stroke-linecap="round"></line><line x1="57.43581899534395" y1="214.81413730766826" x2="45.14853833100908" y2="223.41778385293395" stroke="#FF5E5E" stroke-width="2.4" stroke-linecap="round"></line><line x1="52.139129372358425" y1="206.5" x2="39.148748315591845" y2="214" stroke="#FF5E5E" stroke-width="2.4" stroke-linecap="round"></line><line x1="47.587220064858556" y1="197.75586357669903" x2="33.99260325930881" y2="204.09513750280954" stroke="#FF5E5E" stroke-width="2.4" stroke-linecap="round"></line><line x1="43.81473385119236" y1="188.64827619580058" x2="29.719344539403735" y2="193.77857834568562" stroke="#FF5E5E" stroke-width="2.4" stroke-linecap="round"></line><line x1="40.85038162933529" y1="179.24655209658488" x2="26.36149423499927" y2="183.12883777312268" stroke="#FF5E5E" stroke-width="2.4" stroke-linecap="round"></line><line x1="38.7167239096205" y1="169.62224407636313" x2="23.944607614437373" y2="172.22696674136708" stroke="rgb(54,212,152)" stroke-width="2.4" stroke-linecap="round"></line><line x1="37.429999115632754" y1="159.84859893048542" x2="22.48707864425657" y2="161.1559350717003" stroke="rgb(58,212,150)" stroke-width="2.4" stroke-linecap="round"></line><line x1="37" y1="150" x2="22" y2="150.00000000000003" stroke="rgb(61,213,148)" stroke-width="2.4" stroke-linecap="round"></line><line x1="37.429999115632754" y1="140.15140106951466" x2="22.48707864425657" y2="138.8440649282998" stroke="rgb(64,214,147)" stroke-width="2.4" stroke-linecap="round"></line><line x1="38.7167239096205" y1="130.37775592363687" x2="23.944607614437373" y2="127.77303325863289" stroke="rgb(67,214,145)" stroke-width="2.4" stroke-linecap="round"></line><line x1="40.850381629335274" y1="120.7534479034152" x2="26.361494234999242" y2="116.8711622268774" stroke="rgb(70,215,143)" stroke-width="2.4" stroke-linecap="round"></line><line x1="43.814733851192344" y1="111.35172380419945" x2="29.71934453940372" y2="106.22142165431441" stroke="rgb(73,216,142)" stroke-width="2.4" stroke-linecap="round"></line><line x1="53.9313745741151" y1="105.20246425548588" x2="33.992603259308794" y2="95.90486249719049" stroke="rgb(76,216,140)" stroke-width="3.2" stroke-linecap="round"></line><line x1="52.13912937235844" y1="93.49999999999999" x2="39.14874831559186" y2="85.99999999999999" stroke="rgb(79,217,138)" stroke-width="2.4" stroke-linecap="round"></line><line x1="57.43581899534391" y1="85.18586269233182" x2="45.14853833100902" y2="76.58221614706613" stroke="rgb(82,217,137)" stroke-width="2.4" stroke-linecap="round"></line><line x1="63.43697792755549" y1="77.36500010542106" x2="51.946311280770814" y2="67.72318596012298" stroke="rgb(85,218,135)" stroke-width="2.4" stroke-linecap="round"></line><line x1="70.09693372592011" y1="70.09693372592014" x2="59.4903320081219" y2="59.490332008121925" stroke="rgb(88,219,133)" stroke-width="2.4" stroke-linecap="round"></line><line x1="77.36500010542105" y1="63.4369779275555" x2="67.72318596012295" y2="51.94631128077083" stroke="rgb(91,219,132)" stroke-width="2.4" stroke-linecap="round"></line><line x1="85.18586269233175" y1="57.43581899534395" x2="76.58221614706606" y2="45.14853833100908" stroke="rgb(94,220,130)" stroke-width="2.4" stroke-linecap="round"></line><line x1="93.49999999999994" y1="52.13912937235847" x2="85.99999999999994" y2="39.14874831559189" stroke="rgb(98,221,128)" stroke-width="2.4" stroke-linecap="round"></line><line x1="102.24413642330092" y1="47.587220064858585" x2="95.90486249719041" y2="33.99260325930884" stroke="rgb(101,221,127)" stroke-width="2.4" stroke-linecap="round"></line><line x1="111.35172380419937" y1="43.81473385119237" x2="106.22142165431433" y2="29.71934453940375" stroke="rgb(104,222,125)" stroke-width="2.4" stroke-linecap="round"></line><line x1="120.75344790341516" y1="40.850381629335274" x2="116.87116222687736" y2="26.361494234999256" stroke="rgb(107,223,123)" stroke-width="2.4" stroke-linecap="round"></line><line x1="130.37775592363687" y1="38.7167239096205" x2="127.77303325863292" y2="23.944607614437373" stroke="rgb(110,223,122)" stroke-width="2.4" stroke-linecap="round"></line><line x1="140.1514010695146" y1="37.429999115632754" x2="138.84406492829976" y2="22.48707864425657" stroke="rgb(113,224,120)" stroke-width="2.4" stroke-linecap="round"></line><line x1="149.99999999999997" y1="44" x2="149.99999999999997" y2="22" stroke="rgb(116,225,118)" stroke-width="3.2" stroke-linecap="round"></line><line x1="159.84859893048534" y1="37.429999115632754" x2="161.1559350717002" y2="22.48707864425657" stroke="rgb(119,225,117)" stroke-width="2.4" stroke-linecap="round"></line><line x1="169.62224407636307" y1="38.716723909620484" x2="172.22696674136705" y2="23.94460761443736" stroke="rgb(122,226,115)" stroke-width="2.4" stroke-linecap="round"></line><line x1="179.24655209658488" y1="40.85038162933529" x2="183.1288377731227" y2="26.36149423499927" stroke="rgb(125,227,113)" stroke-width="2.4" stroke-linecap="round"></line><line x1="188.6482761958005" y1="43.81473385119233" x2="193.77857834568553" y2="29.719344539403707" stroke="rgb(128,227,112)" stroke-width="2.4" stroke-linecap="round"></line><line x1="197.75586357669906" y1="47.587220064858556" x2="204.09513750280956" y2="33.99260325930881" stroke="rgb(131,228,110)" stroke-width="2.4" stroke-linecap="round"></line><line x1="206.5" y1="52.13912937235844" x2="214" y2="39.14874831559186" stroke="rgb(134,229,108)" stroke-width="2.4" stroke-linecap="round"></line><line x1="214.8141373076682" y1="57.43581899534392" x2="223.4177838529339" y2="45.14853833100905" stroke="rgb(138,229,107)" stroke-width="2.4" stroke-linecap="round"></line><line x1="222.63499989457893" y1="63.436977927555475" x2="232.27681403987702" y2="51.9463112807708" stroke="rgb(141,230,105)" stroke-width="2.4" stroke-linecap="round"></line><line x1="229.90306627407983" y1="70.09693372592011" x2="240.50966799187808" y2="59.4903320081219" stroke="rgb(144,231,103)" stroke-width="2.4" stroke-linecap="round"></line><line x1="236.56302207244448" y1="77.36500010542103" x2="248.05368871922917" y2="67.72318596012293" stroke="rgb(147,231,102)" stroke-width="2.4" stroke-linecap="round"></line><line x1="242.56418100465606" y1="85.18586269233175" x2="254.8514616689909" y2="76.58221614706605" stroke="rgb(150,232,100)" stroke-width="2.4" stroke-linecap="round"></line><line x1="247.86087062764153" y1="93.49999999999994" x2="260.8512516844081" y2="85.99999999999994" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="246.06862542588487" y1="105.20246425548581" x2="266.00739674069115" y2="95.90486249719041" stroke="rgba(255,255,255,.07)" stroke-width="3.2" stroke-linecap="round"></line><line x1="256.18526614880767" y1="111.35172380419945" x2="270.2806554605963" y2="106.22142165431441" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="259.1496183706647" y1="120.75344790341516" x2="273.63850576500073" y2="116.87116222687735" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="261.2832760903795" y1="130.37775592363676" x2="276.05539238556264" y2="127.7730332586328" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="262.57000088436723" y1="140.1514010695146" x2="277.5129213557434" y2="138.84406492829973" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="263" y1="149.99999999999997" x2="278" y2="149.99999999999997" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="262.57000088436723" y1="159.84859893048542" x2="277.5129213557434" y2="161.15593507170033" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="261.2832760903795" y1="169.62224407636307" x2="276.05539238556264" y2="172.22696674136702" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="259.1496183706647" y1="179.2465520965848" x2="273.6385057650008" y2="183.1288377731226" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="256.1852661488076" y1="188.64827619580058" x2="270.2806554605963" y2="193.77857834568562" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="252.41277993514143" y1="197.75586357669906" x2="266.0073967406912" y2="204.09513750280954" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="247.86087062764162" y1="206.49999999999991" x2="260.8512516844082" y2="213.99999999999991" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="242.56418100465606" y1="214.8141373076682" x2="254.85146166899096" y2="223.4177838529339" stroke="rgba(255,255,255,.07)" stroke-width="2.4" stroke-linecap="round"></line><line x1="231.20071097061168" y1="218.13548662677314" x2="248.0536887192292" y2="232.27681403987702" stroke="rgba(255,255,255,.07)" stroke-width="3.2" stroke-linecap="round"></line></svg>
+    <span class="ef e">E</span><span class="ef f">F</span>
+    <div class="center">
+      <div class="eyebrow">Range · solo</div>
+      <div class="big">93<small>km</small></div>
+      <div class="pill idle"><i class="ti ti-parking"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-parking"><path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14"></path><path d="M10 16v-8h2.667c.736 0 1.333 .895 1.333 2s-.597 2 -1.333 2h-2.667"></path></svg></i>72% · parked</div>
+    </div>
+  </section>
+
+  <div class="seg glass">
+    <button class="on"><i class="ti ti-user"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-user"><path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0"></path><path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path></svg></i>Solo <b>93</b></button>
+    <button><i class="ti ti-users"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-users"><path d="M5 7a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path><path d="M21 21v-2a4 4 0 0 0 -3 -3.85"></path></svg></i>+1 rider <b>86</b></button>
+  </div>
+  <p class="eta">Since full charge: <b>28% used</b> · about 42 km ridden</p>
+
+  <section class="telemetry glass">
+    <div><span class="k">Volt</span><span class="v">80.08</span></div>
+    <div><span class="k">Ah left</span><span class="v">37.4</span></div>
+    <div><span class="k">Temp</span><span class="v">31.2°</span></div>
+  </section>
+
+  <section class="card glass">
+    <div class="card-head"><h3>24 cells</h3><span class="chip">Balanced · 7 mV spread</span></div>
+    <div class="cells" id="ab-parked-cells"><div class="mid"></div><span><i style="height: 6.75px; top: 50%;"></i></span><span><i style="height: 2px; bottom: 50%;"></i></span><span><i style="height: 4.05px; top: 50%;"></i></span><span><i style="height: 6.75px; bottom: 50%;"></i></span><span><i style="height: 2px; top: 50%;"></i></span><span><i style="height: 6.75px; top: 50%;"></i></span><span><i style="height: 2px; bottom: 50%;"></i></span><span><i style="height: 9.45px; top: 50%; background: rgb(251, 191, 36);"></i></span><span><i style="height: 2px; top: 50%;"></i></span><span><i style="height: 4.05px; bottom: 50%;"></i></span><span><i style="height: 2px; bottom: 50%;"></i></span><span><i style="height: 4.05px; top: 50%;"></i></span><span><i style="height: 2px; top: 50%;"></i></span><span><i style="height: 2px; top: 50%;"></i></span><span><i style="height: 2px; bottom: 50%;"></i></span><span><i style="height: 4.05px; bottom: 50%;"></i></span><span><i style="height: 4.05px; top: 50%;"></i></span><span><i style="height: 4.05px; bottom: 50%;"></i></span><span><i style="height: 2px; top: 50%;"></i></span><span><i style="height: 2px; bottom: 50%;"></i></span><span><i style="height: 6.75px; bottom: 50%;"></i></span><span><i style="height: 2px; bottom: 50%;"></i></span><span><i style="height: 2px; top: 50%;"></i></span><span><i style="height: 9.45px; bottom: 50%; background: rgb(196, 242, 75);"></i></span></div>
+    <div class="legend"><span>Low <b>3.333</b> #8</span><span>Avg <b>3.337 V</b></span><span>High <b>3.340</b> #24</span></div>
+  </section>
+
+  <section class="stats glass">
+    <div><b>21</b><span>cycles</span></div>
+    <div><b class="lime">0</b><span>alarms</span></div>
+    <div><b>37.9°</b><span>peak temp</span></div>
+  </section>
+
+  <section class="card glass">
+    <div class="card-head"><h3>Last 7 days</h3><span style="font-size:11px;color:var(--dim)">battery %</span></div>
+    <svg class="spark" id="ab-parked-spark" viewBox="0 0 311 66" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="ab-parked-f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9BE36A" stop-opacity=".26"></stop><stop offset="1" stop-color="#9BE36A" stop-opacity="0"></stop></linearGradient>
+    <linearGradient id="ab-parked-s" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#34D399"></stop><stop offset="1" stop-color="#C4F24B"></stop></linearGradient></defs>
+    <path d="M 0 6 C 11.961538461538462 6, 11.961538461538462 13.56, 23.923076923076923 13.56 C 35.88461538461539 13.56, 35.88461538461539 21.12, 47.84615384615385 21.12 C 59.80769230769231 21.12, 59.80769230769231 27.060000000000002, 71.76923076923077 27.060000000000002 C 83.73076923076923 27.060000000000002, 83.73076923076923 36.24, 95.6923076923077 36.24 C 107.65384615384616 36.24, 107.65384615384616 35.7, 119.61538461538463 35.7 C 131.5769230769231 35.7, 131.5769230769231 14.100000000000001, 143.53846153846155 14.100000000000001 C 155.5 14.100000000000001, 155.5 16.799999999999997, 167.46153846153845 16.799999999999997 C 179.4230769230769 16.799999999999997, 179.4230769230769 35.7, 191.3846153846154 35.7 C 203.34615384615384 35.7, 203.34615384615384 47.04, 215.3076923076923 47.04 C 227.26923076923077 47.04, 227.26923076923077 54.6, 239.23076923076925 54.6 C 251.19230769230768 54.6, 251.19230769230768 6, 263.15384615384613 6 C 275.11538461538464 6, 275.11538461538464 13.56, 287.0769230769231 13.56 C 299.03846153846155 13.56, 299.03846153846155 21.12, 311 21.12 L 311 66 L 0 66 Z" fill="url(#ab-parked-f)"></path><path d="M 0 6 C 11.961538461538462 6, 11.961538461538462 13.56, 23.923076923076923 13.56 C 35.88461538461539 13.56, 35.88461538461539 21.12, 47.84615384615385 21.12 C 59.80769230769231 21.12, 59.80769230769231 27.060000000000002, 71.76923076923077 27.060000000000002 C 83.73076923076923 27.060000000000002, 83.73076923076923 36.24, 95.6923076923077 36.24 C 107.65384615384616 36.24, 107.65384615384616 35.7, 119.61538461538463 35.7 C 131.5769230769231 35.7, 131.5769230769231 14.100000000000001, 143.53846153846155 14.100000000000001 C 155.5 14.100000000000001, 155.5 16.799999999999997, 167.46153846153845 16.799999999999997 C 179.4230769230769 16.799999999999997, 179.4230769230769 35.7, 191.3846153846154 35.7 C 203.34615384615384 35.7, 203.34615384615384 47.04, 215.3076923076923 47.04 C 227.26923076923077 47.04, 227.26923076923077 54.6, 239.23076923076925 54.6 C 251.19230769230768 54.6, 251.19230769230768 6, 263.15384615384613 6 C 275.11538461538464 6, 275.11538461538464 13.56, 287.0769230769231 13.56 C 299.03846153846155 13.56, 299.03846153846155 21.12, 311 21.12" fill="none" stroke="url(#ab-parked-s)" stroke-width="2.2" vector-effect="non-scaling-stroke"></path></svg>
+  </section>
+
+  <nav class="dock">
+    <a class="on"><i class="ti ti-gauge"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-gauge"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"></path><path d="M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path><path d="M13.41 10.59l2.59 -2.59"></path><path d="M7 12a5 5 0 0 1 5 -5"></path></svg></i>Dash</a>
+    <a><i class="ti ti-heart-rate-monitor"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-heart-rate-monitor"><path d="M3 5a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1l0 -10"></path><path d="M7 20h10"></path><path d="M9 16v4"></path><path d="M15 16v4"></path><path d="M7 10h2l2 3l2 -6l1 3h3"></path></svg></i></a>
+    <a><i class="ti ti-route"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="tabler-icon tabler-icon-route"><path d="M3 19a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"></path><path d="M19 7a2 2 0 1 0 0 -4a2 2 0 0 0 0 4"></path><path d="M11 19h5.5a3.5 3.5 0 0 0 0 -7h-8a3.5 3.5 0 0 1 0 -7h4.5"></path></svg></i></a>
+  </nav>
+</div></div></figure></div></section>
+</div>
+</body>
+</html>

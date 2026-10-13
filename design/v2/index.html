@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Arif's Hammer · v2 home</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600&family=Sora:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3/dist/tabler-icons.min.css" />
+<style>
+  :root { --text:#F1F5F2; --muted:#8D9A94; --dim:#76827B; --glass:rgba(255,255,255,.045); --line:rgba(255,255,255,.08); --amber:#FBBF24; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background:#0E100F; color:var(--text); font:14px/1.45 Sora, system-ui, sans-serif; -webkit-font-smoothing:antialiased; }
+  .board { padding:40px 48px 80px; width:max-content; }
+  .board > h1 { font:600 26px/1.2 Inter, sans-serif; }
+  .board > p { margin:6px 0 28px; font:400 14px/1.5 Inter, sans-serif; color:#8F9893; max-width:820px; }
+  .frames { display:flex; gap:40px; align-items:flex-start; }
+  figure { width:375px; }
+  figcaption { margin-bottom:14px; font:400 13px/1.45 Inter, sans-serif; color:#8F9893; min-height:40px; }
+  figcaption b { display:block; color:#E8ECEA; font-weight:600; font-size:14px; }
+
+  .phone { --acc:#C4F24B; --acc2:#34D399; --ink:#0B1A0E; width:375px; min-height:812px; padding:8px 16px 120px; position:relative; overflow:hidden; border-radius:32px;
+    background: radial-gradient(90% 38% at 50% 14%, rgba(160,232,80,.13), transparent 70%), radial-gradient(70% 30% at 0% 60%, rgba(52,211,153,.07), transparent 72%), #040605; }
+  .phone.charge { --acc:#5EEAD4; --acc2:#10B981; --ink:#022C22;
+    background: radial-gradient(110% 50% at 40% 12%, rgba(16,185,129,.17), transparent 62%), radial-gradient(80% 40% at 100% 40%, rgba(45,212,191,.08), transparent 70%), #030607; }
+  .glass { background:var(--glass); box-shadow: inset 0 0 0 1px var(--line); backdrop-filter: blur(20px); }
+  .eyebrow { font-family:"Barlow Condensed"; font-weight:600; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); }
+  .num { font-family:"Barlow Condensed"; font-variant-numeric: tabular-nums; }
+
+  .hd { display:flex; align-items:center; justify-content:space-between; height:52px; }
+  .brand { display:flex; align-items:center; gap:10px; font-weight:600; font-size:16px; letter-spacing:-.01em; }
+  .mark { width:32px; height:32px; border-radius:11px; display:grid; place-items:center; font-size:18px; color:var(--ink); background:linear-gradient(135deg,var(--acc),var(--acc2)); box-shadow:0 6px 20px -6px var(--acc); }
+  .sync { display:flex; align-items:center; gap:8px; height:36px; padding:0 12px; border-radius:999px; color:var(--muted); font-size:12px; }
+  .sync i { font-size:16px; } .dot { width:6px; height:6px; border-radius:50%; background:var(--acc); box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 20%,transparent); }
+
+  .gauge { position:relative; width:300px; height:252px; margin:8px auto 0; }
+  .gauge > svg { position:absolute; left:0; top:0; width:300px; height:300px; }
+  .ef { position:absolute; top:226px; font-family:"Barlow Condensed"; font-weight:600; font-size:13px; color:var(--dim); }
+  .ef.e { left:72px; } .ef.f { right:72px; }
+  .readout { position:absolute; left:0; right:0; display:flex; flex-direction:column; align-items:center; }
+  .big { font-family:"Barlow Condensed"; font-weight:700; letter-spacing:-.02em; line-height:.82; }
+  .hang { display:inline-block; width:0; white-space:nowrap; }
+  .hang span { margin-left:3px; font-weight:600; letter-spacing:0; color:var(--muted); }
+
+  /* A: mini battery under the number */
+  .cell-mini { margin-top:16px; display:flex; align-items:center; gap:8px; }
+  .cap { position:relative; width:46px; height:18px; border-radius:6px; padding:2px; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.28); }
+  .cap::after { content:""; position:absolute; right:-4px; top:5px; width:3px; height:8px; border-radius:0 2px 2px 0; background:rgba(255,255,255,.28); }
+  .cap i { display:block; height:100%; border-radius:3.5px; background:linear-gradient(90deg,var(--acc2),var(--acc)); }
+  .cell-mini b { font-family:"Barlow Condensed"; font-size:22px; font-weight:600; }
+  /* B: charge sub-dial in the gauge gap */
+  .subdial { position:absolute; left:0; right:0; top:206px; display:flex; flex-direction:column; align-items:center; }
+  .subdial b { font-family:"Barlow Condensed"; font-size:30px; font-weight:600; line-height:1; }
+  .subdial span { font-family:"Barlow Condensed"; font-weight:600; font-size:10px; letter-spacing:.2em; color:var(--dim); margin-top:2px; }
+
+  /* charging orb */
+  .orb { position:absolute; left:50px; top:50px; width:200px; height:200px; border-radius:50%; overflow:hidden; background:rgba(255,255,255,.025); box-shadow: inset 0 0 0 1px var(--line); }
+  .liquid { position:absolute; left:0; right:0; bottom:0; background:linear-gradient(180deg,rgba(94,234,212,.9),rgba(16,185,129,.75) 50%,rgba(6,95,70,.8)); }
+  .liquid::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,rgba(255,255,255,.14),transparent 40%,transparent 65%,rgba(0,0,0,.15)); }
+  .wave { position:absolute; left:0; top:-9px; width:200%; height:10px; animation:wave 3.4s linear infinite; }
+  .wave path { fill:rgba(94,234,212,.9); }
+  @keyframes wave { to { transform:translateX(-50%); } }
+  .bubble { position:absolute; bottom:10px; width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,.55); animation:rise 3.6s ease-in infinite; opacity:0; z-index:1; }
+  @keyframes rise { 0%{transform:translateY(0);opacity:0} 15%{opacity:.8} 100%{transform:translateY(-110px);opacity:0} }
+
+  .seg { display:flex; gap:4px; padding:4px; margin-top:4px; border-radius:16px; }
+  .seg button { flex:1; border:0; background:none; color:var(--muted); font:400 13px Sora; padding:10px 0; border-radius:12px; display:flex; align-items:center; justify-content:center; gap:6px; }
+  .seg button i { font-size:16px; } .seg button.on { background:rgba(255,255,255,.08); color:var(--text); }
+  .seg b { font-family:"Barlow Condensed"; font-size:17px; font-weight:600; color:var(--text); }
+
+  .card { margin-top:10px; border-radius:22px; padding:14px 14px 10px; }
+  .card-head { display:flex; align-items:center; justify-content:space-between; }
+  .card-head h3 { font-size:14px; font-weight:600; }
+  .pills { display:flex; gap:2px; padding:2px; border-radius:999px; background:rgba(255,255,255,.05); }
+  .pills span { font-family:"Barlow Condensed"; font-weight:600; font-size:12px; letter-spacing:.08em; padding:2px 10px; border-radius:999px; color:var(--dim); }
+  .pills span.on { background:rgba(255,255,255,.1); color:var(--text); }
+  .spark { display:block; width:100%; height:140px; margin-top:12px; }
+
+  /* Stats A: bento */
+  .bento { margin-top:10px; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .tile { border-radius:22px; padding:14px; min-height:104px; display:flex; flex-direction:column; }
+  .tile .k { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--dim); }
+  .tile .k i { font-size:14px; color:var(--muted); }
+  .tile .v { font-family:"Barlow Condensed"; font-weight:600; font-size:32px; line-height:1; margin-top:auto; padding-top:12px; }
+  .tile .v small { font-size:16px; color:var(--muted); margin-left:2px; font-weight:600; }
+  .tile .s { font-size:11px; color:var(--muted); margin-top:4px; }
+  .tile.wide { grid-column:1 / -1; min-height:auto; flex-direction:row; align-items:center; justify-content:space-between; }
+  .tile.wide .v { margin:0; padding:0; font-size:22px; }
+  .ok { color:var(--acc); }
+
+  /* Stats B: list */
+  .list { margin-top:10px; border-radius:22px; padding:4px 0; }
+  .row { display:flex; align-items:center; gap:12px; padding:12px 16px; }
+  .row + .row { box-shadow: inset 0 1px 0 var(--line); }
+  .row .ic { width:34px; height:34px; border-radius:11px; display:grid; place-items:center; background:rgba(255,255,255,.05); color:var(--muted); font-size:17px; }
+  .row .l { flex:1; } .row .l b { display:block; font-weight:400; font-size:13px; } .row .l span { font-size:11px; color:var(--dim); }
+  .row .r { font-family:"Barlow Condensed"; font-weight:600; font-size:22px; }
+  .row .r small { font-size:14px; color:var(--muted); margin-left:2px; }
+
+  /* Battery tab */
+  .title { margin-top:10px; }
+  .title h2 { font-size:24px; font-weight:600; letter-spacing:-.02em; }
+  .chips { display:flex; gap:6px; margin-top:10px; }
+  .chips span { font-size:11px; font-weight:600; padding:3px 10px; border-radius:999px; background:rgba(255,255,255,.06); color:var(--muted); }
+  .telemetry { display:grid; grid-template-columns:repeat(3,1fr); margin-top:18px; border-radius:20px; padding:12px 4px; text-align:center; }
+  .telemetry div + div { box-shadow:-1px 0 0 var(--line); }
+  .telemetry .kk { display:block; font-family:"Barlow Condensed"; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--dim); font-weight:600; }
+  .telemetry .vv { display:block; font-family:"Barlow Condensed"; font-size:24px; font-weight:600; margin-top:2px; }
+  .chip { padding:4px 10px; border-radius:999px; font-size:11px; font-weight:600; background:color-mix(in srgb,var(--acc) 15%,transparent); color:var(--acc); }
+  .cells { position:relative; display:flex; gap:3px; height:54px; margin-top:12px; }
+  .cells .mid { position:absolute; left:0; right:0; top:50%; height:1px; background:var(--line); }
+  .cells span { position:relative; flex:1; } .cells span i { position:absolute; left:0; right:0; border-radius:2px; background:rgba(255,255,255,.2); }
+  .legend { display:flex; justify-content:space-between; margin-top:10px; font-size:11px; color:var(--muted); } .legend b { color:var(--text); font-weight:500; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
+
+  .dock { position:absolute; left:50%; bottom:20px; transform:translateX(-50%); display:flex; gap:6px; padding:6px; border-radius:999px; background:rgba(18,24,20,.78); box-shadow: inset 0 0 0 1px var(--line), 0 12px 40px rgba(0,0,0,.5); backdrop-filter: blur(20px); }
+  .dock a { height:48px; padding:0 18px; border-radius:999px; display:flex; align-items:center; gap:8px; color:var(--muted); font-size:13px; }
+  .dock a i { font-size:21px; } .dock a.on { background:linear-gradient(135deg,var(--acc),var(--acc2)); color:var(--ink); font-weight:600; }
+</style>
+</head>
+<body>
+<div class="board">
+  <h1>Arif's Hammer · home v2</h1>
+  <p>Scooter first: range is the hero and uses the full 100%. No riding state, no state pills — charging shows itself through the liquid dial and teal accent. Cells + Volt/Ah/Temp move to the Battery tab. Order: header, hero, toggle, history, stats. Two ideas for "charge left" and for the stats block (A and B).</p>
+  <div class="frames" id="frames"></div>
+</div>
+<script>
+const CELLS = [3334,3337,3335,3339,3336,3334,3337,3333,3336,3338,3337,3335,3336,3336,3337,3338,3335,3338,3336,3337,3339,3337,3336,3340];
+const PTS = [[0,52],[0.026,100],[0.3393,85],[0.3458,68],[0.3486,45],[0.371,45],[0.9256,24],[0.9403,13],[0.9421,10],[0.9559,10],[1,72]];
+const header = `<header class="hd"><div class="brand"><span class="mark"><i class="ti ti-bolt"></i></span>Arif's Hammer</div><span class="sync glass"><span class="dot"></span>just now<i class="ti ti-refresh"></i></span></header>`;
+const big = (v, unit, size, us) => `<span class="big" style="font-size:${size}px">${v}<span class="hang"><span style="font-size:${us}px">${unit}</span></span></span>`;
+const gauge = (soc, ramp, inner) => `<section class="gauge" data-soc="${soc}" data-ramp="${ramp}"><svg viewBox="0 0 300 300"></svg>${inner}<span class="ef e">E</span><span class="ef f">F</span></section>`;
+const seg = (s, p) => `<div class="seg glass"><button class="on"><i class="ti ti-user"></i>Solo <b>${s}</b></button><button><i class="ti ti-users"></i>+1 rider <b>${p}</b></button></div>`;
+const history = `<section class="card glass"><div class="card-head"><h3>Last 7 days</h3><div class="pills"><span class="on">7D</span><span>30D</span><span>All</span></div></div><svg class="spark" data-pts='${JSON.stringify(PTS)}' viewBox="0 0 315 140" preserveAspectRatio="none"></svg></section>`;
+const dock = (tab) => `<nav class="dock"><a class="${tab === 'dash' ? 'on' : ''}"><i class="ti ti-gauge"></i>${tab === 'dash' ? 'Dash' : ''}</a><a class="${tab === 'bat' ? 'on' : ''}"><i class="ti ti-battery-3"></i>${tab === 'bat' ? 'Battery' : ''}</a><a><i class="ti ti-route"></i></a></nav>`;
+const bento = (first) => `<section class="bento">
+  ${first}
+  <div class="tile glass"><span class="k"><i class="ti ti-plug-connected"></i>Last charge</span><span class="v">2<small>days ago</small></span><span class="s">52% → 100% · 3h 56m</span></div>
+  <div class="tile glass"><span class="k"><i class="ti ti-road"></i>Lifetime</span><span class="v">~3,150<small>km</small></span><span class="s">21 cycles × 150 km</span></div>
+  <div class="tile glass"><span class="k"><i class="ti ti-battery-3"></i>Battery</span><span class="v ok" style="font-size:24px">Healthy</span><span class="s">Cells balanced · 37.9° peak</span></div>
+</section>`;
+const ridden = `<div class="tile glass"><span class="k"><i class="ti ti-scooter-electric"></i>Since last charge</span><span class="v">~42<small>km</small></span><span class="s">28% used</span></div>`;
+
+const parkedA = `<div class="phone">${header}
+  ${gauge(72, 'lime', `<div class="readout" style="top:58px"><span class="eyebrow">Range · solo</span><div style="margin-top:8px">${big('108', 'km', 84, 22)}</div>
+    <div class="cell-mini"><span class="cap"><i style="width:72%"></i></span><b>72%</b></div></div>`)}
+  ${seg(108, 99)}${history}${bento(ridden)}${dock('dash')}</div>`;
+
+const listStats = `<section class="list glass">
+  <div class="row"><span class="ic"><i class="ti ti-scooter-electric"></i></span><div class="l"><b>Ridden since last charge</b><span>28% used</span></div><span class="r">~42<small>km</small></span></div>
+  <div class="row"><span class="ic"><i class="ti ti-plug-connected"></i></span><div class="l"><b>Last charged</b><span>52% → 100% · 3h 56m</span></div><span class="r">2<small>days ago</small></span></div>
+  <div class="row"><span class="ic"><i class="ti ti-road"></i></span><div class="l"><b>Lifetime</b><span>21 cycles × 150 km</span></div><span class="r">~3,150<small>km</small></span></div>
+  <div class="row"><span class="ic" style="color:var(--acc)"><i class="ti ti-battery-3"></i></span><div class="l"><b>Battery</b><span>Cells balanced · 37.9° peak</span></div><span class="r ok" style="font-size:18px">Healthy <i class="ti ti-chevron-right" style="font-size:14px;color:var(--dim)"></i></span></div>
+</section>`;
+const parkedB = `<div class="phone">${header}
+  ${gauge(72, 'lime', `<div class="readout" style="top:68px"><span class="eyebrow">Range · solo</span><div style="margin-top:8px">${big('108', 'km', 84, 22)}</div></div>
+    <div class="subdial"><b>72%</b><span>CHARGE</span></div>`)}
+  ${seg(108, 99)}${history}${listStats}${dock('dash')}</div>`;
+
+const charging = `<div class="phone charge">${header}
+  ${gauge(61, 'teal', `<div class="orb"><div class="liquid" style="height:61%"><svg class="wave" viewBox="0 0 240 10" preserveAspectRatio="none"><path d="M0 5 Q 15 0 30 5 T 60 5 T 90 5 T 120 5 T 150 5 T 180 5 T 210 5 T 240 5 V10 H0 Z"/></svg><span class="bubble" style="left:26%"></span><span class="bubble" style="left:58%;animation-delay:1.2s"></span><span class="bubble" style="left:42%;animation-delay:2.3s"></span></div></div>
+    <div class="readout" style="top:94px"><span class="big" style="font-size:84px;color:#fff;text-shadow:0 2px 20px rgba(2,44,34,.5)">61<span class="hang"><span style="font-size:26px;color:rgba(255,255,255,.75)">%</span></span></span>
+    <span style="margin-top:10px;font-size:12px;color:rgba(255,255,255,.85)">Full in 2h 52m</span></div>`)}
+  ${seg(92, 84)}${history}${bento(`<div class="tile glass"><span class="k"><i class="ti ti-bolt"></i>Charging at</span><span class="v">568<small>W</small></span><span class="s">7.08 A · +9% so far</span></div>`)}${dock('dash')}</div>`;
+
+const battery = `<div class="phone">${header}
+  <div class="title"><h2>Battery</h2><div class="chips"><span>LiFePO4</span><span>24S</span><span>52 Ah</span></div></div>
+  <section class="telemetry glass"><div><span class="kk">Volt</span><span class="vv">80.08</span></div><div><span class="kk">Ah left</span><span class="vv">37.4</span></div><div><span class="kk">Temp</span><span class="vv">31.2°</span></div></section>
+  <section class="card glass" style="padding-bottom:12px"><div class="card-head"><h3>24 cells</h3><span class="chip">Balanced · 7 mV spread</span></div><div class="cells" id="cells"><div class="mid"></div></div>
+    <div class="legend"><span>Low <b>3.333</b> #8</span><span>Avg <b>3.337 V</b></span><span>High <b>3.340</b> #24</span></div></section>
+  <section class="grid2">
+    <div class="tile glass"><span class="k">Cycles</span><span class="v">21<small>/ ~2,500</small></span><span class="s">Under 1% of rated life</span></div>
+    <div class="tile glass"><span class="k">BMS alarms</span><span class="v ok">None</span><span class="s">in 12 readings</span></div>
+  </section>
+  <p style="margin-top:14px;font-size:12px;color:var(--dim)">…then balance over time, pack voltage, charges, readings, connection — as today.</p>
+  ${dock('bat')}</div>`;
+
+const FR = [
+  ['Parked · A', 'Mini battery under the range shows charge left. Stats as a 2×2 bento.', parkedA],
+  ['Parked · B', 'Charge left sits in the gauge gap like a sub-dial. Stats as one list.', parkedB],
+  ['Charging', 'The dial fills; % + time to full inside it. First stat tile becomes the charge speed.', charging],
+  ['Battery tab', 'Volt / Ah / Temp and the 24 cells move here, above the existing health sections.', battery],
+];
+document.getElementById('frames').innerHTML = FR.map(([t, s, h]) => `<figure><figcaption><b>${t}</b>${s}</figcaption>${h}</figure>`).join('');
+
+const NS = 'http://www.w3.org/2000/svg';
+const mix = (a, b, t) => 'rgb(' + a.map((x, i) => Math.round(x + (b[i] - x) * t)).join(',') + ')';
+const RAMPS = { lime: [[52,211,153],[196,242,75]], teal: [[16,185,129],[94,234,212]] };
+const pt = (r, d) => [150 + r * Math.cos(d * Math.PI / 180), 150 + r * Math.sin(d * Math.PI / 180)];
+document.querySelectorAll('.gauge').forEach((g) => {
+  const svg = g.querySelector('svg'), soc = +g.dataset.soc, R = RAMPS[g.dataset.ramp];
+  for (let i = 0; i <= 52; i++) {
+    const pct = i / 52 * 100, d = 140 + 260 * i / 52, major = i % 13 === 0, [x1, y1] = pt(major ? 106 : 113, d), [x2, y2] = pt(128, d), lit = pct <= soc;
+    const l = document.createElementNS(NS, 'line');
+    Object.entries({ x1, y1, x2, y2, 'stroke-width': major ? 3.2 : 2.4, 'stroke-linecap': 'round', stroke: lit ? mix(R[0], R[1], pct / 100) : 'rgba(255,255,255,.07)' }).forEach(([k, v]) => l.setAttribute(k, v));
+    svg.appendChild(l);
+  }
+});
+document.querySelectorAll('.spark').forEach((sp, idx) => {
+  const pts = JSON.parse(sp.dataset.pts), W = 315, H = 140, xy = pts.map(([x, p]) => [x * W, 6 + (1 - p / 100) * (H - 12)]);
+  let d = `M ${xy[0][0]} ${xy[0][1]}`;
+  for (let i = 1; i < xy.length; i++) { const [x0, y0] = xy[i - 1], [x1, y1] = xy[i], mx = (x0 + x1) / 2; d += ` C ${mx} ${y0}, ${mx} ${y1}, ${x1} ${y1}`; }
+  const cs = getComputedStyle(sp.closest('.phone')), a = cs.getPropertyValue('--acc').trim(), b = cs.getPropertyValue('--acc2').trim();
+  sp.innerHTML = `<defs><linearGradient id="f${idx}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${b}" stop-opacity=".28"/><stop offset="1" stop-color="${b}" stop-opacity="0"/></linearGradient><linearGradient id="s${idx}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="${b}"/><stop offset="1" stop-color="${a}"/></linearGradient></defs>
+    <path d="${d} L ${W} ${H} L 0 ${H} Z" fill="url(#f${idx})"/><path d="${d}" fill="none" stroke="url(#s${idx})" stroke-width="2.2" vector-effect="non-scaling-stroke"/>`;
+});
+const box = document.getElementById('cells'), avg = CELLS.reduce((a, b) => a + b) / 24, half = Math.max(10, ...CELLS.map((v) => Math.abs(v - avg))), hi = Math.max(...CELLS), lo = Math.min(...CELLS);
+CELLS.forEach((v) => { const s = document.createElement('span'), b = document.createElement('i'), d = v - avg; b.style.height = Math.max(2, Math.abs(d) / half * 27) + 'px'; b.style[d >= 0 ? 'bottom' : 'top'] = '50%'; if (v === hi) b.style.background = '#C4F24B'; if (v === lo) b.style.background = '#FBBF24'; s.appendChild(b); box.appendChild(s); });
+</script>
+</body>
+</html>
